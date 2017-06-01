@@ -8,6 +8,9 @@ services:
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
 
   cpu_microservice:
     image: cpu_microservice
@@ -16,6 +19,9 @@ services:
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
 
   memory_microservice:
     image: memory_microservice
@@ -24,6 +30,9 @@ services:
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
 
   io_microservice:
     image: io_microservice
@@ -32,6 +41,18 @@ services:
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+  monitor:
+    image: monitor
+    build:
+      context: ./Monitor
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
 
   messagequeue:
     image: rabbitmq:3
