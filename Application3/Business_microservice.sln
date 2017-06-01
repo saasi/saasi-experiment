@@ -12,6 +12,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory_microservice", "Memory_microservice\Memory_microservice.csproj", "{165EAE58-F793-425D-A65A-7BF044E00451}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monitor", "Monitor\Monitor.csproj", "{625FE40E-64D4-481E-BB34-1B4CD658C521}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
