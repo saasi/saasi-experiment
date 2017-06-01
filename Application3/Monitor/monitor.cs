@@ -15,6 +15,11 @@ namespace Monitor
 
         public static void Main(string[] args)
         {
+            // wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
+            Thread.Sleep(5000);
+            Console.WriteLine("================== Sleeping done");
+
             monitor dm = new monitor();
             new Thread(monitorBusiness).Start();
             while (true)
@@ -59,7 +64,7 @@ namespace Monitor
 
         public static void monitorBusiness() //A thread to listen message from business
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {

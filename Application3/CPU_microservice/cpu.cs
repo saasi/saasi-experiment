@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +15,11 @@ namespace CPU_Microservice
     {
         static void Main(string[] args)
         {
+            // wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
+            Thread.Sleep(5000);
+            Console.WriteLine("================== Sleeping done");
+
             new Thread(CPU.CpuProcessing).Start();
             new Thread(CPU.CpuProcessing).Start();
         }
@@ -36,11 +41,11 @@ namespace CPU_Microservice
         }
         public static void CpuProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchange: "call",   type: "fanout");
+                channel.ExchangeDeclare(exchange: "call", type: "fanout");
                 var queueName = "cpu_queue";
                 channel.QueueDeclare(queue: queueName,
                                 durable: true,
@@ -66,8 +71,10 @@ namespace CPU_Microservice
                                      noAck: true,
                                      consumer: consumer);
 
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
+
+                Console.WriteLine(" Looping ...");
+                //Console.ReadLine();
+                while(true){ Thread.Sleep(5000);};
             }
         }
 

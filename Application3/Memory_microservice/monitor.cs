@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace MEMORY_Microservice
 {
@@ -11,6 +12,10 @@ namespace MEMORY_Microservice
     {
         static void Main(string[] args)
         {
+            // wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
+            Thread.Sleep(5000);
+            Console.WriteLine("================== Sleeping done");
             new Thread(memory.MemoryProcessing).Start();
             new Thread(memory.MemoryProcessing).Start();
 
@@ -21,16 +26,19 @@ namespace MEMORY_Microservice
             currentTime = System.DateTime.Now;
             DateTime finishTime = currentTime.AddSeconds(time);
             Console.WriteLine("Start." + Convert.ToString(currentTime));
+            List<Object> alist = new List<Object>();
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
-                double[,] a = new double[5000, 5000];
+                double[,] a = new double[8000, 8000];
+                alist.Add(a);
             }
+            alist.Clear();
             Console.WriteLine("Done." + Convert.ToString(System.DateTime.Now));
         }
 
         private static void MemoryProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -60,8 +68,9 @@ namespace MEMORY_Microservice
                                      noAck: true,
                                      consumer: consumer);
 
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
+                Console.WriteLine(" Looping...");
+                //Console.ReadLine();
+                while(true){ Thread.Sleep(5000);};
             }
         }
     }

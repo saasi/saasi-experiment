@@ -1,4 +1,4 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.IO;
@@ -11,6 +11,10 @@ namespace IO_Microservice
     {
         static void Main(string[] args)
         {
+            // wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
+            Thread.Sleep(5000);
+            Console.WriteLine("================== Sleeping done");
 
             new Thread(io.IoProcessing).Start();
             new Thread(io.IoProcessing).Start();
@@ -52,7 +56,7 @@ namespace IO_Microservice
         }
         public static void IoProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -82,32 +86,9 @@ namespace IO_Microservice
                                      noAck: true,
                                      consumer: consumer);
 
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
-            }
-        }
-
-        public static void connectToMonitor(String message)
-        {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "io_monitor",
-                     durable: true,
-                     exclusive: false,
-                     autoDelete: false,
-                     arguments: null);
-
-                var body = Encoding.UTF8.GetBytes(message);
-
-                var properties = channel.CreateBasicProperties();
-                properties.Persistent = true;
-
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "io_monitor",
-                                     basicProperties: properties,
-                                     body: body);
+                Console.WriteLine(" Looping ...");
+                //Console.ReadLine();
+                while(true){ Thread.Sleep(5000);};
             }
         }
     }
