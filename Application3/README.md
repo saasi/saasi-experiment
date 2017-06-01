@@ -5,11 +5,17 @@
 ## Build with Docker
 > This is just for testing locally. Not for running on Kubernetes.
 ```bash
-docker-compose -f docker-compose.ci.build.yml run ci-build
+build.sh
 ```
 
 ## Run with Docker
 > This is just for testing locally. Not for running on Kubernetes.
+
+*Must first build*
+
+```bash
+run.sh
+```
 
 ## Scale with Docker
 ```bash
