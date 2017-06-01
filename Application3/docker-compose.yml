@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  business_microservice:
+    image: business_microservice
+    build:
+      context: ./Business_microservice
+      dockerfile: Dockerfile
+
+  cpu_microservice:
+    image: cpu_microservice
+    build:
+      context: ./CPU_microservice
+      dockerfile: Dockerfile
+
+  memory_microservice:
+    image: memory_microservice
+    build:
+      context: ./Memory_microservice
+      dockerfile: Dockerfile
+
+  io_microservice:
+    image: io_microservice
+    build:
+      context: ./IO_microservice
+      dockerfile: Dockerfile

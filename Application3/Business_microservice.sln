@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IO_microservice", "IO_micro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory_microservice", "Memory_microservice\Memory_microservice.csproj", "{165EAE58-F793-425D-A65A-7BF044E00451}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{91204D7E-387C-4C22-810D-8B611611D6F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91204D7E-387C-4C22-810D-8B611611D6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91204D7E-387C-4C22-810D-8B611611D6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91204D7E-387C-4C22-810D-8B611611D6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91204D7E-387C-4C22-810D-8B611611D6F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
