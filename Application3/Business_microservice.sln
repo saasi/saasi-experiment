@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.6
@@ -10,6 +9,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IO_microservice", "IO_microservice\IO_microservice.csproj", "{6E7A6714-3C1A-4E51-9292-1648C94C0FC7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory_microservice", "Memory_microservice\Memory_microservice.csproj", "{165EAE58-F793-425D-A65A-7BF044E00451}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitor", "Monitor\Monitor.csproj", "{625FE40E-64D4-481E-BB34-1B4CD658C521}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{91204D7E-387C-4C22-810D-8B611611D6F5}"
 EndProject
@@ -35,6 +36,10 @@ Global
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Release|Any CPU.Build.0 = Release|Any CPU
 		{91204D7E-387C-4C22-810D-8B611611D6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{91204D7E-387C-4C22-810D-8B611611D6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91204D7E-387C-4C22-810D-8B611611D6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,4 +1,4 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.IO;
@@ -36,9 +36,10 @@ namespace IO_Microservice
             {
                 String s = io.GenerateRandomString(800);
                 sw.Write(s);
+                fs.Flush();
             }
 
-            fs.Flush();
+            
             fs.Dispose();
             Console.WriteLine("Done." + Convert.ToString(System.DateTime.Now));
         }
