@@ -10,3 +10,9 @@ docker-compose -f docker-compose.ci.build.yml run ci-build
 
 ## Run with Docker
 > This is just for testing locally. Not for running on Kubernetes.
+
+## Scale with Docker
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.override.yml scale cpu_microservice=3
+
+```
