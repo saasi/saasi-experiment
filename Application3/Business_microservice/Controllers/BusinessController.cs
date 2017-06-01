@@ -23,7 +23,7 @@ namespace Business_microservice.Controllers
         {
             ConfigSettings = settings.Value;
         }
-      public IActionResult Index(int? io = 0, int? cpu = 0, int? memory = 0, int? timeout = 0)
+      public IActionResult Index(int? io = 0, int? cpu = 0, int? memory = 0, int? timeout = 0, int? id = 0, string? guid)
         {
 
             var factory = new ConnectionFactory() { HostName = "localhost" };

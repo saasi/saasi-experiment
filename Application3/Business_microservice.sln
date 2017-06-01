@@ -11,6 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IO_microservice", "IO_micro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory_microservice", "Memory_microservice\Memory_microservice.csproj", "{165EAE58-F793-425D-A65A-7BF044E00451}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monitor", "Monitor\Monitor.csproj", "{625FE40E-64D4-481E-BB34-1B4CD658C521}"
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +34,10 @@ Global
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{165EAE58-F793-425D-A65A-7BF044E00451}.Release|Any CPU.Build.0 = Release|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{625FE40E-64D4-481E-BB34-1B4CD658C521}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

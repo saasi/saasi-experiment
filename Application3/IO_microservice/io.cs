@@ -32,9 +32,10 @@ namespace IO_Microservice
             {
                 String s = io.GenerateRandomString(800);
                 sw.Write(s);
+                fs.Flush();
             }
 
-            fs.Flush();
+            
             fs.Dispose();
             Console.WriteLine("Done." + Convert.ToString(System.DateTime.Now));
         }
@@ -71,7 +72,7 @@ namespace IO_Microservice
                     var message = Encoding.UTF8.GetString(body);
                     Console.WriteLine(message);
                     var order = message.Split(' ');
-                    if (order[1].Equals("1"))
+                    if (order[0].Equals("1"))
                     {
                         int time = Convert.ToInt16(order[3]);
                         io.Fun(time);
@@ -83,6 +84,30 @@ namespace IO_Microservice
 
                 Console.WriteLine(" Press [enter] to exit.");
                 Console.ReadLine();
+            }
+        }
+
+        public static void connectToMonitor(String message)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "io_monitor",
+                     durable: true,
+                     exclusive: false,
+                     autoDelete: false,
+                     arguments: null);
+
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "io_monitor",
+                                     basicProperties: properties,
+                                     body: body);
             }
         }
     }

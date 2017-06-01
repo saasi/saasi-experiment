@@ -40,7 +40,7 @@ namespace CPU_Microservice
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchange: "call", type: "fanout");
+                channel.ExchangeDeclare(exchange: "call",   type: "fanout");
                 var queueName = "cpu_queue";
                 channel.QueueDeclare(queue: queueName,
                                 durable: true,
@@ -55,7 +55,7 @@ namespace CPU_Microservice
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     var order = message.Split(' ');
-                    if (order[0].Equals("1"))
+                    if (order[1].Equals("1"))
                     {
                         int time = Convert.ToInt16(order[3]);
                         CPU.Fun(time);
