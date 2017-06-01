@@ -18,7 +18,7 @@ namespace Application2
         public  void Fun()
         {
             String st = Guid.NewGuid().ToString();
-            FileStream fs = new FileStream("write" + Convert.ToString(st) + ".txt", FileMode.Create);
+            FileStream fs = new FileStream("write" + Convert.ToString(st) + ".tmp", FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;

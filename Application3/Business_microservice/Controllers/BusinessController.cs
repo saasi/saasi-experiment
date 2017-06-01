@@ -23,16 +23,15 @@ namespace Business_microservice.Controllers
         {
             ConfigSettings = settings.Value;
         }
-        public IActionResult Index()
+      public IActionResult Index(int? io = 0, int? cpu = 0, int? memory = 0, int? timeout = 0)
         {
 
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
-            using (var channel2 = connection.CreateModel())
             {
                 channel.ExchangeDeclare(exchange: "call", type: "fanout");
-                string message = ConfigSettings.order[0];
+                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timeout);
                 var body = Encoding.UTF8.GetBytes(message);
                 var properties = channel.CreateBasicProperties();
                 properties.Persistent = true;
