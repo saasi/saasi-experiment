@@ -11,6 +11,10 @@ namespace IO_Microservice
     {
         static void Main(string[] args)
         {
+            // wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
+            Thread.Sleep(5000);
+            Console.WriteLine("================== Sleeping done");
 
             new Thread(io.IoProcessing).Start();
             new Thread(io.IoProcessing).Start();
@@ -71,7 +75,7 @@ namespace IO_Microservice
                     var message = Encoding.UTF8.GetString(body);
                     Console.WriteLine(message);
                     var order = message.Split(' ');
-                    if (order[1].Equals("1"))
+                    if (order[0].Equals("1"))
                     {
                         int time = Convert.ToInt16(order[3]);
                         io.Fun(time);
@@ -81,8 +85,9 @@ namespace IO_Microservice
                                      noAck: true,
                                      consumer: consumer);
 
-                Console.WriteLine(" Press [enter] to exit.");
-                Console.ReadLine();
+                Console.WriteLine(" Looping ...");
+                //Console.ReadLine();
+                while(true){ Thread.Sleep(5000);};
             }
         }
     }
