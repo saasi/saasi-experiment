@@ -1,0 +1,65 @@
+version: '2'
+
+services:
+  business_microservice:
+    image: business_microservice
+    build:
+      context: ./Business_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5004"
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+
+  cpu_microservice:
+    image: cpu_microservice
+    build:
+      context: ./CPU_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+
+  memory_microservice:
+    image: memory_microservice
+    build:
+      context: ./Memory_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+
+  io_microservice:
+    image: io_microservice
+    build:
+      context: ./IO_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+  
+
+  businessfunction:
+    image: businessfunction
+    build:
+      context: ./BusinessFunction
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+  messagequeue:
+    image: rabbitmq:3
+
+
+
