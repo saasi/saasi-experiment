@@ -11,41 +11,82 @@ using System.Threading;
 
 namespace CPU_Microservice
 {
+    
     class CPU
     {
+        private string id;
+        private static int workNum;
+        public CPU(string id)
+        {
+            this.id = id;
+            workNum = 1;
+        }
         static void Main(string[] args)
         {
             // wait for RabbitMQ to be ready
             Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
             Thread.Sleep(5000);
             Console.WriteLine("================== Sleeping done");
-
-            new Thread(CPU.CpuProcessing).Start();
-            new Thread(CPU.CpuProcessing).Start();
+            CPU cpu1 = new CPU("1");
+            CPU cpu2 = new CPU("2");
+            CPU cpu3 = new CPU("3");
+            Thread t1 = new Thread(cpu1.CpuProcessing);
+            Thread t2 = new Thread(cpu2.CpuProcessing);
+            Thread t3 = new Thread(cpu3.CpuProcessing);
+            t1.Start();
+            t2.Start();
+            t3.Start();
         }
-
-        public static void Fun(int time)
+        public class Worker
         {
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            Console.WriteLine("Start." + Convert.ToString(currentTime));
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
+            private int time;
+            private Guid id;
+            public Worker(int time)
             {
-                string comparestring1 = StringDistance.GenerateRandomString(200);
-                string comparestring2 = StringDistance.GenerateRandomString(200);
-                StringDistance.LevenshteinDistance(comparestring1, comparestring2);
+                this.time = time;
+                this.id = Guid.NewGuid();
             }
-            Console.WriteLine("Done." + Convert.ToString(System.DateTime.Now));
+            public void Fun()
+            {
+                DateTime currentTime = new DateTime();
+                currentTime = System.DateTime.Now;
+                DateTime finishTime = currentTime.AddSeconds(time);
+                Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                {
+                    string comparestring1 = StringDistance.GenerateRandomString(100);
+                    string comparestring2 = StringDistance.GenerateRandomString(100);
+                    StringDistance.LevenshteinDistance(comparestring1, comparestring2);
+                }
+                Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
 
+
+            }
         }
-        public static void CpuProcessing()
+            public void Fun(int time)
+            {
+                DateTime currentTime = new DateTime();
+                currentTime = System.DateTime.Now;
+                DateTime finishTime = currentTime.AddSeconds(time);
+                Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                {
+                    string comparestring1 = StringDistance.GenerateRandomString(100);
+                    string comparestring2 = StringDistance.GenerateRandomString(100);
+                    StringDistance.LevenshteinDistance(comparestring1, comparestring2);
+                }
+                Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
+
+
+            }
+        public  void CpuProcessing()
         {
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            //var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchange: "call", type: "fanout");
+                channel.ExchangeDeclare(exchange: "call", type: "direct");
                 var queueName = "cpu_queue";
                 channel.QueueDeclare(queue: queueName,
                                 durable: true,
@@ -53,7 +94,7 @@ namespace CPU_Microservice
                                 autoDelete: false,
                                 arguments: null);
                 channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
-                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "");
+                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "api");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
@@ -63,12 +104,17 @@ namespace CPU_Microservice
                     if (order[1].Equals("1"))
                     {
                         int time = Convert.ToInt16(order[3]);
-                        CPU.Fun(time);
+                        //Worker worker = new Worker(time);
+                        //Thread t = new Thread(worker.Fun);
+                        //t.Start();
+                        //t.Join(); 
+                        this.Fun(time);
+                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     }
 
                 };
                 channel.BasicConsume(queue: queueName,
-                                     noAck: true,
+                                     noAck:false,
                                      consumer: consumer);
 
 
@@ -77,6 +123,8 @@ namespace CPU_Microservice
                 while(true){ Thread.Sleep(5000);};
             }
         }
+
+
 
     }
     internal class StringDistance

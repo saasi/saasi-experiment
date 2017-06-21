@@ -23,70 +23,42 @@ namespace Business_microservice.Controllers
         {
             ConfigSettings = settings.Value;
         }
-        public IActionResult Index(Guid guid, DateTime timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
+        //public IActionResult Index(Guid guid, DateTime timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
+        public IActionResult Index(Guid guid,String timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
         {
-            DateTime startRunTime = System.DateTime.Now;
+            
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            //var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchange: "call", type: "fanout");
-                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timetorun);
+                channel.ExchangeDeclare(exchange: "mono", type: "direct");
+                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timetorun) + " " +  Convert.ToString(timeout) + " " + timestart;
+                Console.WriteLine(message);
                 var body = Encoding.UTF8.GetBytes(message);
                 var properties = channel.CreateBasicProperties();
                 properties.Persistent = true;
-                channel.BasicPublish(exchange: "call",
-                                      routingKey: "",
+                channel.BasicPublish(exchange: "mono",
+                                      routingKey: "business",
                                       basicProperties: properties,
                                       body: body);
-                DateTime currentTime = new DateTime();
-                currentTime = System.DateTime.Now;
-                DateTime finishTime = currentTime.AddSeconds(timetorun);
-                while (System.DateTime.Now.CompareTo(finishTime) < 0)
-                {
-                    GenerateRandomString(100);
-                }
-                DateTime completeRunTime = System.DateTime.Now;
-                if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
-                    reportDM(id, guid);
+
+
+             //   DateTime completeRunTime = System.DateTime.Now;
+                // if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
+            /*    Console.WriteLine("send to DM");
+                var message2 = Convert.ToString(id) + " " + guid;
+                var body2 = Encoding.UTF8.GetBytes(message2);
+                channel.BasicPublish(exchange: "call",
+                      routingKey: "report",
+                      basicProperties: null,
+                      body: body2);
+                      */
                 return View();
             }
         }
-        private static string GenerateRandomString(int length)
-        {
-            var r = new Random((int)DateTime.Now.Ticks);
-            var sb = new StringBuilder(length);
-            for (int i = 0; i < length; i++)
-            {
-                int c = r.Next(97, 123);
-                sb.Append(Char.ConvertFromUtf32(c));
-            }
-            return sb.ToString();
-        }
 
-        private static void reportDM(int id, Guid guid) //send message to DM
-        {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "report_queue",
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
-                var message = Convert.ToString(id) + " " + guid;
-                var body = Encoding.UTF8.GetBytes(message);
-                var properties = channel.CreateBasicProperties();
-                properties.Persistent = true;
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "report_queue",
-                                     basicProperties: properties,
-                                     body: body);
-
-            }
-        }
     }
 }
 

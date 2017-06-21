@@ -6,6 +6,8 @@ services:
     build:
       context: ./Business_microservice
       dockerfile: Dockerfile
+    ports:
+      - "5001:5004"
     links:
       - messagequeue:rabbitmq
     depends_on:
@@ -44,10 +46,12 @@ services:
     depends_on:
       - messagequeue
 
-  monitor:
-    image: monitor
+  
+
+  businessfunction:
+    image: businessfunction
     build:
-      context: ./Monitor
+      context: ./BusinessFunction
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
@@ -56,3 +60,6 @@ services:
 
   messagequeue:
     image: rabbitmq:3
+
+
+

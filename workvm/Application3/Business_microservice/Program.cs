@@ -13,6 +13,7 @@ namespace Business_microservice
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
+                .UseUrls("http://*:5004")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

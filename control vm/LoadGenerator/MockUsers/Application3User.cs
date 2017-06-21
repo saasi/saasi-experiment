@@ -3,48 +3,55 @@ using System.Net.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
+using System.Text;
 
 namespace LoadGenerator.MockUsers {
     public class Application3User : BaseApplicationUser
     {
         private string[] _config = new string[] {
             //io cpu memory timetorun timeout
+            "1 0 0 5 6",
+            "0 1 0 5 6",
+            "0 0 1 5 6",
+            "1 1 0 5 6",
+            "1 1 1 5 4", //5
             "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //5
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //10
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //15
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //20
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //25
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11",
-            "1 0 0 10 11", //30            
+            "0 1 0 10 11",
+            "0 0 1 10 11",
+            "1 1 0 10 11",
+            "1 1 1 10 10", //10
+            "1 0 0 15 15",
+            "0 1 0 15 15",
+            "0 0 1 15 15",
+            "1 1 0 15 15",
+            "1 1 1 15 16", //15
+            "1 0 0 20 21",
+            "0 1 0 20 21",
+            "0 0 1 20 21",
+            "1 1 0 20 21",
+            "1 1 1 20 20", //20
+            "1 0 0 25 26",
+            "0 1 0 25 26",
+            "0 0 1 25 26",
+            "1 1 0 25 26",
+            "1 1 1 25 25", //25
+            "1 0 0 30 31",
+            "0 1 0 30 31",
+            "0 0 1 30 31",
+            "1 1 0 30 31",
+            "1 1 1 30 30", //5           
         };
+        private IConnection connection;
+        private IModel channel;
+        private ConnectionFactory factory;
         public Application3User()
         {
             _httpClient = new HttpClient();
             _httpClient.MaxResponseContentBufferSize = 256000;
             _guid = System.Guid.NewGuid().ToString();
+            factory = new ConnectionFactory() { HostName = "localhost" };
+
         }
         public override async Task Run(string baseURL, int duration)
         {
@@ -68,14 +75,27 @@ namespace LoadGenerator.MockUsers {
                          {"timestart", ((DateTimeOffset)System.DateTime.Now).ToUnixTimeSeconds().ToString()}
                      };
                     var url = new Uri(QueryHelpers.AddQueryString(baseURL+"/Business", parameters));
-                    Console.WriteLine(url.ToString());
-                    try {
-                        var response = await _httpClient.GetAsync(url);
-                        Console.WriteLine($"User {_guid} {response.StatusCode}");
-                    } catch {
-                        Console.WriteLine($"User {_guid} Network Error");
+                    
+                    using (connection = factory.CreateConnection())
+                    using (var channel = connection.CreateModel())
+                    {
+                        channel.ExchangeDeclare(exchange: "url", type: "direct");
+                        var body = Encoding.UTF8.GetBytes(url.ToString().Split('/')[3]);
+                   // var properties = channel.CreateBasicProperties();
+                  //  properties.Persistent = true;
+                        channel.BasicPublish(exchange: "url",
+                                          routingKey: "dispatch",
+                                          basicProperties: null,
+                                          body: body);
+                        Console.WriteLine(url.ToString().Split('/')[3]);
                     }
-
+                    System.Threading.Thread.Sleep(1000);
+                    /*  try {
+                          var response = await _httpClient.GetAsync(url);
+                          Console.WriteLine($"User {_guid} {response.StatusCode}");
+                      } catch {
+                          Console.WriteLine($"User {_guid} Network Error");
+                      }*/
                 }
             }
         }
