@@ -12,6 +12,8 @@ namespace IO_Microservice
 {
     class io
     {
+        private static readonly string _rabbitMQHost = "rabbitmq";
+        private static readonly long _fileSize = 10L * 1024L * 1024L * 1024L; //10 G
         private int id;
         public io(int id)
         {
@@ -38,36 +40,31 @@ namespace IO_Microservice
 
         private void Fun(int time)
         {
-
-
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;
             DateTime finishTime = currentTime.AddSeconds(time);
             Console.WriteLine(this.id.ToString() + ":Start." + Convert.ToString(currentTime));
             String st = Guid.NewGuid().ToString();
-            String fileName = "write" + Convert.ToString(st) + ".txt";
+            String fileName = "write" + Convert.ToString(st) + ".tmp";
             FileStream fs = new FileStream(fileName, FileMode.Create);
+            fs.SetLength(_fileSize);
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
 
                 StreamWriter sw = new StreamWriter(fs);
-               // String s = io.GenerateRandomString(2000);
-               // sw.Write("1111111111111111111111111111111111111111111111");
-               // fs.Flush();
+                String s = io.GenerateRandomString(2000);
+                sw.Write(s);
+                fs.Flush();
                 //var httpClient = new HttpClient();
                 //httpClient.MaxResponseContentBufferSize = 256000;
                 
                 //var url = "http://localhost:5001";
                 //var response = httpClient.GetAsync(url);
-                Thread.Sleep(100); 
-              //  System.IO.Directory.Delete(fileName);
+                //Thread.Sleep(100); 
             }
-            //fs.Dispose();
-
-
-
+            fs.Dispose();
+            System.IO.Directory.Delete(fileName);
             Console.WriteLine(this.id+":Done." + Convert.ToString(System.DateTime.Now));
-            
         }
         private static string GenerateRandomString(int length)
         {
