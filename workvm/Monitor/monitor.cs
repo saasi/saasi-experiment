@@ -15,9 +15,9 @@ namespace Monitor
         private static int CPUViolationCounter = 0;
         private static int MemoryViolationCounter = 0;
         private static int IOViolationCounter = 0;
-        private static double cpuViolationThresdhold = 60.0;
-        private static double memoryViolationThreshold = 70.0;
-        private static double IoViolation = 10.0;
+        private static double cpuViolationThresdhold = 90.0;
+        private static double memoryViolationThreshold = 50.0;
+        private static double IOViolationThresdhold = 10.0;
         private static Dictionary<string, int> bms;
         private static Dictionary<string, string> containers;
         private static String vmaddress;
@@ -32,13 +32,87 @@ namespace Monitor
             //Console.WriteLine("ip" + vmaddress);
             //new Thread(monitorBusinessTimeout).Start();
             // new Thread(monitorBusinessInfo).Start();
-         //   while (true)
-            //  {
-                monitorUsage();
-                Thread.Sleep(5000);
-            Console.ReadLine();
-         //     }
+            containerViolation = new Dictionary<string, int>();
+            Thread.Sleep(5000);
+            while (true)
+            {
+                containers = getContainerList(); //"id" : "image"
+                Console.WriteLine("Update container list");
+                DateTime startTime = new DateTime();
+                startTime = System.DateTime.Now;
+                DateTime finishTime = startTime.AddSeconds(20);               
+                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                {
+                   foreach (KeyValuePair<string, string> container in containers)
+                   {
+                        if (!containerViolation.ContainsKey(container.Key))
+                            containerViolation.Add(container.Key, 0);
+                       if (container.Value.Equals("io_microservice"))
+                       {
+                            var usage = getUsage(container,"io");
+                           
+                           if (usage > IOViolationThresdhold)
+                           {
+                                containerViolation[container.Key]++;
+                                writeRecord("io", container.Key, usage);
+                                if (containerViolation[container.Key] >=5)
+                                {
+                                    ioNum++;
+                                    writeRecord("io");
+                                    scaleOut("io");
+                                    containerViolation[container.Key] = 0;
+                                }
+                               
+                           }
+                       }
 
+
+                       if (container.Value.Equals("cpu_microservice"))
+                       {
+                            var usage = getUsage(container,"cpu");
+
+                           if (usage > cpuViolationThresdhold)
+                           {
+                                writeRecord("cpu", container.Key, usage);
+                                containerViolation[container.Key]++;
+                                Console.WriteLine("cpuvolation:" + containerViolation[container.Key]);
+                                if (containerViolation[container.Key] >= 5)
+                                {
+                                    cpuNum++;
+                                    writeRecord("cpu");
+                                    scaleOut("cpu");
+                                    containerViolation[container.Key] = 0;
+                                }
+                            }
+                       }
+
+
+                       if (container.Value.Equals("memory_microservice"))
+                       {
+                            var usage = getUsage(container,"memory");
+
+                           if (usage > memoryViolationThreshold)
+                           {
+                                Console.WriteLine("writememory:" + usage);
+                                writeRecord("memory", container.Key, usage);
+                                containerViolation[container.Key]++;
+                                if (containerViolation[container.Key] >= 5)
+                                {
+                                    memNum++;
+                                    writeRecord("memory");
+                                    scaleOut("memory");
+                                    containerViolation[container.Key] = 0;
+                                }
+                           }
+                       }
+
+                        
+                   }
+                    Thread.Sleep(2000);
+                }
+
+
+            }
 
         }
 

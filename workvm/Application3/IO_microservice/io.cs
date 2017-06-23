@@ -54,13 +54,13 @@ namespace IO_Microservice
                // String s = io.GenerateRandomString(2000);
                // sw.Write("1111111111111111111111111111111111111111111111");
                // fs.Flush();
-                var httpClient = new HttpClient();
-                httpClient.MaxResponseContentBufferSize = 256000;
+                //var httpClient = new HttpClient();
+                //httpClient.MaxResponseContentBufferSize = 256000;
                 
-                var url = "http://localhost:5001";
-                var response = httpClient.GetAsync(url);
+                //var url = "http://localhost:5001";
+                //var response = httpClient.GetAsync(url);
                 Thread.Sleep(100); 
-                //System.IO.Directory.Delete(fileName);
+              //  System.IO.Directory.Delete(fileName);
             }
             //fs.Dispose();
 
