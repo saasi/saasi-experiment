@@ -1,2 +1,2 @@
 #!/bin/sh
- docker ps --format "{{.ID}} {{.Image}}" &> name.txt
+ docker ps --format "{{.ID}}: {{.Names}} {{.Image}}" &> name.txt

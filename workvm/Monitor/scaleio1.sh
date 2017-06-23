@@ -1,3 +1,2 @@
 #!/bin/sh
-docker-compose scale io_microservice=$1
-
+docker-compose -f docker-compose.yml -f docker-compose.override.yml scale io_microservice=1

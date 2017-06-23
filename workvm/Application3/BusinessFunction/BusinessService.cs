@@ -54,7 +54,7 @@ namespace BusinessFunction
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 8, global: false);
                 channel_mono.QueueBind(queue: queueName, exchange: "mono", routingKey: "business");
                 var consumer = new EventingBasicConsumer(channel_mono);
                 consumer.Received += (model, ea) =>
@@ -64,26 +64,26 @@ namespace BusinessFunction
                     Console.WriteLine(message);
                     Console.WriteLine(bmsGuid + ":call api");
                     CallApi(message);
-                  //  businessTask bt = new businessTask(message);
-                  //  Thread t = new Thread(bt.Fun);
-                  //  t.Start();
-                  //  t.Join();
-                
+                    businessTask bt = new businessTask(message, channel_mono, ea);
+                    //Thread t = new Thread(bt.Fun);
+                    //t.Start();
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(bt.Fun));
+
 
                 };
                 channel_mono.BasicConsume(queue: queueName,
-                                     noAck: true,
+                                     noAck: false,
                                      consumer: consumer);
 
-                // if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
-                /*    Console.WriteLine("send to DM");
+              /*   if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
+                    Console.WriteLine("send to DM");
                     var message2 = Convert.ToString(id) + " " + guid;
                     var body2 = Encoding.UTF8.GetBytes(message2);
                     channel.BasicPublish(exchange: "call",
                           routingKey: "report",
                           basicProperties: null,
-                          body: body2);
-                          */
+                          body: body2);*/
+                          
                 while (true) { Thread.Sleep(1000); };
             }
             
@@ -91,11 +91,15 @@ namespace BusinessFunction
         class businessTask
         {
             private string message;
-            public businessTask(string message)
+            private IModel channel;
+            private BasicDeliverEventArgs ea;
+            public businessTask(string message, IModel channel, BasicDeliverEventArgs ea)
             {
                 this.message = message;
+                this.channel = channel;
+                this.ea = ea;
             }
-            public void Fun()
+            public void Fun(object state)
             {
                 DateTime currentTime = System.DateTime.Now;
                 Console.WriteLine("business start:" + currentTime.ToString());
@@ -104,7 +108,7 @@ namespace BusinessFunction
                 DateTime finishTime = currentTime.AddSeconds(timetorun);
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
-                    GenerateRandomString(100);
+                    GenerateRandomString(10);
                 }
                 DateTime completeRunTime = System.DateTime.Now;
                 Console.WriteLine("business end:" + completeRunTime.ToString());
@@ -117,7 +121,7 @@ namespace BusinessFunction
                     httpClient.MaxResponseContentBufferSize = 256000;
                     var response = httpClient.GetAsync("http://10.137.0.81:5001/BusinessTimeout?bmsguid=" + message2);
                 }
-
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
             }
         }
 

@@ -1,2 +1,2 @@
 #!/bin/sh
-sudo docker-compose scale businessfunction=$1
+dotnet run &

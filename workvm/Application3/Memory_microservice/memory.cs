@@ -32,41 +32,7 @@ namespace MEMORY_Microservice
          //   t2.Start();
 
         }
-        private  void Fun(int time)
-        {
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            Console.WriteLine(this.id + ":Start." + Convert.ToString(currentTime));
-            List<IntPtr> alist = new List<IntPtr>();
-            int i = 0;
-            IntPtr hglobal;
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-                //list.Add(new byte[1024]); // Change the size here.
-                //Thread.Sleep(5); // Change the wait time here.
-                //double[,] a = new double[10000, 10000];
-                hglobal = Marshal.AllocHGlobal(2000);
-                alist.Add(hglobal);
-                Thread.Sleep(5); // Change the wait time here.
-                
-                //i++;
-                //if (i == 1000)
-                //    list.Clear();
-                //   Marshal.FreeHGlobal(hglobal);
-            }
-            Console.WriteLine("free memory");
-            foreach (var item in alist)
-            {
-                Marshal.FreeHGlobal(item);
-            }
-            alist = null;
-            //Console.WriteLine(i.ToString());
-            //alist.Clear();
-            //alist = null;
-            
-            Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
-        }
+
 
         private  void MemoryProcessing()
         {
@@ -94,7 +60,8 @@ namespace MEMORY_Microservice
                         int time = Convert.ToInt16(order[3]);
                         //this.Fun(time);
                         worker w = new worker(Guid.NewGuid().ToString(), time, channel, ea);
-                        new Thread(w.Fun).Start();
+                        //new Thread(w.Fun).Start();
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
                     }
 
                 };
@@ -123,7 +90,7 @@ namespace MEMORY_Microservice
                 this.ea = ea;
             }
 
-            public void Fun()
+            public void Fun(object state)
             {
                 DateTime currentTime = new DateTime();
                 currentTime = System.DateTime.Now;
@@ -137,9 +104,9 @@ namespace MEMORY_Microservice
                     //list.Add(new byte[1024]); // Change the size here.
                     //Thread.Sleep(5); // Change the wait time here.
                     //double[,] a = new double[10000, 10000];
-                    hglobal = Marshal.AllocHGlobal(1000);
+                    hglobal = Marshal.AllocHGlobal(1);
                     alist.Add(hglobal);
-                    Thread.Sleep(2); // Change the wait time here.
+                    //Thread.Sleep(10); // Change the wait time here.
 
                     //i++;
                     //if (i == 1000)
