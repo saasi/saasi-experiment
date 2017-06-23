@@ -26,9 +26,7 @@ namespace CPU_Microservice
         static void Main(string[] args)
         {
             // Wait for RabbitMQ to be ready
-            Console.WriteLine("================== Waiting for RabbitMQ to start");
-           
-
+            Console.WriteLine("================== Waiting for RabbitMQ to start");         
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
