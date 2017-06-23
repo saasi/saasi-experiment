@@ -16,21 +16,24 @@ namespace Monitor
         private static int MemoryViolationCounter = 0;
         private static int IOViolationCounter = 0;
         private static double cpuViolationThresdhold = 90.0;
-        private static double memoryViolationThreshold = 50.0;
+        private static double memoryViolationThreshold = 70.0;
         private static double IOViolationThresdhold = 10.0;
         private static Dictionary<string, int> bms;
         private static Dictionary<string, string> containers;
-        private static String vmaddress;
         private static int bmsNum = 1;
+        private static int ioNum = 1;
+        private static int cpuNum = 1;
+        private static int memNum = 1;
+        private static string vmaddress; 
+        private static Dictionary<string, int> containerViolation;
         public static void Main(string[] args)
         {
-            // wait for RabbitMQ to be ready
-           // vmaddress = getVmAddress();
-           // Console.WriteLine("ip"+ vmaddress);
-           // sendVMInfo();
-            //monitor dm = new monitor();
-            //Console.WriteLine("ip" + vmaddress);
-            //new Thread(monitorBusinessTimeout).Start();
+
+             vmaddress = getVmAddress();
+             Console.WriteLine("ip"+ vmaddress);
+             sendVMInfo();
+            monitor dm = new monitor();
+            new Thread(monitorBusinessTimeout).Start();
             // new Thread(monitorBusinessInfo).Start();
             containerViolation = new Dictionary<string, int>();
             Thread.Sleep(5000);
@@ -114,11 +117,81 @@ namespace Monitor
 
             }
 
+
         }
 
         public monitor()
         {
             bms = new Dictionary<string, int>();
+        }
+        public static double getUsage(KeyValuePair<string, string> container, string type)
+        {
+            double usage = 0;
+
+            
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./stats.sh " + container.Key, };
+                Console.WriteLine("./stats.sh " + container.Key);
+                Process ip = new Process() { StartInfo = startInfo, };
+                ip.Start();
+                Thread.Sleep(500);
+                var lines = File.ReadAllLines(@"stats.txt");
+  
+               // System.IO.Directory.Delete("stats.txt");
+                List<string> list = new List<string>();
+                foreach (string s in lines)
+                {
+                    if (s.Contains(container.Key))
+                    {
+                        list.Add(s);
+                    }
+                }
+                var line = list.ToArray()[0].Split(' ');
+                List<string> list2 = new List<string>();
+                foreach (string s in line)
+                {
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        list2.Add(s);
+                    }
+                }
+                var data = list2.ToArray();
+                
+                if (type.Equals("cpu"))
+                {
+                    usage = Convert.ToDouble(data[1].Substring(0, data[1].Length - 1));
+                }
+
+                if (type.Equals("memory"))
+                {
+                    usage = Convert.ToDouble(data[7].Substring(0, data[7].Length - 1));
+                }
+
+                if (type.Equals("io"))
+                {
+                    var total = Convert.ToDouble(data[13]);
+                    if (data[16].Equals("MB"))
+                    {
+                        var use = Convert.ToDouble(data[15]) / 1000;
+                        usage = use / total;
+                    }
+                    if (data[16].Equals("KB"))
+                    {
+                        var use = Convert.ToDouble(data[15]) / 1000000;
+                        usage = use / total;
+                    }
+
+                }
+            }catch
+            {
+                Console.WriteLine("read error");
+            }
+
+            Console.WriteLine(type + ":" +container.Key+":"+ usage.ToString());
+            return usage;
+
         }
 
         public static String getVmAddress()
@@ -138,22 +211,16 @@ namespace Monitor
         {
             Dictionary<string, string> tempContainers = new Dictionary<string, string>();
             ProcessStartInfo startInfo2 = new ProcessStartInfo()
-            { FileName = "/bin/bash", Arguments = "./image.sh", };
+            { FileName = "/bin/bash", Arguments = "./nameidcollect.sh", };
             Process imgname = new Process() { StartInfo = startInfo2, };
             imgname.Start();
 
-            //Get Container IP (Store in text File)
-            ProcessStartInfo startInfo4 = new ProcessStartInfo()
-            { FileName = "/bin/bash", Arguments = "./guid.sh", };
-            Process guid = new Process() { StartInfo = startInfo4, };
-            guid.Start();
             Thread.Sleep(1000);
-            string[] imageInfo = System.IO.File.ReadAllLines(@"image.txt");
-            string[] guidsInfo = System.IO.File.ReadAllLines(@"id.txt");
-            for (int i = 0; i < guidsInfo.Length; i++)
+            string[] Info = System.IO.File.ReadAllLines(@"name.txt");
+            foreach (string container in Info)
             {
-                tempContainers.Add(guidsInfo[i], imageInfo[i]);
-                System.Console.WriteLine(i.ToString());
+                tempContainers.Add(container.Split(' ')[0], container.Split(' ')[1]);
+                Console.WriteLine(container.Split(' ')[0] + " " + container.Split(' ')[1]);
             }
 
             return tempContainers;
@@ -190,7 +257,7 @@ namespace Monitor
                             bmsNum++;
                             Console.WriteLine("scaleouting");
                             scaleOut("bms");
-                            writeRecord(message);
+                            writeRecord(Guid.Parse(message));
                             bms[message] = 0;
                         }
                     }
@@ -223,10 +290,8 @@ namespace Monitor
             {
                 //each line
                 string currentLine = lines[intCounter];
-                Console.WriteLine(currentLine);
+                Console.WriteLine("current line:" + currentLine);
                 string[] fields = currentLine.Split('\t');
-                foreach (String str1 in fields)
-                    Console.WriteLine(str1);
                 // int fieldCounter = 0;
                 String currentValue;
                 
@@ -234,12 +299,12 @@ namespace Monitor
                 {
                     //fieldCounter = 0
                     //get CPU
-
+                    Console.WriteLine(fieldCounter.ToString());
                     if (fieldCounter == 1)
                     {
                         //cpu
                         currentValue = fields[fieldCounter];
-                        Console.WriteLine(currentValue);
+                        Console.WriteLine("current value:" + currentValue);
                         String CPUValue = currentValue.Replace('%', ' ');
                         Console.WriteLine("cpu:" + CPUValue);
                         Double dblCPU = Double.Parse(CPUValue);
@@ -301,7 +366,7 @@ namespace Monitor
                                 String IOValue = currentValue.Replace('B', ' ');
                                 Console.WriteLine("io:" + IOValue);
                                 Double dblIO = Double.Parse(IOValue);
-                                if (dblIO > IoViolation)
+                                if (dblIO > IOViolationThresdhold)
                                 {
                                     Console.WriteLine("IO Violation");
                                     IOViolationCounter++;
@@ -335,7 +400,7 @@ namespace Monitor
                     }
 
 
-                    Console.ReadLine();
+                   
                 }
             }
         
@@ -345,10 +410,42 @@ namespace Monitor
         public static void scaleOut(string type)
         {
 	         //scalebms
-               ProcessStartInfo statInfo1 = new ProcessStartInfo()
-	                   { FileName = "/bin/bash", Arguments = "./scalebms1.sh " + bmsNum}; //Again, scriptfile should be in working directory
-			               Process stat = new Process() { StartInfo = statInfo1, };
-				                   stat.Start();
+            if (type.Equals("bms"))
+            {
+                Console.WriteLine("scaleout bms");
+                ProcessStartInfo statInfo1 = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./scalebms1.sh " + bmsNum }; //Again, scriptfile should be in working directory
+                Process stat = new Process() { StartInfo = statInfo1, };
+                stat.Start();
+            }
+
+            if (type.Equals("io"))
+            {
+                Console.WriteLine("scaleout bms");
+                ProcessStartInfo statInfo1 = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./scaleio1.sh " + ioNum }; //Again, scriptfile should be in working directory
+                Process stat = new Process() { StartInfo = statInfo1, };
+                stat.Start();
+            }
+
+            if (type.Equals("cpu"))
+            {
+                Console.WriteLine("scaleout bms");
+                ProcessStartInfo statInfo1 = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./scalecpu1.sh " + cpuNum }; //Again, scriptfile should be in working directory
+                Process stat = new Process() { StartInfo = statInfo1, };
+                stat.Start();
+            }
+
+            if (type.Equals("memory"))
+            {
+                Console.WriteLine("scaleout bms");
+                ProcessStartInfo statInfo1 = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./scalemem1.sh " + memNum }; //Again, scriptfile should be in working directory
+                Process stat = new Process() { StartInfo = statInfo1, };
+                stat.Start();
+            }
+
         }
 
      /*   public static void monitorBusinessInfo()
