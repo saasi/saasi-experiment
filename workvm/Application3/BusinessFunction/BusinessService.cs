@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -9,12 +10,34 @@ namespace BusinessFunction
 {
     class BusinessService
     {
+        private static readonly string _rabbitMQHost = "rabbitmq";
         private static Guid bmsGuid;
         static void Main(string[] args)
         {
-            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
-            Thread.Sleep(5000);
-            Console.WriteLine("================== Sleeping done");
+            // Wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting for RabbitMQ to start");
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    using (var connection = factory.CreateConnection())
+                    {
+                        Console.WriteLine("================== Connected");
+                        connected = true;
+                    }
+
+                }
+                catch (BrokerUnreachableException e)
+                {
+                    // not connected
+                    Console.WriteLine("================== Not connected, retrying in 500ms");
+                }
+                Thread.Sleep(500);
+            }
+
+
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
             //
@@ -22,7 +45,7 @@ namespace BusinessFunction
         static void sendBMSInfo()  //send bms guid to monitor
         {
             
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             using (var connection = factory.CreateConnection())
             using (var channel_api = connection.CreateModel())
             {
@@ -41,7 +64,7 @@ namespace BusinessFunction
         static void businessProcessing()
         {
             
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             using (var connection = factory.CreateConnection())
             using (var channel_mono = connection.CreateModel())
             {
@@ -138,7 +161,7 @@ namespace BusinessFunction
         }
         public static void CallApi(String message)
         {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             using (var connection = factory.CreateConnection())
             using (var channel_api = connection.CreateModel())
             {
