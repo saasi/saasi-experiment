@@ -28,25 +28,29 @@ namespace CPU_Microservice
             Thread.Sleep(5000);
             Console.WriteLine("================== Sleeping done");
             CPU cpu1 = new CPU("1");
-            CPU cpu2 = new CPU("2");
-            CPU cpu3 = new CPU("3");
+          //  CPU cpu2 = new CPU("2");
+          //  CPU cpu3 = new CPU("3");
             Thread t1 = new Thread(cpu1.CpuProcessing);
-            Thread t2 = new Thread(cpu2.CpuProcessing);
-            Thread t3 = new Thread(cpu3.CpuProcessing);
+           // Thread t2 = new Thread(cpu2.CpuProcessing);
+           // Thread t3 = new Thread(cpu3.CpuProcessing);
             t1.Start();
-            t2.Start();
-            t3.Start();
+           // t2.Start();
+           // t3.Start();
         }
         public class Worker
         {
             private int time;
-            private Guid id;
-            public Worker(int time)
+            private string id;
+            private IModel channel;
+            private BasicDeliverEventArgs ea;
+            public Worker(string id, int time, IModel channel, BasicDeliverEventArgs ea)
             {
                 this.time = time;
-                this.id = Guid.NewGuid();
+                this.channel = channel;
+                this.ea = ea;
+                this.id = id;
             }
-            public void Fun()
+            public void Fun(object state)
             {
                 DateTime currentTime = new DateTime();
                 currentTime = System.DateTime.Now;
@@ -54,31 +58,16 @@ namespace CPU_Microservice
                 Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
-                    string comparestring1 = StringDistance.GenerateRandomString(100);
-                    string comparestring2 = StringDistance.GenerateRandomString(100);
+                    string comparestring1 = StringDistance.GenerateRandomString(50);
+                    string comparestring2 = StringDistance.GenerateRandomString(50);
                     StringDistance.LevenshteinDistance(comparestring1, comparestring2);
                 }
                 Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
-
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
             }
         }
-            public void Fun(int time)
-            {
-                DateTime currentTime = new DateTime();
-                currentTime = System.DateTime.Now;
-                DateTime finishTime = currentTime.AddSeconds(time);
-                Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
-                while (System.DateTime.Now.CompareTo(finishTime) < 0)
-                {
-                    string comparestring1 = StringDistance.GenerateRandomString(100);
-                    string comparestring2 = StringDistance.GenerateRandomString(100);
-                    StringDistance.LevenshteinDistance(comparestring1, comparestring2);
-                }
-                Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
 
-
-            }
         public  void CpuProcessing()
         {
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
@@ -93,7 +82,7 @@ namespace CPU_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 5, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "api");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
@@ -108,8 +97,8 @@ namespace CPU_Microservice
                         //Thread t = new Thread(worker.Fun);
                         //t.Start();
                         //t.Join(); 
-                        this.Fun(time);
-                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                        Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
                     }
 
                 };

@@ -15,8 +15,8 @@ namespace Monitor
         private static int CPUViolationCounter = 0;
         private static int MemoryViolationCounter = 0;
         private static int IOViolationCounter = 0;
-        private static double cpuViolationThresdhold = 60.0;
-        private static double memoryViolationThreshold = 70.0;
+        private static double cpuViolationThresdhold = 90.0;
+        private static double memoryViolationThreshold = 50.0;
         private static double IOViolationThresdhold = 10.0;
         private static Dictionary<string, int> bms;
         private static Dictionary<string, string> containers;
@@ -37,12 +37,13 @@ namespace Monitor
             // new Thread(monitorBusinessInfo).Start();
             containerViolation = new Dictionary<string, int>();
             Thread.Sleep(5000);
-          /*  while (true)
+            while (true)
             {
                 containers = getContainerList(); //"id" : "image"
+                Console.WriteLine("Update container list");
                 DateTime startTime = new DateTime();
                 startTime = System.DateTime.Now;
-                DateTime finishTime = startTime.AddSeconds(30000);               
+                DateTime finishTime = startTime.AddSeconds(20);               
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
                    foreach (KeyValuePair<string, string> container in containers)
@@ -114,7 +115,7 @@ namespace Monitor
                 }
 
 
-            }*/
+            }
 
 
         }
