@@ -1,1 +1,0 @@
-Cannot connect to the Docker daemon. Is the docker daemon running on this host?
