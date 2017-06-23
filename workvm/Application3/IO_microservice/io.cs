@@ -7,11 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
+using RabbitMQ.Client.Exceptions;
 
 namespace IO_Microservice
 {
     class io
     {
+        private static readonly string _rabbitMQHost = "rabbitmq";
         private int id;
         public io(int id)
         {
@@ -19,10 +21,29 @@ namespace IO_Microservice
         }
         static void Main(string[] args)
         {
-            // wait for RabbitMQ to be ready
-            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
-            Thread.Sleep(5000);
-            Console.WriteLine("================== Sleeping done");
+            // Wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting for RabbitMQ to start");
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    using (var connection = factory.CreateConnection())
+                    {
+                        Console.WriteLine("================== Connected");
+                        connected = true;
+                    }
+
+                }
+                catch (BrokerUnreachableException e)
+                {
+                    // not connected
+                    Console.WriteLine("================== Not connected, retrying in 500ms");
+                }
+                Thread.Sleep(500);
+            }
+
             io io1 = new io(1);
             Thread t1 = new Thread(io1.IoProcessing);
             //  io io2 = new io(2);
@@ -82,7 +103,7 @@ namespace IO_Microservice
         }
         public  void IoProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             //var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
