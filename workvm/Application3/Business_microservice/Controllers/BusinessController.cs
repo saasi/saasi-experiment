@@ -24,7 +24,7 @@ namespace Business_microservice.Controllers
             ConfigSettings = settings.Value;
         }
         //public IActionResult Index(Guid guid, DateTime timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
-        public IActionResult Index(Guid guid,String timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
+        public IActionResult Index(Guid guid, Guid bmsguid, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
         {
             
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
@@ -33,7 +33,7 @@ namespace Business_microservice.Controllers
             using (var channel = connection.CreateModel())
             {
                 channel.ExchangeDeclare(exchange: "mono", type: "direct");
-                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timetorun) + " " +  Convert.ToString(timeout) + " " + timestart;
+                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timetorun) + " " +  Convert.ToString(timeout);
                 Console.WriteLine(message);
                 var body = Encoding.UTF8.GetBytes(message);
                 var properties = channel.CreateBasicProperties();

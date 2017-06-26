@@ -22,8 +22,11 @@ namespace MEMORY_Microservice
         {
             // Wait for RabbitMQ to be ready
             Console.WriteLine("================== Waiting for RabbitMQ to start");
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
@@ -44,6 +47,11 @@ namespace MEMORY_Microservice
                 }
                 Thread.Sleep(500);
             }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             memory mem1 = new memory("1");
             memory mem2 = new memory("2");
 
