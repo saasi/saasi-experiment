@@ -7,11 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
+using RabbitMQ.Client.Exceptions;
 
 namespace IO_Microservice
 {
     class io
     {
+        private static readonly string _rabbitMQHost = "rabbitmq";
+        private static readonly long _fileSize = 10L * 1024L * 1024L * 1024L; //10 G
         private int id;
         public io(int id)
         {
@@ -19,10 +22,29 @@ namespace IO_Microservice
         }
         static void Main(string[] args)
         {
-            // wait for RabbitMQ to be ready
-            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
-            Thread.Sleep(5000);
-            Console.WriteLine("================== Sleeping done");
+            // Wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting for RabbitMQ to start");
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    using (var connection = factory.CreateConnection())
+                    {
+                        Console.WriteLine("================== Connected");
+                        connected = true;
+                    }
+
+                }
+                catch (BrokerUnreachableException e)
+                {
+                    // not connected
+                    Console.WriteLine("================== Not connected, retrying in 500ms");
+                }
+                Thread.Sleep(500);
+            }
+
             io io1 = new io(1);
             Thread t1 = new Thread(io1.IoProcessing);
             //  io io2 = new io(2);
@@ -36,39 +58,7 @@ namespace IO_Microservice
             //Console.ReadLine();
         }
 
-        private void Fun(int time)
-        {
 
-
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            Console.WriteLine(this.id.ToString() + ":Start." + Convert.ToString(currentTime));
-            String st = Guid.NewGuid().ToString();
-            String fileName = "write" + Convert.ToString(st) + ".txt";
-            FileStream fs = new FileStream(fileName, FileMode.Create);
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-
-                StreamWriter sw = new StreamWriter(fs);
-               // String s = io.GenerateRandomString(2000);
-               // sw.Write("1111111111111111111111111111111111111111111111");
-               // fs.Flush();
-                //var httpClient = new HttpClient();
-                //httpClient.MaxResponseContentBufferSize = 256000;
-                
-                //var url = "http://localhost:5001";
-                //var response = httpClient.GetAsync(url);
-                Thread.Sleep(100); 
-              //  System.IO.Directory.Delete(fileName);
-            }
-            //fs.Dispose();
-
-
-
-            Console.WriteLine(this.id+":Done." + Convert.ToString(System.DateTime.Now));
-            
-        }
         private static string GenerateRandomString(int length)
         {
             var r = new Random((int)DateTime.Now.Ticks);
@@ -82,7 +72,7 @@ namespace IO_Microservice
         }
         public  void IoProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             //var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
@@ -94,27 +84,72 @@ namespace IO_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 4, global: false);
-                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "api");
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 5, global: false);
+                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "io");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
+                    Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
-                    if (order[0].Equals("1"))
-                    {
+                 //   if (order[0].Equals("1"))
+                 //   {
                         int time = Convert.ToInt16(order[3]);
-                        this.Fun(time);
-                    }
+                        Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
+                 //   }
                 };
                 channel.BasicConsume(queue: queueName,
-                                     noAck: true,
+                                     noAck: false,
                                      consumer: consumer);
 
                 Console.WriteLine(" Looping ...");
                 //Console.ReadLine();
                 while(true){ Thread.Sleep(5000);};
+            }
+        }
+
+        public class Worker
+        {
+            private int time;
+            private string id;
+            private IModel channel;
+            private BasicDeliverEventArgs ea;
+            public Worker(string id, int time, IModel channel, BasicDeliverEventArgs ea)
+            {
+                this.time = time;
+                this.channel = channel;
+                this.ea = ea;
+                this.id = id;
+            }
+            public void Fun(object state)
+            {
+                DateTime currentTime = new DateTime();
+                currentTime = System.DateTime.Now;
+                DateTime finishTime = currentTime.AddSeconds(time);
+                Console.WriteLine(this.id.ToString() + ":Start." + Convert.ToString(currentTime));
+                String st = Guid.NewGuid().ToString();
+                String fileName = "write" + st + ".tmp";
+                FileStream fs = new FileStream(fileName, FileMode.Create);
+                fs.SetLength(_fileSize);
+                StreamWriter sw = new StreamWriter(fs);
+                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                {
+
+
+                    String s = io.GenerateRandomString(2000);
+                    sw.Write(s);
+                    fs.Flush(true);
+                    //Thread.Sleep(100); 
+                }
+                sw.Dispose();
+
+                fs.Dispose();
+                var fi = new System.IO.FileInfo(fileName);
+                fi.Delete();
+                Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
             }
         }
     }

@@ -32,6 +32,7 @@ services:
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq
+    mem_limit: 512m
     depends_on:
       - messagequeue
 

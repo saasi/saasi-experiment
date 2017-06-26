@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -10,11 +11,33 @@ namespace BusinessFunction
     class BusinessService
     {
         private static Guid bmsGuid;
+        private static readonly string _rabbitMQHost = "rabbitmq";
         static void Main(string[] args)
         {
-            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
-            Thread.Sleep(5000);
-            Console.WriteLine("================== Sleeping done");
+            // Wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting for RabbitMQ to start");
+
+
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    using (var connection = factory.CreateConnection())
+                    {
+                        Console.WriteLine("================== Connected");
+                        connected = true;
+                    }
+
+                }
+                catch (BrokerUnreachableException e)
+                {
+                    // not connected
+                    Console.WriteLine("================== Not connected, retrying in 500ms");
+                }
+                Thread.Sleep(500);
+            }
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
             //
@@ -54,7 +77,7 @@ namespace BusinessFunction
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 8, global: false);
+                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 15, global: false);
                 channel_mono.QueueBind(queue: queueName, exchange: "mono", routingKey: "business");
                 var consumer = new EventingBasicConsumer(channel_mono);
                 consumer.Received += (model, ea) =>
@@ -64,6 +87,7 @@ namespace BusinessFunction
                     Console.WriteLine(message);
                     Console.WriteLine(bmsGuid + ":call api");
                     CallApi(message);
+                    //channel_mono.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     businessTask bt = new businessTask(message, channel_mono, ea);
                     //Thread t = new Thread(bt.Fun);
                     //t.Start();
@@ -102,10 +126,15 @@ namespace BusinessFunction
             public void Fun(object state)
             {
                 DateTime currentTime = System.DateTime.Now;
+                //DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                //var startTime = dtDateTime.AddSeconds(Convert.ToDouble(message.Split(' ')[5]));
                 Console.WriteLine("business start:" + currentTime.ToString());
                 var timetorun = Convert.ToDouble(message.Split(' ')[3]);
                 var timeout = Convert.ToDouble(message.Split(' ')[4]);
+                
+                
                 DateTime finishTime = currentTime.AddSeconds(timetorun);
+                //DateTime finishTime = startTime.AddSeconds(timetorun);
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
                     GenerateRandomString(10);
@@ -113,7 +142,9 @@ namespace BusinessFunction
                 DateTime completeRunTime = System.DateTime.Now;
                 Console.WriteLine("business end:" + completeRunTime.ToString());
                 Console.WriteLine(currentTime.AddSeconds(timeout).ToString() + " " + completeRunTime.ToString());
+                //Console.WriteLine(startTime.AddSeconds(timeout).ToString() + " " + completeRunTime.ToString());
                 if (currentTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0) //check timeout
+                //if (startTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0)
                 {
                     var message2 = bmsGuid;
                     Console.WriteLine("send to GlobalDM:" + message2);
@@ -146,10 +177,29 @@ namespace BusinessFunction
                 var body = Encoding.UTF8.GetBytes(message);
                 //var properties = channel_api.CreateBasicProperties();
                 //properties.Persistent = true;
-                channel_api.BasicPublish(exchange: "call",
-                                      routingKey: "api",
-                                      basicProperties: null,
-                                      body: body);
+                var order = message.Split(' ');
+                if (order[0].Equals("1"))
+                {
+                    channel_api.BasicPublish(exchange: "call",
+                  routingKey: "io",
+                  basicProperties: null,
+                  body: body);
+                }
+                if (order[1].Equals("1"))
+                {
+                    channel_api.BasicPublish(exchange: "call",
+                  routingKey: "cpu",
+                  basicProperties: null,
+                  body: body);
+                }
+                if (order[2].Equals("1"))
+                {
+                    channel_api.BasicPublish(exchange: "call",
+                  routingKey: "memory",
+                  basicProperties: null,
+                  body: body);
+                }
+                Console.WriteLine(message);
                 Console.WriteLine("Send to API microservice");
             }
         }

@@ -8,12 +8,14 @@ using RabbitMQ.Client.Events;
 using System.IO;
 using System.Text;
 using System.Threading;
+using RabbitMQ.Client.Exceptions;
 
 namespace CPU_Microservice
 {
     
     class CPU
     {
+        private static readonly string _rabbitMQHost = "rabbitmq";
         private string id;
         private static int workNum;
         public CPU(string id)
@@ -23,10 +25,31 @@ namespace CPU_Microservice
         }
         static void Main(string[] args)
         {
-            // wait for RabbitMQ to be ready
-            Console.WriteLine("================== Waiting 5 sec for RabbitMQ");
-            Thread.Sleep(5000);
-            Console.WriteLine("================== Sleeping done");
+            // Wait for RabbitMQ to be ready
+            Console.WriteLine("================== Waiting for RabbitMQ to start");
+           
+
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var connected = false;
+            while (!connected)
+            {
+                try
+                {
+                    using (var connection = factory.CreateConnection())
+                    {
+                        Console.WriteLine("================== Connected");
+                        connected = true;
+                    }
+
+                } catch (BrokerUnreachableException e)
+                {
+                    // not connected
+                    Console.WriteLine("================== Not connected, retrying in 500ms");
+                }
+                Thread.Sleep(500);
+            }
+            
+
             CPU cpu1 = new CPU("1");
           //  CPU cpu2 = new CPU("2");
           //  CPU cpu3 = new CPU("3");
@@ -58,8 +81,8 @@ namespace CPU_Microservice
                 Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
-                    string comparestring1 = StringDistance.GenerateRandomString(50);
-                    string comparestring2 = StringDistance.GenerateRandomString(50);
+                    string comparestring1 = StringDistance.GenerateRandomString(20);
+                    string comparestring2 = StringDistance.GenerateRandomString(20);
                     StringDistance.LevenshteinDistance(comparestring1, comparestring2);
                 }
                 Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
@@ -68,10 +91,9 @@ namespace CPU_Microservice
             }
         }
 
-        public  void CpuProcessing()
+        public void CpuProcessing()
         {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
-            //var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -83,15 +105,16 @@ namespace CPU_Microservice
                                 autoDelete: false,
                                 arguments: null);
                 channel.BasicQos(prefetchSize: 0, prefetchCount: 5, global: false);
-                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "api");
+                channel.QueueBind(queue: queueName, exchange: "call", routingKey: "cpu");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
+                    Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
-                    if (order[1].Equals("1"))
-                    {
+                  //  if (order[1].Equals("1"))
+                  //  {
                         int time = Convert.ToInt16(order[3]);
                         //Worker worker = new Worker(time);
                         //Thread t = new Thread(worker.Fun);
@@ -99,7 +122,7 @@ namespace CPU_Microservice
                         //t.Join(); 
                         Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
-                    }
+                   // }
 
                 };
                 channel.BasicConsume(queue: queueName,
