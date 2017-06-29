@@ -12,16 +12,10 @@ namespace BusinessFunction
     {
         private static readonly string _rabbitMQHost = "rabbitmq";
         private static Guid bmsGuid;
-        private static readonly string _rabbitMQHost = "rabbitmq";
         static void Main(string[] args)
         {
             // Wait for RabbitMQ to be ready
             Console.WriteLine("================== Waiting for RabbitMQ to start");
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
@@ -42,11 +36,8 @@ namespace BusinessFunction
                 }
                 Thread.Sleep(500);
             }
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
             //

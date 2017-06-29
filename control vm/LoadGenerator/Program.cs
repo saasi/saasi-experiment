@@ -58,7 +58,7 @@ namespace LoadGenerator
         static void RunUser1(int duration=1){
             Console.WriteLine("RUN!");
             IApplicationUser user = new Application1User();
-            var t =Task.Run(async()=> {await user.Run("http://web", duration);});
+            var t =Task.Run(async()=> {await user.Run("http://localhost:5004", duration);});
             t.Wait();
         }
 
