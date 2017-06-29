@@ -15,21 +15,25 @@ namespace Monitor
         private static int CPUViolationCounter = 0;
         private static int MemoryViolationCounter = 0;
         private static int IOViolationCounter = 0;
-        private static double cpuViolationThresdhold = 90.0;
-        private static double memoryViolationThreshold = 70.0;
-        private static double IOViolationThresdhold = 10.0;
+        private static double cpuViolationThresdhold = 80.0;
+        private static double memoryViolationThreshold = 40.0;
+        private static double IOViolationThresdhold = 30.0;
         private static Dictionary<string, int> bms;
         private static Dictionary<string, string> containers;
+        private static Dictionary<string, DateTime> scaleTime;
         private static int bmsNum = 1;
         private static int ioNum = 1;
         private static int cpuNum = 1;
         private static int memNum = 1;
         private static string vmaddress; 
         private static Dictionary<string, int> containerViolation;
+        private static Dictionary<string, double> io_use_old;
         public static void Main(string[] args)
         {
 
              vmaddress = getVmAddress();
+            scaleTime = new Dictionary<string, DateTime>();
+            io_use_old = new Dictionary<string, double>();
              Console.WriteLine("ip"+ vmaddress);
              sendVMInfo();
             monitor dm = new monitor();
@@ -53,16 +57,26 @@ namespace Monitor
                        if (container.Value.Equals("io_microservice"))
                        {
                             var usage = getUsage(container,"io");
-                           
+                            writeRecord("io", container.Key, usage);
                            if (usage > IOViolationThresdhold)
                            {
+                                
                                 containerViolation[container.Key]++;
-                                writeRecord("io", container.Key, usage);
+                                Console.WriteLine("io volation:" + containerViolation[container.Key]);
+                                
                                 if (containerViolation[container.Key] >=5)
                                 {
-                                    ioNum++;
-                                    writeRecord("io");
-                                    scaleOut("io");
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    {
+                                        ioNum++;
+                                        writeRecord("io");
+                                        scaleOut("io");
+                                        if (!scaleTime.ContainsKey(container.Key))
+                                            scaleTime.Add(container.Key, DateTime.Now);
+                                        else
+                                            scaleTime[container.Key] = DateTime.Now;
+                                        
+                                    }
                                     containerViolation[container.Key] = 0;
                                 }
                                
@@ -73,18 +87,27 @@ namespace Monitor
                        if (container.Value.Equals("cpu_microservice"))
                        {
                             var usage = getUsage(container,"cpu");
-
-                           if (usage > cpuViolationThresdhold)
-                           {
-                                writeRecord("cpu", container.Key, usage);
+                            writeRecord("cpu", container.Key, usage);
+                            if (usage > cpuViolationThresdhold)
+                            {
+                                
                                 containerViolation[container.Key]++;
-                                Console.WriteLine("cpuvolation:" + containerViolation[container.Key]);
+                                Console.WriteLine("cpu volation:" + containerViolation[container.Key]);
                                 if (containerViolation[container.Key] >= 5)
                                 {
-                                    cpuNum++;
-                                    writeRecord("cpu");
-                                    scaleOut("cpu");
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    {
+                                        cpuNum++;
+                                        writeRecord("cpu");
+                                        scaleOut("cpu");
+                                        if (!scaleTime.ContainsKey(container.Key))
+                                            scaleTime.Add(container.Key, DateTime.Now);
+                                        else
+                                            scaleTime[container.Key] = DateTime.Now;
+                                        
+                                    }
                                     containerViolation[container.Key] = 0;
+
                                 }
                             }
                        }
@@ -92,18 +115,26 @@ namespace Monitor
 
                        if (container.Value.Equals("memory_microservice"))
                        {
-                            var usage = getUsage(container,"memory");
-
+                           var usage = getUsage(container,"memory");
+                           writeRecord("memory", container.Key, usage);
                            if (usage > memoryViolationThreshold)
                            {
-                                Console.WriteLine("writememory:" + usage);
-                                writeRecord("memory", container.Key, usage);
+                                
                                 containerViolation[container.Key]++;
+                                Console.WriteLine("memory volation:" + containerViolation[container.Key]);
                                 if (containerViolation[container.Key] >= 5)
                                 {
-                                    memNum++;
-                                    writeRecord("memory");
-                                    scaleOut("memory");
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    {
+                                        memNum++;
+                                        writeRecord("memory");
+                                        scaleOut("memory");
+                                        if (!scaleTime.ContainsKey(container.Key))
+                                            scaleTime.Add(container.Key, DateTime.Now);
+                                        else
+                                            scaleTime[container.Key] = DateTime.Now;
+                                        
+                                    }
                                     containerViolation[container.Key] = 0;
                                 }
                            }
@@ -133,13 +164,11 @@ namespace Monitor
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo()
                 { FileName = "/bin/bash", Arguments = "./stats.sh " + container.Key, };
-                Console.WriteLine("./stats.sh " + container.Key);
                 Process ip = new Process() { StartInfo = startInfo, };
                 ip.Start();
                 Thread.Sleep(500);
                 var lines = File.ReadAllLines(@"stats.txt");
   
-               // System.IO.Directory.Delete("stats.txt");
                 List<string> list = new List<string>();
                 foreach (string s in lines)
                 {
@@ -149,6 +178,7 @@ namespace Monitor
                     }
                 }
                 var line = list.ToArray()[0].Split(' ');
+
                 List<string> list2 = new List<string>();
                 foreach (string s in line)
                 {
@@ -158,7 +188,10 @@ namespace Monitor
                     }
                 }
                 var data = list2.ToArray();
-                
+               // for (int i = 0; i < data.Length; i++)
+               // {
+              //      Console.WriteLine(data[i]);
+              //  }
                 if (type.Equals("cpu"))
                 {
                     usage = Convert.ToDouble(data[1].Substring(0, data[1].Length - 1));
@@ -171,18 +204,23 @@ namespace Monitor
 
                 if (type.Equals("io"))
                 {
-                    var total = Convert.ToDouble(data[13]);
-                    if (data[16].Equals("MB"))
+                    if (!io_use_old.ContainsKey(container.Key))
+                        io_use_old.Add(container.Key, 0);
+                    double use = 0;
+                    if (data[17].Equals("MB"))
                     {
-                        var use = Convert.ToDouble(data[15]) / 1000;
-                        usage = use / total;
+                        use = Convert.ToDouble(data[16]);
                     }
-                    if (data[16].Equals("KB"))
-                    {
-                        var use = Convert.ToDouble(data[15]) / 1000000;
-                        usage = use / total;
-                    }
+                    else if (data[17].Equals("GB"))
+                        use = Convert.ToDouble(data[16]) * 1000;
 
+                    Console.WriteLine(use.ToString());
+                    if (use == 0)
+                        use = io_use_old[container.Key];
+                    usage = (use - io_use_old[container.Key]) / 3;
+                    Console.WriteLine(container.Key + ":" + io_use_old[container.Key] + " " + use);
+                    io_use_old[container.Key] = use;
+                    
                 }
             }catch
             {
@@ -252,12 +290,20 @@ namespace Monitor
                     if (bms.ContainsKey(message))
                     {
                         bms[message]++;
-                        if (bms[message] >1)
+                        if (bms[message] >5)
                         {
-                            bmsNum++;
-                            Console.WriteLine("scaleouting");
-                            scaleOut("bms");
-                            writeRecord(Guid.Parse(message));
+                            if (!scaleTime.ContainsKey(message) || scaleTime[message].AddSeconds(60).CompareTo(DateTime.Now) < 0)
+                            {
+                                bmsNum++;
+                                Console.WriteLine("scaleouting");
+                                scaleOut("bms");
+                                if (!scaleTime.ContainsKey(message))
+                                    scaleTime.Add(message, DateTime.Now);
+                                else
+                                    scaleTime[message] = DateTime.Now;
+                                writeRecord(Guid.Parse(message));
+                                
+                            }
                             bms[message] = 0;
                         }
                     }
@@ -278,134 +324,6 @@ namespace Monitor
         }
 
 
-        public static void monitorUsage()
-        {
-            ProcessStartInfo statInfo1 = new ProcessStartInfo()
-            { FileName = "/bin/bash", Arguments = "./statscollect.sh", };
-            Process stat = new Process() { StartInfo = statInfo1, };
-            stat.Start();
-            string[] lines = File.ReadAllLines(@"stats.txt");
-
-            for (int intCounter = 0; intCounter < lines.Length; intCounter++)
-            {
-                //each line
-                string currentLine = lines[intCounter];
-                Console.WriteLine("current line:" + currentLine);
-                string[] fields = currentLine.Split('\t');
-                // int fieldCounter = 0;
-                String currentValue;
-                
-                for (int fieldCounter = 0; fieldCounter < fields.Length; fieldCounter++)
-                {
-                    //fieldCounter = 0
-                    //get CPU
-                    Console.WriteLine(fieldCounter.ToString());
-                    if (fieldCounter == 1)
-                    {
-                        //cpu
-                        currentValue = fields[fieldCounter];
-                        Console.WriteLine("current value:" + currentValue);
-                        String CPUValue = currentValue.Replace('%', ' ');
-                        Console.WriteLine("cpu:" + CPUValue);
-                        Double dblCPU = Double.Parse(CPUValue);
-                        if (dblCPU > cpuViolationThresdhold)
-                        {
-                            CPUViolationCounter++;
-                            Console.WriteLine("CPU Violation");
-                            if (CPUViolationCounter >= 3)
-                            {
-                                //scale out CPU
-                                ProcessStartInfo startInfo1 = new ProcessStartInfo()
-                                { FileName = "/bin/bash", Arguments = "./scalecpu1.sh", }; //script files should be contained in the application directory
-                                Process cpuscale = new Process() { StartInfo = startInfo1, };
-                                cpuscale.Start();
-
-                                //Collect Stats of New Containers
-                                ProcessStartInfo startInfo2 = new ProcessStartInfo()
-                                { FileName = "/bin/bash", Arguments = "./infocollect_onscale.sh", }; //Console Application 1 (Which runs the scripts to collect container info should be in the directory of this app)
-                                Process onscalestat = new Process() { StartInfo = startInfo2, };
-                                onscalestat.Start();
-                                writeRecord("cpu");
-                                CPUViolationCounter = 0;
-                            }
-                        }
-                        //memory
-
-                        if (fieldCounter == 3)
-                        {
-                            currentValue = fields[fieldCounter];
-                            String memValue = currentValue.Replace('%', ' ');
-                            Console.WriteLine("mem:" + memValue);
-                            Double dblmem = Double.Parse(memValue);
-                            if (dblmem > memoryViolationThreshold)
-                            {
-                                Console.WriteLine("memory Violation");
-                                MemoryViolationCounter++;
-                                if (MemoryViolationCounter >= 3)
-                                {
-                                    //Scale Memory
-                                    ProcessStartInfo startInfo2 = new ProcessStartInfo()
-                                    { FileName = "/bin/bash", Arguments = "./scalemem1", };
-                                    Process memscale = new Process() { StartInfo = startInfo2, };
-                                    memscale.Start();
-
-                                    //Collect Stats of New Containers
-                                    ProcessStartInfo startInfo3 = new ProcessStartInfo()
-                                    { FileName = "/bin/bash", Arguments = "./infocollect_onscale.sh", }; //Console Application 1 (Which runs the scripts to collect container info should be in the directory of this app)
-                                    Process onscalestat = new Process() { StartInfo = startInfo2, };
-                                    onscalestat.Start();
-                                    writeRecord("memory");
-                                    MemoryViolationCounter = 0;
-                                }
-                            }
-
-
-                            if (fieldCounter == 4)
-                            {
-                                currentValue = fields[fieldCounter];
-                                String IOValue = currentValue.Replace('B', ' ');
-                                Console.WriteLine("io:" + IOValue);
-                                Double dblIO = Double.Parse(IOValue);
-                                if (dblIO > IOViolationThresdhold)
-                                {
-                                    Console.WriteLine("IO Violation");
-                                    IOViolationCounter++;
-                                    if (IOViolationCounter >= 3)
-                                    {
-                                        //Scale IO
-                                        ProcessStartInfo startInfo3 = new ProcessStartInfo()
-                                        { FileName = "bin/bash", Arguments = "./scaleio1", };
-                                        Process ioscale = new Process() { StartInfo = startInfo3, };
-                                        ioscale.Start();
-
-                                        //Collect Stats of New Containers
-                                        ProcessStartInfo startInfo2 = new ProcessStartInfo()
-                                        { FileName = "/bin/bash", Arguments = "./infocollect_onscale.sh", }; //Console Application 1 (Which runs the scripts to collect container info should be in the directory of this app)
-                                        Process onscalestat = new Process() { StartInfo = startInfo2, };
-                                        onscalestat.Start();
-                                        writeRecord("io");
-                                        IOViolationCounter = 0;
-                                    }
-
-                                }
-
-                            }
-
-
-
-
-
-
-                        }
-                    }
-
-
-                   
-                }
-            }
-        
-    
-}
 
         public static void scaleOut(string type)
         {
@@ -421,7 +339,7 @@ namespace Monitor
 
             if (type.Equals("io"))
             {
-                Console.WriteLine("scaleout bms");
+                Console.WriteLine("scaleout io");
                 ProcessStartInfo statInfo1 = new ProcessStartInfo()
                 { FileName = "/bin/bash", Arguments = "./scaleio1.sh " + ioNum }; //Again, scriptfile should be in working directory
                 Process stat = new Process() { StartInfo = statInfo1, };
@@ -430,7 +348,7 @@ namespace Monitor
 
             if (type.Equals("cpu"))
             {
-                Console.WriteLine("scaleout bms");
+                Console.WriteLine("scaleout cpu");
                 ProcessStartInfo statInfo1 = new ProcessStartInfo()
                 { FileName = "/bin/bash", Arguments = "./scalecpu1.sh " + cpuNum }; //Again, scriptfile should be in working directory
                 Process stat = new Process() { StartInfo = statInfo1, };
@@ -439,7 +357,7 @@ namespace Monitor
 
             if (type.Equals("memory"))
             {
-                Console.WriteLine("scaleout bms");
+                Console.WriteLine("scaleout memory");
                 ProcessStartInfo statInfo1 = new ProcessStartInfo()
                 { FileName = "/bin/bash", Arguments = "./scalemem1.sh " + memNum }; //Again, scriptfile should be in working directory
                 Process stat = new Process() { StartInfo = statInfo1, };
