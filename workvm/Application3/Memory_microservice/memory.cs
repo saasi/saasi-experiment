@@ -22,11 +22,8 @@ namespace MEMORY_Microservice
         {
             // Wait for RabbitMQ to be ready
             Console.WriteLine("================== Waiting for RabbitMQ to start");
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
@@ -47,11 +44,6 @@ namespace MEMORY_Microservice
                 }
                 Thread.Sleep(500);
             }
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             memory mem1 = new memory("1");
             memory mem2 = new memory("2");
 
@@ -76,7 +68,7 @@ namespace MEMORY_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 3, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "memory");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
@@ -126,41 +118,49 @@ namespace MEMORY_Microservice
                 currentTime = System.DateTime.Now;
                 DateTime finishTime = currentTime.AddSeconds(time);
                 Console.WriteLine(this.id + ":Start." + Convert.ToString(currentTime));
-                List<IntPtr> alist = new List<IntPtr>();
+                //List<IntPtr> alist = new List<IntPtr>();
+                List<byte[]> alist = new List<byte[]>();
                 int i = 0;
                 IntPtr hglobal;
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
-                    //list.Add(new byte[1024]); // Change the size here.
+                    byte[] b = new byte[30];
+                    alist.Add(b); // Change the size here.
                     //Thread.Sleep(5); // Change the wait time here.
                     //double[,] a = new double[10000, 10000];
-                    hglobal = Marshal.AllocHGlobal(1);
-                    alist.Add(hglobal);
+                    //hglobal = Marshal.AllocHGlobal(1);
+                   // alist.Add(hglobal);
                     //Thread.Sleep(1); // Change the wait time here.
 
                     i++;
                     if (i == 2000)
                     {
-                        Thread.Sleep(10); // Change the wait time here.
+                        Thread.Sleep(40); // Change the wait time here.
                         i = 0;
+
                     }
                         
 
                 }
+                /*   foreach (var item in alist)
+                   {
+                       //Marshal.FreeHGlobal(item);
+
+                   }*/
+                alist.Clear();
+                alist = null;
+                GC.Collect();
                 //Console.WriteLine("free memory");
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
-                foreach (var item in alist)
-                {
-                    Marshal.FreeHGlobal(item);
-                }
+
+
                 alist = null;
                 //Console.WriteLine(i.ToString());
                 //alist.Clear();
                 //alist = null;
+                Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
 
-                
-                
+
             }
         }
     }

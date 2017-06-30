@@ -58,33 +58,7 @@ namespace IO_Microservice
             //Console.ReadLine();
         }
 
-<<<<<<< HEAD
 
-=======
-        private void Fun(int time)
-        {
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            Console.WriteLine(this.id.ToString() + ":Start." + Convert.ToString(currentTime));
-            String st = Guid.NewGuid().ToString();
-            String fileName = "write" + Convert.ToString(st) + ".tmp";
-            FileStream fs = new FileStream(fileName, FileMode.Create);
-            fs.SetLength(_fileSize);
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-
-                StreamWriter sw = new StreamWriter(fs);
-                String s = io.GenerateRandomString(2000);
-                sw.Write(s);
-                fs.Flush();
-                //Thread.Sleep(100); 
-            }
-            fs.Dispose();
-            System.IO.Directory.Delete(fileName);
-            Console.WriteLine(this.id+":Done." + Convert.ToString(System.DateTime.Now));
-        }
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
         private static string GenerateRandomString(int length)
         {
             var r = new Random((int)DateTime.Now.Ticks);
@@ -110,7 +84,7 @@ namespace IO_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 5, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "io");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
@@ -164,10 +138,10 @@ namespace IO_Microservice
                 {
 
 
-                    String s = io.GenerateRandomString(2000);
+                    String s = io.GenerateRandomString(1000);
                     sw.Write(s);
                     fs.Flush(true);
-                    //Thread.Sleep(100); 
+                    Thread.Sleep(1); 
                 }
                 sw.Dispose();
 

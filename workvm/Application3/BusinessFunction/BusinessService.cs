@@ -10,18 +10,14 @@ namespace BusinessFunction
 {
     class BusinessService
     {
-        private static readonly string _rabbitMQHost = "rabbitmq";
         private static Guid bmsGuid;
         private static readonly string _rabbitMQHost = "rabbitmq";
         static void Main(string[] args)
         {
             // Wait for RabbitMQ to be ready
             Console.WriteLine("================== Waiting for RabbitMQ to start");
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
@@ -42,11 +38,6 @@ namespace BusinessFunction
                 }
                 Thread.Sleep(500);
             }
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
             //
@@ -54,7 +45,7 @@ namespace BusinessFunction
         static void sendBMSInfo()  //send bms guid to monitor
         {
             
-            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel_api = connection.CreateModel())
             {
@@ -73,7 +64,7 @@ namespace BusinessFunction
         static void businessProcessing()
         {
             
-            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel_mono = connection.CreateModel())
             {
@@ -86,7 +77,7 @@ namespace BusinessFunction
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 15, global: false);
+                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
                 channel_mono.QueueBind(queue: queueName, exchange: "mono", routingKey: "business");
                 var consumer = new EventingBasicConsumer(channel_mono);
                 consumer.Received += (model, ea) =>
@@ -134,25 +125,32 @@ namespace BusinessFunction
             }
             public void Fun(object state)
             {
-                DateTime currentTime = System.DateTime.Now;
-                //DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-                //var startTime = dtDateTime.AddSeconds(Convert.ToDouble(message.Split(' ')[5]));
-                Console.WriteLine("business start:" + currentTime.ToString());
-                var timetorun = Convert.ToDouble(message.Split(' ')[3]);
-                var timeout = Convert.ToDouble(message.Split(' ')[4]);
-                
-                
-                DateTime finishTime = currentTime.AddSeconds(timetorun);
-                //DateTime finishTime = startTime.AddSeconds(timetorun);
-                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                Guid id = Guid.NewGuid();
+               // 
+                DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                DateTime startTime = DateTime.Now;
+                try
                 {
-                    GenerateRandomString(10);
+                    startTime = dtDateTime.AddSeconds(Convert.ToDouble(message.Split(' ')[5]));
                 }
+                catch
+                {
+
+                }
+                
+                //Console.WriteLine(id + " business start:" + startTime.ToString());
+                var timetorun = Convert.ToInt16(message.Split(' ')[3]);
+                var timeout = Convert.ToInt16(message.Split(' ')[4]);
+                Thread.Sleep(timetorun * 1000);
+                //DateTime beginTime = System.DateTime.Now;
+                //DateTime finishTime = beginTime.AddSeconds(timetorun);
+                
+                //DateTime finishTime = startTime.AddSeconds(timetorun);
+
                 DateTime completeRunTime = System.DateTime.Now;
-                Console.WriteLine("business end:" + completeRunTime.ToString());
-                Console.WriteLine(currentTime.AddSeconds(timeout).ToString() + " " + completeRunTime.ToString());
+                Console.WriteLine(id + startTime.ToString() + " " + completeRunTime.ToString() + " " + startTime.AddSeconds(timeout).ToString());
                 //Console.WriteLine(startTime.AddSeconds(timeout).ToString() + " " + completeRunTime.ToString());
-                if (currentTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0) //check timeout
+                if (startTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0) //check timeout
                 //if (startTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0)
                 {
                     var message2 = bmsGuid;
@@ -162,6 +160,22 @@ namespace BusinessFunction
                     var response = httpClient.GetAsync("http://10.137.0.81:5001/BusinessTimeout?bmsguid=" + message2);
                 }
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+
+         /*       var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+                using (var connection = factory.CreateConnection())
+                using (var channel_mono = connection.CreateModel())
+                {
+                    channel.ExchangeDeclare(exchange: "reply", type: "direct");
+                    string reply = "done";
+                    var body = Encoding.UTF8.GetBytes(reply);
+                    var properties = channel.CreateBasicProperties();
+                    properties.Persistent = true;
+                    channel.BasicPublish(exchange: "mono",
+                                          routingKey: messageGuid,
+                                          basicProperties: properties,
+                                          body: body);
+                }*/
+                    
             }
         }
 
@@ -178,7 +192,7 @@ namespace BusinessFunction
         }
         public static void CallApi(String message)
         {
-            var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel_api = connection.CreateModel())
             {

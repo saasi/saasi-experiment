@@ -26,13 +26,9 @@ namespace CPU_Microservice
         static void Main(string[] args)
         {
             // Wait for RabbitMQ to be ready
-<<<<<<< HEAD
             Console.WriteLine("================== Waiting for RabbitMQ to start");
            
 
-=======
-            Console.WriteLine("================== Waiting for RabbitMQ to start");         
->>>>>>> 605888aad46c1b59554cf11d756da5491cd0f912
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
             var connected = false;
             while (!connected)
@@ -83,11 +79,18 @@ namespace CPU_Microservice
                 currentTime = System.DateTime.Now;
                 DateTime finishTime = currentTime.AddSeconds(time);
                 Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+                int i = 0;
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
-                    string comparestring1 = StringDistance.GenerateRandomString(20);
-                    string comparestring2 = StringDistance.GenerateRandomString(20);
-                    StringDistance.LevenshteinDistance(comparestring1, comparestring2);
+                    string comparestring1 = StringDistance.GenerateRandomString(1000);
+                    i++;
+                    if (i == 50)
+                    {
+                        Thread.Sleep(10); // Change the wait time here.
+                        i = 0;
+                    }
+                  //  string comparestring2 = StringDistance.GenerateRandomString(1000);
+                   // StringDistance.LevenshteinDistance(comparestring1, comparestring2);
                 }
                 Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
@@ -108,7 +111,7 @@ namespace CPU_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 5, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "cpu");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
