@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Net.Http;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace DisptachMessage
 {
@@ -15,12 +16,14 @@ namespace DisptachMessage
         static ConcurrentDictionary<string, string> bmsDic;
         static int count = 0;
         static MSQueue<string> bmsQueue;
+        static ConcurrentQueue<string> urlQueue;
         static void Main(string[] args)
         {
             //In the final version, we need to use dictionary to store <bmsguid, ipaddress> so we can send scaleout order to specific DM in vm)
             bmsBag = new ConcurrentBag<string>();
             bmsDic = new ConcurrentDictionary<string, string>();
             bmsQueue = new MSQueue<string>();
+            urlQueue = new ConcurrentQueue<string>();
             new Thread(urlListener).Start();
             new Thread(bmsListener).Start();
  	    new Thread(globalDMListener).Start();
@@ -40,14 +43,17 @@ namespace DisptachMessage
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                //channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
                 channel.QueueBind(queue: queueName, exchange: "url", routingKey: "dispatch");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    dispatchAsync(message);
+                    urlQueue.Enqueue(message);
+                    var t = Task.Run(async () => { await Run(); });
+                    t.Wait();
+                    
                 };
                 channel.BasicConsume(queue: queueName,
                      noAck: true,
@@ -91,29 +97,40 @@ namespace DisptachMessage
             }
         }
 
-        static async System.Threading.Tasks.Task dispatchAsync(string message) // dispatch to bms
+        static async System.Threading.Tasks.Task Run() // dispatch to bms
         {
-            string bmsinfo = "";
-            if (!bmsQueue.deque(ref bmsinfo))
+            while(!urlQueue.IsEmpty)
             {
-                var bmsArray = bmsBag.ToArray();
-                foreach (string info in bmsArray)
+                urlQueue.TryDequeue(out string message);
+                string bmsinfo = "";
+                if (!bmsQueue.deque(ref bmsinfo))
                 {
-                    bmsQueue.enqueue(info);
+                    var bmsArray = bmsBag.ToArray();
+                    foreach (string info in bmsArray)
+                    {
+                        bmsQueue.enqueue(info);
+                    }
+                    bmsQueue.deque(ref bmsinfo);
                 }
-                bmsQueue.deque(ref bmsinfo);
+
+
+
+                var address = bmsinfo.Split(' ')[0];
+                //var bmsguid = bmsinfo.Split(' ')[1];
+                var url = "http://" + address + ":5001/" + message;
+                var httpClient = new HttpClient();
+                httpClient.MaxResponseContentBufferSize = 256000;
+                try {
+                        var response = await httpClient.GetAsync(url);
+                        Console.WriteLine($"{response.StatusCode}");
+                } catch {
+                         Console.WriteLine($"Network Error");
+                }
+                Console.WriteLine(url + "dispatched");
             }
 
-
- 
-            var address = bmsinfo.Split(' ')[0];
-            //var bmsguid = bmsinfo.Split(' ')[1];
-            var url = "http://" + address + ":5001/" + message;
-            var httpClient = new HttpClient();
-            httpClient.MaxResponseContentBufferSize = 256000;
-            var response =await httpClient.GetAsync(url);
-            Console.WriteLine(url + "dispatched");
         }
+
 
         static void globalDMListener()
         {
