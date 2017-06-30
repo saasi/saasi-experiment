@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import socket
 from threading import Thread
 import time
+from subprocess import call
 
 interval = 1 # interval between each stats collection
 CPUViolationCounter = 0
@@ -45,6 +46,17 @@ def getContainerList():
 def scaleOut(sType): 
     if (sType == 'bms'):
         print("Scaleout bms")
+        call("sudo docker-compose scale businessfunction="+str(bmsNum))
+    elif (sType == 'io'):
+        print("Scaleout io")
+        call("sudo docker-compose scale io_microservice="+str(ioNum))
+    elif (sType == 'memory'):
+        print("Scaleout memory")
+        call("sudo docker-compose scale memory_microservice="+str(memNum))
+    elif (sType == 'cpu'):
+        print("Scaleout cpu")
+        call("sudo docker-compose scale cpu_microservice="+str(cpuNum))
+
 
 def monitorBusinessTimeout():
     import pika
@@ -88,9 +100,9 @@ if __name__ == '__main__':
     vmaddress = getVmAddress()
     containerViolation = {}
     print("IP:", vmaddress)
-    #sendVMInfo()
+    sendVMInfo()
     print("VM info sent")
-    #Thread(target = monitorBusinessTimeout).start()
+    Thread(target = monitorBusinessTimeout).start()
     while(True):
         containers = getContainerList()
         print("Updated container list")
