@@ -4,14 +4,15 @@ import socket
 from threading import Thread
 import time
 from subprocess import call
+from utils import ServiceType
 
 interval = 1 # interval between each stats collection
 CPUViolationCounter = 0
 MemoryViolationCounter = 0
 IOViolationCounter = 0
-cpuViolationThresdhold = 80.0
+cpuViolationThreshold = 80.0
 memoryViolationThreshold = 40.0
-IOViolationThresdhold = 30.0
+IOViolationThreshold = 30.0
 
 bmsNum = 1
 ioNum = 1
@@ -21,41 +22,66 @@ memNum = 1
 cli = docker.from_env()
 
 
-def getUsage(container, sType='io'):
+def getUsage(container, sType=ServiceType.IO_Microservice):
     '''
     params:
         container: container object
     '''
-    stats = container.stats()
-    if (sType =='memory'):
+    stats = container.stats(stream=False)
+    if (sType == ServiceType.Memory_Microservice):
         return stats['memory_stats']['usage']
-    elif (sType=='cpu'):
-        return stats['cpu_stats']['total_usage'] #?
-    elif (sType=='io'):
-        return stats['memory_stats']['io_service_bytes_recursive']
+    elif (sType== ServiceType.CPU_Microservice):
+        return stats['cpu_stats']['cpu_usage']['total_usage'] #?
+    elif (sType == ServiceType.IO_Microservice):
+        alist = stats['blkio_stats']['io_service_bytes_recursive']
+        filterList = [x for x in alist if x['op']=='Total']
+        print(filterList)
+        if len(filterList)>0:
+            return filterList[0]['value']
+        else:
+            return 0 # No IO stats
 
 def getVmAddress():
     myname = socket.getfqdn(socket.gethostname())
     myaddr = socket.gethostbyname(myname)
     return myaddr
 
+def getImageName(img):
+    return img.attrs['RepoTags'][0].split(':')[0]
+
+def getContainerType(container):
+    imageName = getImageName(container.image)
+    if (imageName == 'io_microservice'):
+        return ServiceType.IO_Microservice
+    elif (imageName == 'cpu_microservice'):
+        return ServiceType.CPU_Microservice
+    elif (imageName == 'memory_microservice'):
+        return ServiceType.Memory_Microservice
+    else:
+        return ServiceType.Unknown
+
 def getContainerList():
     global cli
     return cli.containers.list()
 
 def scaleOut(sType): 
-    if (sType == 'bms'):
+    global bmsNum, cpuNum, ioNum, memNum
+    if (sType == ServiceType.Business_Microservice):
         print("Scaleout bms")
-        call("sudo docker-compose scale businessfunction="+str(bmsNum))
-    elif (sType == 'io'):
-        print("Scaleout io")
-        call("sudo docker-compose scale io_microservice="+str(ioNum))
-    elif (sType == 'memory'):
-        print("Scaleout memory")
-        call("sudo docker-compose scale memory_microservice="+str(memNum))
-    elif (sType == 'cpu'):
-        print("Scaleout cpu")
-        call("sudo docker-compose scale cpu_microservice="+str(cpuNum))
+        bmsNum += 1
+        call(["sudo", "docker-compose", "scale", "businessfunction="+str(bmsNum)])
+    elif (sType == ServiceType.IO_Microservice):
+        ioNum += 1
+        print("Scaleout io ->", ioNum)
+        call(["sudo", "docker-compose", "scale", "io_microservice="+str(ioNum)])
+    elif (sType == ServiceType.Memory_Microservice):
+        memNum +=1 
+        print("Scaleout memory ->", memNum)
+        call(["sudo","docker-compose", "scale", "memory_microservice="+str(memNum)])
+    elif (sType == ServiceType.CPU_Microservice):
+        cpuNum += 1
+        print("Scaleout cpu ->",cpuNum)
+        call(["sudo", "docker-compose", "scale", "cpu_microservice="+str(cpuNum)])
 
 
 def monitorBusinessTimeout():
@@ -75,16 +101,28 @@ def monitorBusinessTimeout():
         time.sleep(500)
 
 def writeStats(sType, containerId, usage):
-    with open(sType+'.txt', 'a') as file:
-        file.write(containerId+' '+usage+' '+str(datetime.now())+'\n')
+    if (sType == ServiceType.IO_Microservice):
+        prefix = 'io'
+    elif (sType == ServiceType.CPU_Microservice):
+        prefix = 'cpu'
+    elif (sType == ServiceType.Memory_Microservice):
+        prefix = 'memory'
+    with open('logs/'+prefix+'.txt', 'a') as file:
+        file.write(containerId+' '+str(usage)+' '+str(datetime.now())+'\n')
 
 def writeBmsScaleout(bmsguid):
-    with open('business.txt', 'a') as file:
+    with open('logs/business.txt', 'a') as file:
         file.write(bmsguid+' '+ str(datetime.now())+'\n')
 
 def writeApiScaleout(sType):
-    with open('api-scaleout.txt', 'a') as file:
-        file.write(sType+' '+ str(datetime.now())+'\n')
+    if (sType == ServiceType.IO_Microservice):
+        prefix = 'io'
+    elif (sType == ServiceType.CPU_Microservice):
+        prefix = 'cpu'
+    elif (sType == ServiceType.Memory_Microservice):
+        prefix = 'memory'
+    with open('logs/api-scaleout.txt', 'a') as file:
+        file.write(prefix+' '+ str(datetime.now())+'\n')
 
 def sendVMInfo():
     global vmaddress
@@ -96,9 +134,46 @@ def sendVMInfo():
         print("Network Error")
 
 
+def checkViolationCPU(container):
+    global cpuViolationThreshold
+    usage = getUsage(container, ServiceType.CPU_Microservice)
+    if (usage > cpuViolationThreshold):
+        return True
+    else:
+        return False
+
+def checkViolationIO(container):
+    global IOViolationThreshold
+    usage = getUsage(container, ServiceType.IO_Microservice)
+    if (usage > IOViolationThreshold):
+        return True
+    else:
+        return False
+
+def checkViolationMemory(container):
+    global memoryViolationThreshold
+    usage = getUsage(container, ServiceType.Memory_Microservice)
+    if (usage > memoryViolationThreshold):
+        return True
+    else:
+        return False
+
+def checkViolation( sType, containerList):
+    if (sType == ServiceType.IO_Microservice):
+        func = checkViolationIO
+    elif (sType == ServiceType.CPU_Microservice):
+        func = checkViolationCPU
+    elif (sType == ServiceType.Memory_Microservice):
+        func = checkViolationMemory
+    for container in containerList:
+        if (func(container)):
+            return True
+    return False
+    
 if __name__ == '__main__':
     vmaddress = getVmAddress()
     containerViolation = {}
+    lastScaleTime = {}
     print("IP:", vmaddress)
     sendVMInfo()
     print("VM info sent")
@@ -106,45 +181,25 @@ if __name__ == '__main__':
     while(True):
         containers = getContainerList()
         print("Updated container list")
-        time.sleep(interval)
-        for container in containers:
-            if container.id not in containerViolation:
-                containerViolation[container.id] = 0
-            if container.image == 'io_microservice':
-                usage = getUsage(container,"io")
-                if (usage > IOViolationThresdhold):
-                    containerViolation[container.id] += 1
-                    print("IO violation:", container.id, containerViolation[container.id])
-                    if (containerViolation[container.id] >= 5): 
-                        if ((container.id not in lastScaleTime) or (lastScaleTime[container.id]+timedelta(minutes=1)<datetime.now())):
-                            ioNum +=1
-                            writeApiScaleout('io')
-                            scaleOut('io')
-                            lastScaleTime[container.id] = datetime.now()
-                        containerViolation[container.id]=0
 
-            elif container.image == 'cpu_microservice':
-                usage = getUsage(container, 'cpu')
-                if (usage > cpuViolationThresdhold):
-                    containerViolation[container.id] += 1
-                    print("CPU violation",container.id, containerViolation[container.id])
-                    if (containerViolation[container.id] >= 5): 
-                        if ((container.id not in lastScaleTime) or (lastScaleTime[container.id]+timedelta(minutes=1)<datetime.now())):
-                            cpuNum +=1 
-                            writeApiScaleout('cpu')
-                            scaleOut('cpu')
-                            lastScaleTime[container.id] = datetime.now()
-                        containerViolation[container.id]=0
-            elif container.image == 'memory_microservice':
-                usage = getUsage(container, 'memory')
-                if (usage > cpuViolationThresdhold):
-                    containerViolation[container.id] += 1
-                    print("Memory violation",container.id, containerViolation[container.id])
-                    if (containerViolation[container.id] >= 5): 
-                        if ((container.id not in lastScaleTime) or (lastScaleTime[container.id]+timedelta(minutes=1)<datetime.now())):
-                            memNum +=1
-                            writeApiScaleout('memory')
-                            scaleOut('memory')
-                            lastScaleTime[container.id] = datetime.now()
-                        containerViolation[container.id]=0
+        serviceContainers = {ServiceType.CPU_Microservice:[], ServiceType.IO_Microservice:[], ServiceType.Memory_Microservice:[]}
+
+        # classify containers
+        for container in containers:
+            sType = getContainerType(container)
+            print(container.id, sType)
+            if sType in [ServiceType.CPU_Microservice, ServiceType.IO_Microservice, ServiceType.Memory_Microservice]:
+                writeStats(sType, container.id, getUsage(container,sType))
+                serviceContainers[sType].append(container)
+
+        # scale out by category
+        for sType in [ServiceType.CPU_Microservice, ServiceType.IO_Microservice, ServiceType.Memory_Microservice]:
+            violated = checkViolation(sType, serviceContainers[sType])
+            if (violated):
+                if (sType not in lastScaleTime or (lastScaleTime[sType]+timedelta(minutes=1)<datetime.now())):
+                    scaleOut(sType)
+                    writeApiScaleout(sType)
+                    lastScaleTime[sType] = datetime.now()
+
+
         time.sleep(interval)
