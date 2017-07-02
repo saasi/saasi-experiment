@@ -10,3 +10,8 @@
   - Memory intensive microservice
   - Business microservice (calls the above 3)
     - has 30 variants
+
+
+## Automation
+
+See [README](automation/README.md)
