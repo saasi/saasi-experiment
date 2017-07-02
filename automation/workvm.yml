@@ -1,0 +1,19 @@
+---
+- name: Pull latest code, and run microservices
+  hosts: all
+  remote_user: saasi
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: create dir
+    file: path=/app state=directory
+  - name: checkout code
+    git:
+      repo: 'git@github.com:ztl8702/saasi-experiment.git'
+      dest: /app
+      version: deploy
+  - name: run microservices
+    shell: /app/workvm/Application3/run.sh
+  - name: run DM
+    shell: dotnet run /app/workvm/Application3/Monitor/Monitor.csproj
