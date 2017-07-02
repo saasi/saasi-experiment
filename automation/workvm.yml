@@ -10,7 +10,7 @@
     file: path=/app state=directory
   - name: checkout code
     git:
-      repo: 'https://github.com/ztl8702/saasi-experiment.git'
+      repo: 'git@github.com:ztl8702/saasi-experiment.git'
       dest: /app
       version: deploy
   - name: run microservices
