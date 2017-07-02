@@ -4,6 +4,7 @@
   remote_user: saasi
   become_method: sudo
   become_user: root
+  become: true
 
   tasks:
   - name: create dir
@@ -13,7 +14,13 @@
       repo: 'git@github.com:ztl8702/saasi-experiment.git'
       dest: /app
       version: deploy
+      force: true
+      accept_hostkey: true
+  - name: add permissions
+    shell: chmod +x /app/workvm/Application3/run.sh
   - name: run microservices
-    shell: /app/workvm/Application3/run.sh
+    shell: ./run.sh
+    args:
+      chdir: /app/workvm/Application3/
   - name: run DM
     shell: dotnet run /app/workvm/Application3/Monitor/Monitor.csproj
