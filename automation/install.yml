@@ -1,0 +1,26 @@
+---
+- name: Install dotnet and rabbitmq
+  hosts: all
+  remote_user: saasi
+  become_method: sudo
+  become_user: root
+  become: true
+
+  tasks:
+  - name: install erlang
+    package:
+      name: erlang
+      state: latest
+  - name: check rabbitmq
+    stat: path=/sbin/rabbitmq-server
+    register: rmq_r
+  - name: install rabbitmq
+    shell: curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | bash
+    when: rmq_r.stat.exists == False
+  - name: check if dotnet is installed
+    stat: path=/opt/dotnet/dotnet
+    register: dotnet_r
+  - name: install dotnet sdk
+    when: dotnet_r.stat.exists == False
+    shell: yum install -y libunwind libicu && curl -sSL -o dotnet.tar.gz https://go.microsoft.com/fwlink/?linkid=848821 mkdir -p /opt/dotnet && tar zxf dotnet.tar.gz -C /opt/dotnet && ln -s /opt/dotnet/dotnet /usr/local/bin
+     
