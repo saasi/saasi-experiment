@@ -57,7 +57,7 @@ namespace Monitor
                        if (container.Value.Equals("io_microservice"))
                        {
                             var usage = getUsage(container,"io");
-                            writeRecord("io", container.Key, usage);
+                            
                            if (usage > IOViolationThresdhold)
                            {
                                 
@@ -87,7 +87,6 @@ namespace Monitor
                        if (container.Value.Equals("cpu_microservice"))
                        {
                             var usage = getUsage(container,"cpu");
-                            writeRecord("cpu", container.Key, usage);
                             if (usage > cpuViolationThresdhold)
                             {
                                 
@@ -116,7 +115,6 @@ namespace Monitor
                        if (container.Value.Equals("memory_microservice"))
                        {
                            var usage = getUsage(container,"memory");
-                           writeRecord("memory", container.Key, usage);
                            if (usage > memoryViolationThreshold)
                            {
                                 
@@ -228,6 +226,7 @@ namespace Monitor
             }
 
             Console.WriteLine(type + ":" +container.Key+":"+ usage.ToString());
+            writeRecord(type, container.Key, usage);
             return usage;
 
         }
@@ -407,15 +406,15 @@ namespace Monitor
 
         public static void writeRecord(string type, string containerId, double usage) //record cpu/io/memory usage
         {
-            StreamWriter sw = File.AppendText(type + ".txt");
-            sw.WriteLine(containerId + " " + Convert.ToString(usage) + " " + Convert.ToString(System.DateTime.Now));
+            StreamWriter sw = File.AppendText("apiStats.txt");
+            sw.WriteLine(type + " " + containerId + " " + Convert.ToString(usage) + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
         }
 
         public static void writeRecord(Guid bmsguid) //record bms scaleout
         {
-            StreamWriter sw = File.AppendText("business.txt");
+            StreamWriter sw = File.AppendText("business-scaleout.txt");
             sw.WriteLine(bmsguid.ToString() + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();

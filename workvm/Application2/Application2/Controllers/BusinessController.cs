@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading;
+using RabbitMQ.Client;
+using System.Text;
 
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,46 +22,60 @@ namespace Application2.Controllers
             ConfigSettings = settings.Value;
         }
         // GET: /<controller>/
-        public IActionResult Index(int? io = 0, int? cpu = 0, int? memory = 0, int? timeout = 0)
+        public IActionResult Index(Guid guid, String timestart, int? io = 0, int? cpu = 0, int? memory = 0, int timetorun = 0, int id = 0, int timeout = 0)
         {
-          /*  for (int i = 0; i < 4; i++)
-            {
-                var order = ConfigSettings.record[i].Split(' ');
-                if (order[0].Equals("1"))
-                {
-                    cpu CPU = new cpu(order[3]);
-                    new Thread(CPU.Fun).Start();
 
-                }
-                if (order[1].Equals("1"))
-                {
-                    io IO = new io(order[3]);
-                    new Thread(IO.Fun).Start();
-                }
-                if (order[2].Equals("1"))
-                {
-                    memory MEM = new memory(order[3]);
-                    new Thread(MEM.Fun).Start();
-                }
-            }*/
-            if (cpu == 1)
+            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
+            //var factory = new ConnectionFactory() { HostName = "localhost" };
+            Guid messageGuid = Guid.NewGuid();
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
             {
-                cpu CPU = new cpu(Convert.ToString(timeout));
-                new Thread(CPU.Fun).Start();
-            }
+                channel.ExchangeDeclare(exchange: "mono", type: "direct");
+                string message = Convert.ToString(io) + " " + Convert.ToString(cpu) + " " + Convert.ToString(memory) + " " + Convert.ToString(timetorun) + " " + Convert.ToString(timeout) + " " + timestart + " " + messageGuid;
+                Console.WriteLine(message);
+                var body = Encoding.UTF8.GetBytes(message);
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+                channel.BasicPublish(exchange: "mono",
+                                      routingKey: "business",
+                                      basicProperties: properties,
+                                      body: body);
 
-            if (io == 1)
-            {
-                io IO = new io(Convert.ToString(timeout));
-                new Thread(IO.Fun).Start();
-            }
 
-            if (memory == 1)
-            {
-                memory MEM = new memory(Convert.ToString(timeout));
-                new Thread(MEM.Fun).Start();
+                //   DateTime completeRunTime = System.DateTime.Now;
+                // if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
+                /*    Console.WriteLine("send to DM");
+                    var message2 = Convert.ToString(id) + " " + guid;
+                    var body2 = Encoding.UTF8.GetBytes(message2);
+                    channel.BasicPublish(exchange: "call",
+                          routingKey: "report",
+                          basicProperties: null,
+                          body: body2);
+                          */
             }
-            return View();
+            /*    using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    channel.ExchangeDeclare(exchange: "reply", type: "direct");
+                    var queueName = "reply_queue";
+                    channel.QueueDeclare(queue: queueName,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null);
+                    channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+                    channel.QueueBind(queue: queueName, exchange: "mono", routingKey: messageGuid.ToString());
+                    var consumer = new EventingBasicConsumer(channel);
+                    consumer.Received += (model, ea) =>
+                    {
+                        var body = ea.Body;
+                        var message = Encoding.UTF8.GetString(body);
+
+                    };
+
+                }*/
+            return new JsonResult(new Dictionary<string, string> { { "status", "ok" } });
         }
     }
 }

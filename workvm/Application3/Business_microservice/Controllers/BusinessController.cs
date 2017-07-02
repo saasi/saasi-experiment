@@ -78,8 +78,9 @@ namespace Business_microservice.Controllers
                     };
 
                 }*/
-            return new JsonResult(new Dictionary<string, string> { { "status", "ok" } });
+            return new JsonResult(new Dictionary<string, string> { { "status" , "ok" } });
         }
         
     }
 }
+

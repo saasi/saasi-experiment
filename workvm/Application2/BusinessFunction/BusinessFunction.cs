@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace BusinessFunction
 {
-    class BusinessService
+    class BusinessFunction
     {
         private static Guid bmsGuid;
         private static readonly string _rabbitMQHost = "rabbitmq";
@@ -40,30 +40,10 @@ namespace BusinessFunction
             }
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
-            //
-        }
-        static void sendBMSInfo()  //send bms guid to monitor
-        {
-            
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
-            using (var connection = factory.CreateConnection())
-            using (var channel_api = connection.CreateModel())
-            {
-                channel_api.ExchangeDeclare(exchange: "call", type: "direct");
-                var message = bmsGuid.ToString();
-                var body = Encoding.UTF8.GetBytes(message);
-                //var properties = channel_api.CreateBasicProperties();
-                //properties.Persistent = true;
-                channel_api.BasicPublish(exchange: "call",
-                                      routingKey: "businessinfo",
-                                      basicProperties: null,
-                                      body: body);
-                Console.WriteLine(message + ":Send to Monitor");
-            }
         }
         static void businessProcessing()
         {
-            
+
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel_mono = connection.CreateModel())
@@ -99,18 +79,9 @@ namespace BusinessFunction
                                      noAck: false,
                                      consumer: consumer);
 
-              /*   if (startRunTime.AddSeconds(timeout).CompareTo(completeRunTime) > 0) //check timeout
-                    Console.WriteLine("send to DM");
-                    var message2 = Convert.ToString(id) + " " + guid;
-                    var body2 = Encoding.UTF8.GetBytes(message2);
-                    channel.BasicPublish(exchange: "call",
-                          routingKey: "report",
-                          basicProperties: null,
-                          body: body2);*/
-                          
                 while (true) { Thread.Sleep(1000); };
             }
-            
+
         }
         class businessTask
         {
@@ -126,7 +97,7 @@ namespace BusinessFunction
             public void Fun(object state)
             {
                 Guid id = Guid.NewGuid();
-               // 
+                // 
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
                 DateTime startTime = DateTime.Now;
                 try
@@ -137,7 +108,7 @@ namespace BusinessFunction
                 {
 
                 }
-                
+
                 //Console.WriteLine(id + " business start:" + startTime.ToString());
                 var timetorun = Convert.ToInt16(message.Split(' ')[3]);
                 var timeout = Convert.ToInt16(message.Split(' ')[4]);
@@ -145,7 +116,7 @@ namespace BusinessFunction
                 Thread.Sleep(timetorun * 1000);
                 //DateTime beginTime = System.DateTime.Now;
                 //DateTime finishTime = beginTime.AddSeconds(timetorun);
-                
+
                 //DateTime finishTime = startTime.AddSeconds(timetorun);
 
                 DateTime completeRunTime = System.DateTime.Now;
@@ -162,21 +133,21 @@ namespace BusinessFunction
                 }
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
-         /*       var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
-                using (var connection = factory.CreateConnection())
-                using (var channel_mono = connection.CreateModel())
-                {
-                    channel.ExchangeDeclare(exchange: "reply", type: "direct");
-                    string reply = "done";
-                    var body = Encoding.UTF8.GetBytes(reply);
-                    var properties = channel.CreateBasicProperties();
-                    properties.Persistent = true;
-                    channel.BasicPublish(exchange: "mono",
-                                          routingKey: messageGuid,
-                                          basicProperties: properties,
-                                          body: body);
-                }*/
-                    
+                /*       var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
+                       using (var connection = factory.CreateConnection())
+                       using (var channel_mono = connection.CreateModel())
+                       {
+                           channel.ExchangeDeclare(exchange: "reply", type: "direct");
+                           string reply = "done";
+                           var body = Encoding.UTF8.GetBytes(reply);
+                           var properties = channel.CreateBasicProperties();
+                           properties.Persistent = true;
+                           channel.BasicPublish(exchange: "mono",
+                                                 routingKey: messageGuid,
+                                                 basicProperties: properties,
+                                                 body: body);
+                       }*/
+
             }
         }
 
@@ -193,37 +164,25 @@ namespace BusinessFunction
         }
         public static void CallApi(String message)
         {
-            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
-            using (var connection = factory.CreateConnection())
-            using (var channel_api = connection.CreateModel())
-            {
-                channel_api.ExchangeDeclare(exchange: "call", type: "direct");
-                var body = Encoding.UTF8.GetBytes(message);
-                //var properties = channel_api.CreateBasicProperties();
-                //properties.Persistent = true;
+
+
                 var order = message.Split(' ');
                 if (order[0].Equals("1"))
                 {
-                    channel_api.BasicPublish(exchange: "call",
-                  routingKey: "io",
-                  basicProperties: null,
-                  body: body);
+                    io io = new io(order[3]);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(io.Fun));
                 }
                 if (order[1].Equals("1"))
                 {
-                    channel_api.BasicPublish(exchange: "call",
-                  routingKey: "cpu",
-                  basicProperties: null,
-                  body: body);
+                    cpu cpu = new cpu(order[3]);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(cpu.Fun));
                 }
                 if (order[2].Equals("1"))
                 {
-                    channel_api.BasicPublish(exchange: "call",
-                  routingKey: "memory",
-                  basicProperties: null,
-                  body: body);
+                     memory mem = new memory(order[3]);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(mem.Fun));
                 }
-                Console.WriteLine(message);
+
                 Console.WriteLine("Send to API microservice");
             }
         }
