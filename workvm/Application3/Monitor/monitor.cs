@@ -289,6 +289,7 @@ namespace Monitor
                     if (bms.ContainsKey(message))
                     {
                         bms[message]++;
+                        writeBmsViolation(Guid.Parse(message));
                         if (bms[message] >5)
                         {
                             if (!scaleTime.ContainsKey(message) || scaleTime[message].AddSeconds(60).CompareTo(DateTime.Now) < 0)
@@ -427,7 +428,13 @@ namespace Monitor
             sw.Flush();
             sw.Dispose();
         }
-
+        public static void writeBmsViolation(Guid bmsguid)
+        {
+            StreamWriter sw = File.AppendText("data/business-violation.txt");
+            sw.WriteLine(bmsguid + " " + Convert.ToString(System.DateTime.Now));
+            sw.Flush();
+            sw.Dispose();
+        }
 
         public static void sendVMInfo()
         {
