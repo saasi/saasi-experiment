@@ -1,0 +1,158 @@
+
+PLAY [Generate Git Deploy keys, and print public key] ***************************************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************************************
+ok: [saasi-vm03.it.deakin.edu.au]
+ok: [saasi-vm05.it.deakin.edu.au]
+ok: [saasi-vm02.it.deakin.edu.au]
+ok: [saasi-vm04.it.deakin.edu.au]
+ok: [saasi-vm10.it.deakin.edu.au]
+ok: [saasi-vm11.it.deakin.edu.au]
+ok: [saasi-vm08.it.deakin.edu.au]
+ok: [saasi-vm07.it.deakin.edu.au]
+ok: [saasi-vm09.it.deakin.edu.au]
+ok: [saasi-vm06.it.deakin.edu.au]
+fatal: [saasi-vm01.it.deakin.edu.au]: FAILED! => {"failed": true, "msg": "Using a SSH password instead of a key is not possible because Host Key checking is enabled and sshpass does not support this.  Please add this host's fingerprint to your known_hosts file to manage this host."}
+ok: [saasi-vm13.it.deakin.edu.au]
+ok: [saasi-vm12.it.deakin.edu.au]
+ok: [saasi-vm15.it.deakin.edu.au]
+ok: [saasi-vm14.it.deakin.edu.au]
+
+TASK [check if ssh key exists] **************************************************************************************************************************************************************
+ok: [saasi-vm02.it.deakin.edu.au]
+ok: [saasi-vm05.it.deakin.edu.au]
+ok: [saasi-vm03.it.deakin.edu.au]
+ok: [saasi-vm06.it.deakin.edu.au]
+ok: [saasi-vm04.it.deakin.edu.au]
+ok: [saasi-vm07.it.deakin.edu.au]
+ok: [saasi-vm11.it.deakin.edu.au]
+ok: [saasi-vm10.it.deakin.edu.au]
+ok: [saasi-vm08.it.deakin.edu.au]
+ok: [saasi-vm09.it.deakin.edu.au]
+ok: [saasi-vm12.it.deakin.edu.au]
+ok: [saasi-vm13.it.deakin.edu.au]
+ok: [saasi-vm15.it.deakin.edu.au]
+ok: [saasi-vm14.it.deakin.edu.au]
+
+TASK [ensure ssh key generated] *************************************************************************************************************************************************************
+skipping: [saasi-vm10.it.deakin.edu.au]
+skipping: [saasi-vm09.it.deakin.edu.au]
+skipping: [saasi-vm07.it.deakin.edu.au]
+skipping: [saasi-vm08.it.deakin.edu.au]
+skipping: [saasi-vm06.it.deakin.edu.au]
+skipping: [saasi-vm05.it.deakin.edu.au]
+skipping: [saasi-vm04.it.deakin.edu.au]
+skipping: [saasi-vm03.it.deakin.edu.au]
+skipping: [saasi-vm02.it.deakin.edu.au]
+skipping: [saasi-vm11.it.deakin.edu.au]
+skipping: [saasi-vm12.it.deakin.edu.au]
+skipping: [saasi-vm14.it.deakin.edu.au]
+skipping: [saasi-vm13.it.deakin.edu.au]
+skipping: [saasi-vm15.it.deakin.edu.au]
+
+TASK [print public key] *********************************************************************************************************************************************************************
+changed: [saasi-vm06.it.deakin.edu.au]
+changed: [saasi-vm02.it.deakin.edu.au]
+changed: [saasi-vm03.it.deakin.edu.au]
+changed: [saasi-vm08.it.deakin.edu.au]
+changed: [saasi-vm07.it.deakin.edu.au]
+changed: [saasi-vm04.it.deakin.edu.au]
+changed: [saasi-vm11.it.deakin.edu.au]
+changed: [saasi-vm10.it.deakin.edu.au]
+changed: [saasi-vm09.it.deakin.edu.au]
+changed: [saasi-vm12.it.deakin.edu.au]
+changed: [saasi-vm14.it.deakin.edu.au]
+changed: [saasi-vm13.it.deakin.edu.au]
+changed: [saasi-vm15.it.deakin.edu.au]
+changed: [saasi-vm05.it.deakin.edu.au]
+
+TASK [debug] ********************************************************************************************************************************************************************************
+ok: [saasi-vm15.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWIQsm1CiKCJMJd4mYuUW6sDDQXkxgSZ5ljJWMHVIQ+S+tCwhm21rewNT6wLeHPJ7jREQfEQvJYIzb7fREEfodVbpQPvwBT2TE+/V7eYsIBpGC6UuNPcuUtCJQPXg03cU93pS3V/nFRXLTECEGqNDVk/VzScQKrYG0BVI2Da3rLlKS/zka2cs6cpu60PBTbt6v5fzPP0v7RI7TY0+Z4gbXeMAYvwdmv6R5c1+dOfkfNlUmXAbTr2aHKFpTkzy6VsYAc77ABcn2XZqunVlIS56IFm5nkdflmBY1PusRcjZyA9CZSvkowj3JrV3ml29mTWuxdF2udALIUXJMrwF4beAt root@saasi-vm15"
+    ]
+}
+ok: [saasi-vm11.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDSv86mFdb5yQcyCj0x462fro4YQ+gmYc1ZpHE8GGJ0nv4j9rTrSxIPA7TMn0419A1Oyv9/2IVAbcDcHxyYw1dhHMlujyvQW7LXt34z74lIlPy4BZWXY86MKTtUVgTlTXDh6/VCAjrOwYFwkUis5yJOBUn9G27Qdjszumx3mgf9yddQNz/1xzVOq+y34TDYIuaAL2laaf7v5Paz/8r48DHLP2l/XxmVlwOYFZePeZIkg4FfDXDchhIaXbkEMyEimHWnObj4qT4JjPjGGxxDNT/Aw9OTFeoTndfS7oYJ2VZkalqwcYdZIfWgZYUDYc2ENiqwG9iNDVYNffw2b9D6Fm3z root@saasi-vm11"
+    ]
+}
+ok: [saasi-vm10.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCYk+8ZQ/XrfV5JFT8VXbKZhV5/BpjFxGaDXnJOxKX+CRTqAR81+KL8S58VmcnpJekg+cy0mcErxOLITQHVTL3cIMSFoOg1+vj44dkpDHJdjshT1PfMxAOO4UJW4b4UZ3beIDmU+GgvNm7y9WK39+Euwf0kAX0gKuGwT1hpBhDSebyFx/xrqiNQ5JyBKENvJFQrsI77xta1AlmN0zRSPWv3NPVS/F49Ak9zK5V/A+2ULaoDcWrW5BOAU6H3NfyPcYkUz4MmvFBFW7jaikFt/8GAD3scs/e9zuLpD/qMUt1rKE771pJdK5zDAZex9gfwixRfXNLdnCWVRJMlV3EAMUr root@saasi-vm10"
+    ]
+}
+ok: [saasi-vm09.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOGKEelXXcwpZ3l/zKNGMdqAtmeGcm0HrdM48QhK3ZdIm/IppmGE0nmm2hnRTrGtjTDaUANbrNhdO2Ky/mTcxLfntoAvGCAbg38+bQGqmqdWtG7kYxspGm+zXGluw59ryZstUiLZU9qUQ3FNYFA9iXeX46R4cB5HU5VBy0O79YyCLlZncM2WjYaq/dVxU9I5IEYqfDOwmQ5m/7iI2V+1jAKuJg76yNddIkQjPZL4lTvGGZwLzc7KG5msxkSYQ/OuQqzJx7mIjsrrGAOy7mtGB/eA+7MLN4i5grnmutAoSjPd76fIMzX9e1kzQXMYs3FPkz3dtkBlByxmyRZmGp1gWP root@saasi-vm09"
+    ]
+}
+ok: [saasi-vm08.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGSxVSGVEsdiKmujNIkrseQbgRV8/l1NVBfvWav6AGWCmO/NGcKRFRIHltssCTwPiLHLEwYgtYJL22EuShmJfXkXG6Ci4qJrd/yrULraVooYZoTpbnLLqWrj8nyt9r3iZpm4DhToMp0FHRXI72VmJK5k7pqBmR6wlwn7QQMh3tHeRFH+m31rcXAGgCls6QNUjE9CPVtC6f4psOsTRoYZaD0279tpc2GMtDYFSKng6XRqwmtiqWjxtKDtMJHq6JwWJqbfeZ52SAMOMg3VLPurguJ64f/JHq9X5nCBWsehMsJ8M0RF0ph6McyUMJGebZBBDSRHRJY8tbEzRmN9jpnSAL root@saasi-vm08"
+    ]
+}
+ok: [saasi-vm07.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUlxhzTaBW99n8urMzn1YNEk/slxq9S1t7l5wlM7yx4tfpUdEue5zzx2pyAGVFDYDHXz9oEIXXB0bQCIrNPrW4uVwFOBJQsGpBorp7Q0jVCPgyPhuu2WT+EWL/XQWmdm7OyxWkXPdVig1LZsTPz3CCVRmp5fy6/qFL6fOiXUUvtmiqzU7ul03HUQyUx0UynPYfL8z0XzW0wpLyG7INJ8ZKoxjod9Oe//hbUc3gPN7xSRlDcGExEBIsqDCfRanBVx9CciU+jGkKioyy6kTRG+ABSK0hAVSJ7t2/Jwd+HfwQjaUhynLgkx5sRkGtw3MATBVHIDTe4Z8B3KL6ZhQLuLuh root@saasi-vm07"
+    ]
+}
+ok: [saasi-vm05.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDd6Z9km12USnHxafr5oYwz/Qy4gLHstdtfLSiPi1iTpZ5bqZPDmQXtwUn0mPO2SunRpbtQj0LNybfXDuuz3LEXE82lsqp8rtkexbtG5AaAHaYDwdhJ30zXrk3cGrSPVmnGrwsI3t+KdLT23DYbnQoCrbyZtzY0uFAWPkJPY5vNGxqvCzBHWQyIqjLYLItEOIVVXf3OLmEDvP7QzkK8tMwgg91W5of35p1YtDWkPiHQGbBYgC1AluGyquv6pwsVd4D2nAJA79/bvQlWiqWxN0T1S5DE3VxMkrzlriKdjEva1AKDADT1sAeNb4y0FRRyekssLAwp8I6oIItn4HQ0Z9Yz root@saasi-vm05"
+    ]
+}
+ok: [saasi-vm06.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDqCh/fq/lnHQbRexOVunLZQQmDNn2LHd/k7E3g7iXvar7mL5K/v4y0/NOqQ7Wx3AEOPh3TgO5B234vtvjDezcDGDVm8IRG454T3J6V/MXCC6WQqzwMDVuHhyxpIIWlSvLk91wHgBY2YY+lqvFDcVyYdUerWpqpiEPUNBQQeRqap6z2gUS+SHyqCUQKGq+A/WvDWt3VgvGHWNT14Z3i6bBxoPmWoonJlmuygSo4oHwERmOQXws2nfDFmO/WpA5RgOo4L8sFfyo73tLWS5zBprMaM2i/I/GfBhEpM5c71rSVjxNTZ/4R1YSM+WD3y9FJ5uhWzKwjIkTtewMyPqEHPg7V root@saasi-vm06"
+    ]
+}
+ok: [saasi-vm04.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCcaX9SKqBi63BC6MlXtSWlmWe1UKOK/dupRFGu4Nej1flBqzdqZMcrOuexTTH7MvYOxibpTcRiQtvNBgB+LSXVBMz+HoGCR3Hf268Wgw04si/nzh/7VRRv6FOYkVDropW+C6VojeiBIWgArCv+D9fBUg5GdsCwaT7OlnAqWtKwn0JBcbRPOD1mqv2RyiBWsuz4ruXQBpJxBrfes5/4AK5H+OvSjeUBocmal2SmsL8EsmJa8sSA/Zca43ITR2Fx4UC0j1hHNc+BsMp/GLdVutf0xMj606UH/SO8qqj6AhETScaKjjVS5eYhgUAgWBt8or+cUZaO+IQQWoP0mnJI11X root@saasi-vm04"
+    ]
+}
+ok: [saasi-vm03.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwm2qWqxNWtF97NuxaSl4EzBxyIfjrjyBlkfewB1zSPtfaLhvmKsFN1MGw3LE67c99YLyIVUFT1ButkmmR9O2aEN4HBww/5Gel4jl/F/dJejkyspIpEZBU514QZZEp8BGyuFmfq84MGAxW1F4DD4MuDBOjZlI4bXNRfc0ZIjey4B7U+rITNOEUVEQOgixkWyDScGzsLRoAyft3nyOtF3ZW+ETgsTBU/U2dslRIT7bywClxJOF79Qnc2P9w/T1iEx8QobiyTBlEnie2PnWsN3yx9yCT89r0/OxL91dIVsmEBs9cVxEYn6GqOMGNaynQkm+NGOqR8MLm7b4RaQMwDHIP root@saasi-vm03"
+    ]
+}
+ok: [saasi-vm02.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8y1HuHETMsg0sPufFisukFuW2ZWfGgKIzfHZ7vLmWhrXY1t25wIKVfu8687vtXth7F34fvjGNfI5mGdsmaGRIoZpXQGoWQXf5teo9NXR3VpbGMv0tM/7twqB7P/0E8GK9TYrgr2H/yGtg3uCpcP6QbdONW2DdublWGuytvCKpNtUpt4f/XcWgJtHCwpe/yQzFoL07n6SmQH23fG2O/asaarRihRXLe93zpvgzYEj918k+tnBE8bRGPeoIQ9G/Vfy/EVI8e5Llr4i2qdPRy/tiJiMRxjXCv8neqJYfy+CbAmXQcN9o0mG70uM73qQBe5zZTMVBe1H/OE+fXrPSAC1B root@saasi-vm02"
+    ]
+}
+ok: [saasi-vm12.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCYYPGSyn/4xQGXiCc/MKekb/zDygS1LGi1Aty8dTMJ7tkyr7FExqpErBv0sYHLre7BWSsIpPP/OWVipTU+BUW1UF12eJQCBTcoaqWJL95nQnbThtno5AJqEygQZ2C5frYRo/+58Yh3p4A9MfRvzwog8ncjgnUlG5bxrlBBQQZauQ+GRKnwbSGssKBtRnhjF/HGbkCBgJmfdEyO/i+XitR4tG323GIXsKfiYtdcYlHWfS7ZneJ56DIj3m7bO5AgUmro7ICV72EV3ePAya291cd2/sUxO0rHpH9OVEclpPIx9bZwW9bq0OQuMfC0H5QMEGLp9pTtKZzvq0W+Trk0BnAh root@saasi-vm12"
+    ]
+}
+ok: [saasi-vm13.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC97MmKLqGrwWb3uHVeY2LrZ43DmP6aQEYdn2TRuPsAIRhbeg1C2ShmwYoFk5lGjEJLylOp5l9rsgi7gWFwUFIob7sSjny9VB1qznIwLmtgSBJ11JrWx8BPb1fU44EqPbXSiAhgbUF6wq6JYv1iRvSFXUtiMMVPbbd/+uIhnEVVbOcW0Ab5N5I38m2/nEIPGbHpPR/Br1QAkCqsFAcrzUX3tfU42AtnD4WMUMBbpThvPye3LS/mFcrD0XepAfcVWrD7aMuhSRCDadWB/XJv4h3sEetFHHOvbZnRIJfWuGUTytf6N6oDaRL682xeBAFSIWJKCnC32MGJj7VQnrcc08if root@saasi-vm13"
+    ]
+}
+ok: [saasi-vm14.it.deakin.edu.au] => {
+    "print_result.stdout_lines": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDfCXl3/46A2/m4vLig1iyPveak0q4xdd9y++q0A1RtJGktvZMHkmeYcVXiwqqXwr6Ya52fq9usy+XZsxn/CqYamRK+RDqABQqVAERzmlhbuRSwBlRrBanIq10+lMo0aObO1tCKpx6TBppyDfjhqO36ulKWj2Mr2/TR8o6pIfrYSdClx1Y/qY+ypaw2ell82ynLREi3r4RtIcKarCoMQpqGOVvzD3FTN9nCby+ulL8O42VkMV7WuMXcUsM8Rpv0Ul8rESOHBjbgTro9LC18aPgntihn0NvycW7cHlgcOVmrrss0esqg9dYBCekCaYeSP7f9f9OkVpbqPzrZ/k5UcZb root@saasi-vm14"
+    ]
+}
+	to retry, use: --limit @/root/saasi-experiment/automation/git-deploy-keys.retry
+
+PLAY RECAP **********************************************************************************************************************************************************************************
+saasi-vm01.it.deakin.edu.au : ok=0    changed=0    unreachable=0    failed=1   
+saasi-vm02.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm03.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm04.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm05.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm06.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm07.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm08.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm09.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm10.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm11.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm12.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm13.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm14.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+saasi-vm15.it.deakin.edu.au : ok=4    changed=1    unreachable=0    failed=0   
+

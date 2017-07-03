@@ -2,6 +2,7 @@
 - name: Generate Git Deploy keys, and print public key
   hosts: all
   remote_user: saasi
+  become: true
   become_method: sudo
   become_user: root
 
@@ -14,3 +15,6 @@
     when: ssh_key.stat.exists == False
   - name: print public key
     shell: cat /root/.ssh/id_rsa.pub
+    register: print_result
+  - debug:
+      var: print_result.stdout_lines
