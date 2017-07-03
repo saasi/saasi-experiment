@@ -17,16 +17,18 @@
       force: true
       accept_hostkey: true
   - name: add permissions
-    shell: chmod +x /app/workvm/Application3/run.sh
+    shell: chmod +x /app/workvm/Application3/run.sh && chmod -R o+r /app && chmod -R o+x /app && chmod -R o+w /app
   - name: run microservices
     shell: ./run.sh
     args:
       chdir: /app/workvm/Application3/
   - name: run Monitor
-    shell: dotnet run &
+    shell: dotnet restore && dotnet run &
+    become: false
     args:
       chdir:  /app/workvm/Application3/Monitor/
   - name: run DM
-    shell: dotnet run &
+    shell: dotnet restore && dotnet run &
     args:
       chdir: /app/workvm/DM/DM/
+    become: false
