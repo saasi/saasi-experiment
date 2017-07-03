@@ -7,8 +7,18 @@
   become: true
 
   tasks:
+  - name: ensure rabbitmq started
+    service:
+      name: rabbitmq-server
+      state: started
+  - name: ensure docker started
+    service:
+      name: docker
+      state: started
   - name: create dir
     file: path=/app state=directory
+  - name: stop all dotnet processes
+    shell: killall -q dotnet || echo "ok"
   - name: checkout code
     git:
       repo: 'git@github.com:ztl8702/saasi-experiment.git'
@@ -20,15 +30,30 @@
     shell: chmod +x /app/workvm/Application3/run.sh && chmod -R o+r /app && chmod -R o+x /app && chmod -R o+w /app
   - name: run microservices
     shell: ./run.sh
+#    async: 45
     args:
       chdir: /app/workvm/Application3/
-  - name: run Monitor
-    shell: dotnet restore && dotnet run &
+  - name: run Monitor - restore
+    shell: dotnet restore
+    become: false 
+    args:
+      chdir: /app/workvm/Application3/Monitor/
+  - name: run Monitor 
+    shell: dotnet run 
+    async: 2592000
+    poll: 0
     become: false
     args:
-      chdir:  /app/workvm/Application3/Monitor/
+      chdir: /app/workvm/Application3/Monitor/
+  - name: run DM - restore
+    shell: dotnet restore
+    become: false
+    args:
+      chdir: /app/workvm/DM/DM/ 
   - name: run DM
-    shell: dotnet restore && dotnet run &
+    shell: dotnet run 
+    async: 2592000
+    poll: 0
     args:
       chdir: /app/workvm/DM/DM/
     become: false
