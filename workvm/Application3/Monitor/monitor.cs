@@ -64,9 +64,9 @@ namespace Monitor
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("io volation:" + containerViolation[container.Key]);
                                 
-                                if (containerViolation[container.Key] >=5)
+                                if (containerViolation[container.Key] >=3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         ioNum++;
                                         writeRecord("io");
@@ -92,9 +92,9 @@ namespace Monitor
                                 
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("cpu volation:" + containerViolation[container.Key]);
-                                if (containerViolation[container.Key] >= 5)
+                                if (containerViolation[container.Key] >= 3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         cpuNum++;
                                         writeRecord("cpu");
@@ -120,9 +120,9 @@ namespace Monitor
                                 
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("memory volation:" + containerViolation[container.Key]);
-                                if (containerViolation[container.Key] >= 5)
+                                if (containerViolation[container.Key] >= 3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         memNum++;
                                         writeRecord("memory");
@@ -406,7 +406,7 @@ namespace Monitor
 
         public static void writeRecord(string type, string containerId, double usage) //record cpu/io/memory usage
         {
-            StreamWriter sw = File.AppendText("apiStats.txt");
+            StreamWriter sw = File.AppendText("data/apiStats.txt");
             sw.WriteLine(type + " " + containerId + " " + Convert.ToString(usage) + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
@@ -414,7 +414,7 @@ namespace Monitor
 
         public static void writeRecord(Guid bmsguid) //record bms scaleout
         {
-            StreamWriter sw = File.AppendText("business-scaleout.txt");
+            StreamWriter sw = File.AppendText("data/business-scaleout.txt");
             sw.WriteLine(bmsguid.ToString() + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
@@ -422,7 +422,7 @@ namespace Monitor
 
         public static void writeRecord(string type) //record api scaleout
         {
-            StreamWriter sw = File.AppendText("api-scaleout.txt");
+            StreamWriter sw = File.AppendText("data/api-scaleout.txt");
             sw.WriteLine(type + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();

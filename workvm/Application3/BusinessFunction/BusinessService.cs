@@ -77,7 +77,7 @@ namespace BusinessFunction
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+                channel_mono.BasicQos(prefetchSize: 0, prefetchCount: 15, global: false);
                 channel_mono.QueueBind(queue: queueName, exchange: "mono", routingKey: "business");
                 var consumer = new EventingBasicConsumer(channel_mono);
                 consumer.Received += (model, ea) =>
