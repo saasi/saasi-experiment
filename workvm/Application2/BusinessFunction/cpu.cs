@@ -1,32 +1,37 @@
-﻿using Microsoft.Extensions.Options;
+﻿
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
-namespace Application2
+namespace BusinessFunction
 {
     public class cpu
     {
-        private static String Timeout;
-        public cpu(String timeout)
+        private int timetorun;
+        public cpu(string timetorun)
         {
-            cpu.Timeout = timeout;
+            this.timetorun = Convert.ToInt16(timetorun);
         }
-        public  void Fun()
+        public  void Fun(object state)
         {
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(Convert.ToInt16(cpu.Timeout));
-            Console.WriteLine("CPU service start." + Convert.ToString(currentTime));
+            DateTime finishTime = currentTime.AddSeconds(timetorun);
+            Console.WriteLine( "CPU Start." + Convert.ToString(currentTime));
+            int i = 0;
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
-                string comparestring1 = StringDistance.GenerateRandomString(200);
-                string comparestring2 = StringDistance.GenerateRandomString(200);
-                StringDistance.LevenshteinDistance(comparestring1, comparestring2);
+                string comparestring1 = StringDistance.GenerateRandomString(1000);
+                i++;
+                if (i == 50)
+                {
+                    Thread.Sleep(15); // Change the wait time here.
+                    i = 0;
+                }
+                //  string comparestring2 = StringDistance.GenerateRandomString(1000);
+                // StringDistance.LevenshteinDistance(comparestring1, comparestring2);
             }
-            Console.WriteLine("CPU service end." + Convert.ToString(System.DateTime.Now));
+            Console.WriteLine("CPU Done." + Convert.ToString(System.DateTime.Now));
         }
     }
     internal class StringDistance
