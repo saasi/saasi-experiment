@@ -40,6 +40,10 @@ namespace Monitor
             new Thread(monitorBusinessTimeout).Start();
             // new Thread(monitorBusinessInfo).Start();
             containerViolation = new Dictionary<string, int>();
+	    // Reset scale = 1 for io/cpu/memory
+	    scaleOut("io");
+	    scaleOut("cpu");
+	    scaleOut("memory");
             Thread.Sleep(5000);
             while (true)
             {
