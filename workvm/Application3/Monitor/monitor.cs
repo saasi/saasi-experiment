@@ -40,6 +40,10 @@ namespace Monitor
             new Thread(monitorBusinessTimeout).Start();
             // new Thread(monitorBusinessInfo).Start();
             containerViolation = new Dictionary<string, int>();
+	    // Reset scale = 1 for io/cpu/memory
+	    scaleOut("io");
+	    scaleOut("cpu");
+	    scaleOut("memory");
             Thread.Sleep(5000);
             while (true)
             {
@@ -57,16 +61,16 @@ namespace Monitor
                        if (container.Value.Equals("io_microservice"))
                        {
                             var usage = getUsage(container,"io");
-                            writeRecord("io", container.Key, usage);
+                            
                            if (usage > IOViolationThresdhold)
                            {
                                 
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("io volation:" + containerViolation[container.Key]);
                                 
-                                if (containerViolation[container.Key] >=5)
+                                if (containerViolation[container.Key] >=3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         ioNum++;
                                         writeRecord("io");
@@ -87,15 +91,14 @@ namespace Monitor
                        if (container.Value.Equals("cpu_microservice"))
                        {
                             var usage = getUsage(container,"cpu");
-                            writeRecord("cpu", container.Key, usage);
                             if (usage > cpuViolationThresdhold)
                             {
                                 
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("cpu volation:" + containerViolation[container.Key]);
-                                if (containerViolation[container.Key] >= 5)
+                                if (containerViolation[container.Key] >= 3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         cpuNum++;
                                         writeRecord("cpu");
@@ -116,15 +119,14 @@ namespace Monitor
                        if (container.Value.Equals("memory_microservice"))
                        {
                            var usage = getUsage(container,"memory");
-                           writeRecord("memory", container.Key, usage);
                            if (usage > memoryViolationThreshold)
                            {
                                 
                                 containerViolation[container.Key]++;
                                 Console.WriteLine("memory volation:" + containerViolation[container.Key]);
-                                if (containerViolation[container.Key] >= 5)
+                                if (containerViolation[container.Key] >= 3)
                                 {
-                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(60).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                                    if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
                                     {
                                         memNum++;
                                         writeRecord("memory");
@@ -228,6 +230,7 @@ namespace Monitor
             }
 
             Console.WriteLine(type + ":" +container.Key+":"+ usage.ToString());
+            writeRecord(type, container.Key, usage);
             return usage;
 
         }
@@ -290,6 +293,7 @@ namespace Monitor
                     if (bms.ContainsKey(message))
                     {
                         bms[message]++;
+                        writeBmsViolation(Guid.Parse(message));
                         if (bms[message] >5)
                         {
                             if (!scaleTime.ContainsKey(message) || scaleTime[message].AddSeconds(60).CompareTo(DateTime.Now) < 0)
@@ -407,15 +411,15 @@ namespace Monitor
 
         public static void writeRecord(string type, string containerId, double usage) //record cpu/io/memory usage
         {
-            StreamWriter sw = File.AppendText(type + ".txt");
-            sw.WriteLine(containerId + " " + Convert.ToString(usage) + " " + Convert.ToString(System.DateTime.Now));
+            StreamWriter sw = File.AppendText("data/apiStats.txt");
+            sw.WriteLine(type + " " + containerId + " " + Convert.ToString(usage) + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
         }
 
         public static void writeRecord(Guid bmsguid) //record bms scaleout
         {
-            StreamWriter sw = File.AppendText("business.txt");
+            StreamWriter sw = File.AppendText("data/business-scaleout.txt");
             sw.WriteLine(bmsguid.ToString() + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
@@ -423,12 +427,18 @@ namespace Monitor
 
         public static void writeRecord(string type) //record api scaleout
         {
-            StreamWriter sw = File.AppendText("api-scaleout.txt");
+            StreamWriter sw = File.AppendText("data/api-scaleout.txt");
             sw.WriteLine(type + " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
         }
-
+        public static void writeBmsViolation(Guid bmsguid)
+        {
+            StreamWriter sw = File.AppendText("data/business-violation.txt");
+            sw.WriteLine(bmsguid + " " + Convert.ToString(System.DateTime.Now));
+            sw.Flush();
+            sw.Dispose();
+        }
 
         public static void sendVMInfo()
         {
