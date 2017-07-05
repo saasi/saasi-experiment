@@ -66,7 +66,7 @@ namespace Monitor
                            {
                                 
                                 containerViolation[container.Key]++;
-                                Console.WriteLine("io volation:" + containerViolation[container.Key]);
+                                Console.WriteLine("io violation:" + containerViolation[container.Key]);
                                 
                                 if (containerViolation[container.Key] >=3)
                                 {
@@ -95,7 +95,7 @@ namespace Monitor
                             {
                                 
                                 containerViolation[container.Key]++;
-                                Console.WriteLine("cpu volation:" + containerViolation[container.Key]);
+                                Console.WriteLine("cpu violation:" + containerViolation[container.Key]);
                                 if (containerViolation[container.Key] >= 3)
                                 {
                                     if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
@@ -123,7 +123,7 @@ namespace Monitor
                            {
                                 
                                 containerViolation[container.Key]++;
-                                Console.WriteLine("memory volation:" + containerViolation[container.Key]);
+                                Console.WriteLine("memory violation:" + containerViolation[container.Key]);
                                 if (containerViolation[container.Key] >= 3)
                                 {
                                     if (!scaleTime.ContainsKey(container.Key) || scaleTime[container.Key].AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
