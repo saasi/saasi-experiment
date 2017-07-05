@@ -10,7 +10,7 @@
   - name: ensure rabbitmq started
     service:
       name: rabbitmq-server
-      state: started
+      state: restarted
   - name: ensure docker started
     service:
       name: docker
@@ -39,7 +39,7 @@
     args:
       chdir: /app/workvm/Application3/Monitor/
   - name: run Monitor 
-    shell: dotnet run 
+    shell: dotnet run > data/monitor.log 
     async: 2592000
     poll: 0
     become: false
@@ -51,7 +51,7 @@
     args:
       chdir: /app/workvm/DM/DM/ 
   - name: run DM
-    shell: dotnet run 
+    shell: dotnet run
     async: 2592000
     poll: 0
     args:
