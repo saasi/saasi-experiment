@@ -160,13 +160,11 @@ namespace Monitor
         public static double getUsage(KeyValuePair<string, string> container, string type)
         {
             double usage = 0;
-
-            
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            { FileName = "/bin/bash", Arguments = "./stats.sh " + container.Key, };
+            Process ip = new Process() { StartInfo = startInfo };
             try
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo()
-                { FileName = "/bin/bash", Arguments = "./stats.sh " + container.Key, };
-                Process ip = new Process() { StartInfo = startInfo, };
                 ip.Start();
                 Thread.Sleep(500);
                 var lines = File.ReadAllLines(@"stats.txt");
@@ -227,6 +225,17 @@ namespace Monitor
             }catch
             {
                 Console.WriteLine("read error");
+            }
+            finally
+            {
+                // Must kill the docker stats process. Otherwise CPU will be used up.
+                try {
+                    ip.Kill();
+                    ip.Dispose();
+                } catch {
+                    //do nothing
+                }
+                
             }
 
             Console.WriteLine(type + ":" +container.Key+":"+ usage.ToString());
