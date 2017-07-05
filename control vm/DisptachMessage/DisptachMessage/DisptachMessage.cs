@@ -26,7 +26,7 @@ namespace DisptachMessage
             urlQueue = new ConcurrentQueue<string>();
             new Thread(urlListener).Start();
             new Thread(bmsListener).Start();
- 	    new Thread(globalDMListener).Start();
+ 	        new Thread(globalDMListener).Start();
         }
 
         static void urlListener()
@@ -53,7 +53,6 @@ namespace DisptachMessage
                     urlQueue.Enqueue(message);
                     var t = Task.Run(async () => { await Run(); });
                     t.Wait();
-                    
                 };
                 channel.BasicConsume(queue: queueName,
                      noAck: true,
@@ -97,7 +96,8 @@ namespace DisptachMessage
             }
         }
 
-        static async System.Threading.Tasks.Task Run() // dispatch to bms
+        // dispatch to bms
+        static async Task Run() 
         {
             while(!urlQueue.IsEmpty)
             {
@@ -112,8 +112,6 @@ namespace DisptachMessage
                     }
                     bmsQueue.deque(ref bmsinfo);
                 }
-
-
 
                 var address = bmsinfo.Split(' ')[0];
                 //var bmsguid = bmsinfo.Split(' ')[1];
@@ -156,10 +154,10 @@ namespace DisptachMessage
                     var bmsguid = message.Split(' ')[0];
                     var address = message.Split(' ')[1];
                     bmsDic.GetOrAdd(bmsguid, address);
-                    Console.WriteLine("bmsIP:" + bmsDic[bmsguid]);
-                    Console.WriteLine("message:" + message);
-                    sendToDM(bmsguid);
-                
+                    Console.WriteLine("[globalDMListener] bmsIP:" + bmsDic[bmsguid]);
+                    Console.WriteLine("[globalDMListener] message:" + message);
+                    Task.Run(async () => { await sendToDM(bmsguid); });
+
                 };
                 channel.BasicConsume(queue: queueName,
                      noAck: true,
@@ -168,17 +166,15 @@ namespace DisptachMessage
             }
         }
 
-        static void sendToDM(string bmsguid) // send to DM in vm
+        // send to DM in vm
+        static async Task sendToDM(string bmsguid) 
         {
            
                 var httpClient = new HttpClient();
                 httpClient.MaxResponseContentBufferSize = 256000;
-                
                 var url = "http://" + bmsDic[bmsguid] + ":5002/ScaleOut?bmsguid=" + bmsguid;
-                var response = httpClient.GetAsync(url);
-                Console.WriteLine("sended:" + url);
-           
-
+                var response = await httpClient.GetAsync(url);
+                Console.WriteLine("sent:" + url);
         }
     }
 }
