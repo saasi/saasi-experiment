@@ -12,7 +12,10 @@
       user: saasi
       state: present
       key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-
+  - name: export docker logs
+    shell: docker-compose -f docker-compose.yml -f docker-compose.override.yml logs > /app/workvm/Application3/Monitor/data/docker.log
+    args:
+      chdir: /app/workvm/Application3/
   - name: download monitor data
 #    become: false
     synchronize: 
