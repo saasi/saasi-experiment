@@ -66,7 +66,7 @@ namespace LoadGenerator
         /* EVALUATION 3 */
         static void RunLoad3(int userCount=1,int duration =1) {
             List<Thread> users = new List<Thread>();
-            for (int i =1; i<=userCount;++i) {
+            for (int i =1; i<=userCount; ++i) {
                 var t = new Thread(() => RunUser3(duration));
                 t.Start();
                 Console.Error.WriteLine($"Started Thread #{i}");
@@ -77,9 +77,9 @@ namespace LoadGenerator
         }
         static void RunUser3(int duration = 1){
             Console.WriteLine("RUN!");
-            IApplicationUser user = new Application3User();
-            var t =Task.Run(async()=> {await user.Run("http://localhost:5000", duration);});
-            t.Wait();
+            Application3User user = new Application3User();
+            var t = Task.Run(async ()=>await user.Run("http://localhost:5000", duration));
+            t.Wait(); // prevents the program from existing before this thread finishes
         }
 
     }
