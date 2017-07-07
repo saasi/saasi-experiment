@@ -17,11 +17,12 @@ namespace Monitor
         {
             EndPoint = endpoint;
             _httpClient = new HttpClient();
+            _httpClient.MaxResponseContentBufferSize = 256000;
         }
 
         public async Task<double> GetContainerCPUUsageAsync(string id)
         {
-            var jsonResponse = await HTTPGetAsync($"http://saasi-vm02.it.deakin.edu.au:8080/api/v1.3/docker/{id}");
+            var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{id}");
             dynamic stats = JObject.Parse(jsonResponse);
             Console.WriteLine(stats.ToString());
             Console.WriteLine(stats[0].ToString());

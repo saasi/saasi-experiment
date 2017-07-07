@@ -40,6 +40,7 @@ namespace Monitor
         private async Task<double> GetCPUUsage()
         {
             //_dockerClient.Containers.GetContainerStatsAsync(this.Id);
+            return 0;
 
         }
         public async Task UpdateUsageAsync()
