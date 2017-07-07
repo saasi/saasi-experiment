@@ -25,12 +25,10 @@ namespace Monitor
             var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{id}");
             dynamic stats = JObject.Parse(jsonResponse);
             //Console.WriteLine(stats.ToString());
-            foreach (JProperty item in stats)
-            {
-                
-                Console.WriteLine(item.Value.ToString());
+            dynamic tmp = stats[$"/system.slice/docker-{id}.scope"];
+            JArray statsArray = tmp["stats"];
+            Console.WriteLine(statsArray.Count);
 
-            }
             return 0;
 
         }
