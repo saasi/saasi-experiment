@@ -24,12 +24,29 @@ namespace Monitor
         {
             var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{id}");
             dynamic stats = JObject.Parse(jsonResponse);
-            //Console.WriteLine(stats.ToString());
+            
             dynamic tmp = stats[$"/system.slice/docker-{id}.scope"];
             JArray statsArray = tmp["stats"];
-            Console.WriteLine(statsArray.Count);
 
-            return 0;
+            if (statsArray.Count == 0)
+            {
+                throw new Exception("No stats data");
+            }
+            dynamic cur = statsArray[statsArray.Count - 1];
+            dynamic prev = statsArray[statsArray.Count - 2];
+            string curCPU = cur.cpu.usage.total;
+            string prevCPU = prev.cpu.usage.total;
+            Int64 curCPUUsage = 0; 
+            Int64 prevCPUUsage = 0;
+            Int64.TryParse(curCPU, out curCPUUsage);
+            Int64.TryParse(prevCPU, out prevCPUUsage);
+            DateTime curTime = cur.timestamp;
+            DateTime prevTime = prev.timestamp;
+            TimeSpan interval = curTime - prevTime;
+            double intervalNs = interval.TotalMilliseconds * 1000000; // ms -> ns
+            double cpuPercentage = 100.0 * (double)(curCPUUsage - prevCPUUsage) / intervalNs ;
+            //Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
+            return cpuPercentage;
 
         }
 
