@@ -24,7 +24,7 @@ namespace Monitor
         {
             var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{id}");
             dynamic stats = JObject.Parse(jsonResponse);
-            Console.WriteLine(stats.ToString());
+            //Console.WriteLine(stats.ToString());
             Console.WriteLine(stats[0].ToString());
             return 0;
 
