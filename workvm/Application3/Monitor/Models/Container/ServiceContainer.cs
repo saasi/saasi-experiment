@@ -19,31 +19,37 @@ namespace Monitor
         private double lastBlockIOTotal = 0.0;
         private DateTime lastBlockIORecordedTime;
         private Timer checkStatsTimer;
+        private Timer checkIOStatsTimer;
 
         private readonly DockerClient _dockerClient;
+        private readonly CAdvisorClient _cadvisorClient;
         public ServiceContainer(string id, ContainerType type, DockerClient dockerClient)
         {
             Id = id;
             Type = type;
             _dockerClient = dockerClient;
+            _cadvisorClient = new CAdvisorClient(Id);
             lastBlockIORecordedTime = DateTime.Now;
 
-            checkStatsTimer = new Timer(async (object o) => { await UpdateUsageAsync(); }, null, 0, 500);
+            //  
+            checkStatsTimer = new Timer( (object o) =>
+            {
+                CPUUsage = _cadvisorClient.CPUPercentage;
+                MemoryUsage = _cadvisorClient.MemoryPercentage;
+            }, null, 0, 100);
+            checkIOStatsTimer = new Timer(async (object o) => { await UpdateIOUsageAsync(); }, null, 0, 2000);
         }
 
         ~ServiceContainer()
         {
+            Console.WriteLine($"Container {Id} Died");
             checkStatsTimer.Dispose();
+            checkIOStatsTimer.Dispose();
         }
 
+        
 
-        private async Task<double> GetCPUUsage()
-        {
-            //_dockerClient.Containers.GetContainerStatsAsync(this.Id);
-            return 0;
-
-        }
-        public async Task UpdateUsageAsync()
+        public async Task UpdateIOUsageAsync()
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
             { FileName = "/bin/bash", Arguments = "./stats.sh " + this.Id, };
@@ -74,10 +80,11 @@ namespace Monitor
                 }
                 var data = list2.ToArray();
 
-                CPUUsage = Convert.ToDouble(data[1].Substring(0, data[1].Length - 1));
-     
-                MemoryUsage = Convert.ToDouble(data[7].Substring(0, data[7].Length - 1));
+              
+                Console.WriteLine($"## CPU ds { Convert.ToDouble(data[1].Substring(0, data[1].Length - 1)) } vs. ca {CPUUsage}");
 
+                //
+                Console.WriteLine($"## MEM ds { Convert.ToDouble(data[7].Substring(0, data[7].Length - 1)) } vs. ca {MemoryUsage}");
                 {
 
                     double newBlockIOTotal = lastBlockIOTotal;

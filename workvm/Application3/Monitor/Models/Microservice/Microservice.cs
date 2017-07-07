@@ -56,14 +56,14 @@ namespace Monitor
         public async Task UpdateContainerList()
         {
             var containersList = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
-            var newContainers = new ConcurrentDictionary<string, ServiceContainer>();
+            var newContainers = new ConcurrentDictionary<string, string>();
             foreach (var container in containersList)
             {
                 if (container.Image.Equals(ContainerTypeToString(this.Type))) {
-                    newContainers.TryAdd(container.ID, new ServiceContainer(container.ID, this.Type, this._dockerClient));
+                    newContainers.TryAdd(container.ID, "placeholder");
                 }
             }
-
+          
             // diff
 
             // remove stopped containers
@@ -80,16 +80,16 @@ namespace Monitor
             {
                 if (this.Containers.ContainsKey(pair.Key))
                 {
-                    ServiceContainer value;
-                    this.Containers.TryGetValue(pair.Key, out value);
-                    this.Containers.TryUpdate(pair.Key, pair.Value, value);
+                    //ServiceContainer value;
+                    //this.Containers.TryGetValue(pair.Key, out value);
+                    //this.Containers.TryUpdate(pair.Key, pair.Value, value);
                 } else
                 {
-                    this.Containers.TryAdd(pair.Key, pair.Value);
+                    this.Containers.TryAdd(pair.Key, new ServiceContainer(pair.Key, this.Type, this._dockerClient));
                 }
             }
 
-            Console.WriteLine($"[{this.Type.ToString()}] Updated container list.");
+            Console.WriteLine($"[{this.Type.ToString()}] Updated container list. => {this.ActualScale} containers.");
             //this.Containers.Clear();
             //this.Containers = newContainers;
         }
