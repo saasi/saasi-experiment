@@ -36,6 +36,12 @@ namespace Monitor
             checkStatsTimer.Dispose();
         }
 
+
+        private async Task<double> GetCPUUsage()
+        {
+            //_dockerClient.Containers.GetContainerStatsAsync(this.Id);
+
+        }
         public async Task UpdateUsageAsync()
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
