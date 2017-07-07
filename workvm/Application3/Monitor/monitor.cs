@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using Docker.DotNet;
+using System.Threading.Tasks;
 
 namespace Monitor
 {
@@ -32,6 +33,15 @@ namespace Monitor
                 return;
             }
 
+
+            try
+            {
+                var cadvisorClient = new CAdvisorClient("http://localhost:8080");
+                Task.Run(async ()=> await cadvisorClient.GetContainerCPUUsageAsync("3f4f33d2eb791b2913176d955bc22d798e4f0de5445376309b5eee44f35cd805"));
+            } catch
+            {
+                Console.WriteLine("Could not connect to cadvisor");
+            }
 
             vmaddress = getVmAddress();
             Console.WriteLine("IP:" + vmaddress);
@@ -185,10 +195,6 @@ namespace Monitor
                    // while (true) { Thread.Sleep(5000); };
                }
            }*/
-
-
-
-
 
 
         public static void writeRecord(Guid bmsguid) //record bms scaleout
