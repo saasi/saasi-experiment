@@ -34,7 +34,7 @@ namespace Monitor
                 {
                     Console.Write("Error cadvisor");
                 }
-            }, null, 0, 100);
+            }, null, 0, 3000);
         }
 
         ~CAdvisorClient()
@@ -54,7 +54,7 @@ namespace Monitor
                 long containerMemoryLimit = tmp.spec.memory.limit;
                 var machineMemLimit = await GetMachineMemoryCapacityAsync();
                 this.memoryLimit = Math.Min(containerMemoryLimit, machineMemLimit);
-                Console.WriteLine($"Memory Limit {memoryLimit/1024.0/1024.0} MB");
+               // Console.WriteLine($"Memory Limit {memoryLimit/1024.0/1024.0} MB");
             }
 
             CPUPercentage = await GetContainerCPUUsageAsync(tmp["stats"]);
@@ -91,7 +91,7 @@ namespace Monitor
             TimeSpan interval = curTime - prevTime;
             double intervalNs = interval.TotalMilliseconds * 1000000; // ms -> ns
             double cpuPercentage = 100.0 * (double)(curCPUUsage - prevCPUUsage) / intervalNs ;
-            Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
+        //    Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
             return cpuPercentage;
         }
 
@@ -110,7 +110,7 @@ namespace Monitor
             Int64.TryParse(curMeory, out curMemoryUsage);
             Console.WriteLine($"Memory {curMemoryUsage} bytes");
             var totalMemory = Math.Floor((100.0 * curMemoryUsage ) / ((double)(memoryLimit ?? 1)));
-            Console.WriteLine($"mem {totalMemory}%");
+        //    Console.WriteLine($"mem {totalMemory}%");
             return totalMemory;
         }
 

@@ -27,9 +27,9 @@ namespace Monitor
             Type = type;
             _dockerClient = dockerClient;
             Containers = new ConcurrentDictionary<string, ServiceContainer>();
-            this.updateTimer = new Timer(async (object o)=> { await UpdateContainerList(); }, null, 0, 1000);
+            this.updateTimer = new Timer(async (object o)=> { await UpdateContainerList(); }, null, 0, 20000);
 
-            this.monitorTimer = new Timer((object o) => { CheckResourceUtilisation(); }, null, 1000, 1000);
+            this.monitorTimer = new Timer((object o) => { CheckResourceUtilisation(); }, null, 1000, 10000);
 
             DoScale();
         }

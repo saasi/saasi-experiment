@@ -37,7 +37,7 @@ namespace Monitor
                 CPUUsage = _cadvisorClient.CPUPercentage;
                 MemoryUsage = _cadvisorClient.MemoryPercentage;
             }, null, 0, 100);
-            checkIOStatsTimer = new Timer(async (object o) => { await UpdateIOUsageAsync(); }, null, 0, 2000);
+            //checkIOStatsTimer = new Timer(async (object o) => { await UpdateIOUsageAsync(); }, null, 0, 3000);
         }
 
         ~ServiceContainer()
@@ -57,7 +57,7 @@ namespace Monitor
             try
             {
                 ip.Start();
-                Thread.Sleep(500);
+                Thread.Sleep(3000);
                 var lines = File.ReadAllLines(@"stats.txt");
 
                 List<string> list = new List<string>();
