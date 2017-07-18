@@ -34,7 +34,6 @@
       chdir: /app/workvm/Application3/
   - name: run cadvisor
     shell: 'docker-compose up -d'
-#    async: 45
     args:
       chdir: /app/workvm/Application3/Monitor/
   - name: run Monitor - restore
