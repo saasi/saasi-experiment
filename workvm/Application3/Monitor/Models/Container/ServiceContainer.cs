@@ -36,8 +36,9 @@ namespace Monitor
             {
                 CPUUsage = _cadvisorClient.CPUPercentage;
                 MemoryUsage = _cadvisorClient.MemoryPercentage;
+                IOUsage = _cadvisorClient.IOMBps;
+                LogUsage();
             }, null, 0, 100);
-            //checkIOStatsTimer = new Timer(async (object o) => { await UpdateIOUsageAsync(); }, null, 0, 3000);
         }
 
         ~ServiceContainer()
