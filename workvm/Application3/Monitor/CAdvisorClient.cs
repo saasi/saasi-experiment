@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -15,10 +16,14 @@ namespace Monitor
         private string ContainerId { get; set; } = "";
         public double CPUPercentage { get; private set; } = 0.0;
         public double MemoryPercentage { get; private set; } = 0.0;
+        
+        public double IOMBps {get; private set;} = 0.0;
         private long? memoryLimit = null;
         private readonly Timer _statsTimer;
 
         private readonly HttpClient _httpClient;
+
+        private bool _requestOnGoing = false;
         public CAdvisorClient(string id)
         {
             EndPoint = DefaultEndpoint;
@@ -26,14 +31,22 @@ namespace Monitor
             _httpClient = new HttpClient();
             _httpClient.MaxResponseContentBufferSize = 256000;
 
-            _statsTimer = new Timer(async (object o) => { try
-                {
-                    await UpdateStatsAsync();
+            _statsTimer = new Timer(async (object o) => { 
+                
+                if (!_requestOnGoing) {
+                    _requestOnGoing = true;
+                    try
+                    {
+                        await UpdateStatsAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Write("Exception in CAdvisorClient: ");
+                        Console.WriteLine($"Message={e.Message} Source={e.Source} Trace={e.StackTrace}");
+                    }
+                    _requestOnGoing = false;
                 }
-                catch
-                {
-                    Console.Write("Error cadvisor");
-                }
+              
             }, null, 0, 100);
         }
 
@@ -44,10 +57,24 @@ namespace Monitor
 
         public async Task UpdateStatsAsync()
         {
+            //Console.WriteLine($"=================={ContainerId}");
             var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{ContainerId}");
-            dynamic result = JObject.Parse(jsonResponse);
 
-            dynamic tmp = result[$"/system.slice/docker-{ContainerId}.scope"];
+
+            dynamic result = JObject.Parse(jsonResponse);
+            var properties = new List<String>();
+            foreach (JProperty jp in result) {
+                //Console.WriteLine(jp.Name);
+                properties.Add(jp.Name);
+            }
+
+            if (properties.Count == 0) {
+                Console.WriteLine("No properties");
+            }
+
+            dynamic tmp = result[properties[0]];//$"/system.slice/docker-{ContainerId}.scope"];
+
+            if (tmp == null) return;
 
             if (memoryLimit == null)
             {
@@ -57,8 +84,9 @@ namespace Monitor
                 Console.WriteLine($"Memory Limit {memoryLimit/1024.0/1024.0} MB");
             }
 
-            CPUPercentage = await GetContainerCPUUsageAsync(tmp["stats"]);
-            MemoryPercentage = await GetContainerMemoryUsageAsync(tmp["stats"]);
+            CPUPercentage = await GetContainerCPUUsageAsync(tmp.stats);
+            MemoryPercentage = await GetContainerMemoryUsageAsync(tmp.stats);
+            IOMBps = await GetBlockIOAsync(tmp.stats);
             Console.WriteLine("Updated cadvisor");
         }
 
@@ -95,7 +123,30 @@ namespace Monitor
             return cpuPercentage;
         }
 
-
+        private async Task<double> GetBlockIOAsync(JArray statsArray)
+        {
+            if (statsArray.Count <= 10)
+            {
+                Console.WriteLine("Not enough stats data");
+                throw new Exception("Not enough stats data");
+            }
+            dynamic cur = statsArray[statsArray.Count - 1];
+            dynamic prev = statsArray[statsArray.Count - 9];
+            string curIO = cur.diskio.io_service_bytes[0].stats.Total;
+            string prevIO = prev.diskio.io_service_bytes[0].stats.Total;;
+            Int64 curIOUsage = 0; 
+            Int64 prevIOUsage = 0;
+            Int64.TryParse(curIO, out curIOUsage);
+            Int64.TryParse(prevIO, out prevIOUsage);
+            DateTime curTime = cur.timestamp;
+            DateTime prevTime = prev.timestamp;
+            TimeSpan interval = curTime - prevTime;
+            double intervalSeconds = interval.TotalSeconds; 
+            double IODeltaMB = ((double)curIOUsage - prevIOUsage)/1024.0/1024.0; //MB delta
+            double ioMBps =  IODeltaMB/ intervalSeconds;
+            Console.WriteLine($"IOIOOIOIIOIOIO prev {prevIOUsage} cur {curIOUsage} totaltime {intervalSeconds} s, {ioMBps} MB/s");
+            return ioMBps;
+        }
 
         private async Task<double> GetContainerMemoryUsageAsync(JArray statsArray)
         {
@@ -108,39 +159,10 @@ namespace Monitor
             string curMeory = cur.memory.usage;
             Int64 curMemoryUsage = 0;
             Int64.TryParse(curMeory, out curMemoryUsage);
-            Console.WriteLine($"Memory {curMemoryUsage} bytes");
-            var totalMemory = Math.Floor((100.0 * curMemoryUsage ) / ((double)(memoryLimit ?? 1)));
+            //Console.WriteLine($"Memory {curMemoryUsage} bytes {(double)curMemoryUsage /1024.0/1024.0} Limit{(double)memoryLimit/1024.0/1024.0}");
+            var totalMemory = (100.0 * curMemoryUsage ) / ((double)(memoryLimit ?? 1));
             Console.WriteLine($"mem {totalMemory}%");
             return totalMemory;
-        }
-
-        public async Task<double> GetContainerCPUUsageAsync(string id)
-        {
-            var jsonResponse = await HTTPGetAsync($"{EndPoint}/api/v1.3/docker/{id}");
-            dynamic stats = JObject.Parse(jsonResponse);
-
-            dynamic tmp = stats[$"/system.slice/docker-{id}.scope"];
-            JArray statsArray = tmp["stats"];
-
-            if (statsArray.Count == 0)
-            {
-                throw new Exception("No stats data");
-            }
-            dynamic cur = statsArray[statsArray.Count - 1];
-            dynamic prev = statsArray[statsArray.Count - 2];
-            string curCPU = cur.cpu.usage.total;
-            string prevCPU = prev.cpu.usage.total;
-            Int64 curCPUUsage = 0;
-            Int64 prevCPUUsage = 0;
-            Int64.TryParse(curCPU, out curCPUUsage);
-            Int64.TryParse(prevCPU, out prevCPUUsage);
-            DateTime curTime = cur.timestamp;
-            DateTime prevTime = prev.timestamp;
-            TimeSpan interval = curTime - prevTime;
-            double intervalNs = interval.TotalMilliseconds * 1000000; // ms -> ns
-            double cpuPercentage = 100.0 * (double)(curCPUUsage - prevCPUUsage) / intervalNs;
-            //Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
-            return cpuPercentage;
         }
 
         private async Task<string> HTTPGetAsync(string url)
