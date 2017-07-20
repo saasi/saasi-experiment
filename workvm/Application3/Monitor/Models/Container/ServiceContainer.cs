@@ -46,6 +46,7 @@ namespace Monitor
             Console.WriteLine($"Container {Id} Died");
             checkStatsTimer.Dispose();
             checkIOStatsTimer.Dispose();
+            _cadvisorClient.Dispose();
         }
 
         
