@@ -84,14 +84,14 @@ namespace IO_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 30, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "io");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine("get message:" + message);
+                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
                  //   if (order[0].Equals("1"))
                  //   {
@@ -106,7 +106,7 @@ namespace IO_Microservice
 
                 Console.WriteLine(" Looping ...");
                 //Console.ReadLine();
-                while(true){ Thread.Sleep(5000);};
+                while(true){ Thread.Sleep(10);};
             }
         }
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 using System.Text;
+using System.Net.Http;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,20 +18,21 @@ namespace GlobalDM.Controllers
         {
             var ip = HttpContext.Connection.RemoteIpAddress;
             Console.WriteLine(ip.ToString());
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            //send container information to dispatch
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.ExchangeDeclare(exchange: "global", type: "direct");
-                var body = Encoding.UTF8.GetBytes(bmsguid.ToString() + " " + ip);
-                channel.BasicPublish(exchange: "global",
-                                      routingKey: "",
-                                      basicProperties: null,
-                                      body: body);
-                Console.WriteLine("send bmsguid:" + bmsguid);
-                return View();
-            }
+            Task.Run(async () => { await sendToDM(ip.ToString(), bmsguid.ToString()); });
+
+            return new JsonResult(new Dictionary<string, string> { { "status", "ok" } });
+
+        }
+        static async Task sendToDM(string ip, string bmsguid)
+        {
+
+            var httpClient = new HttpClient();
+            httpClient.MaxResponseContentBufferSize = 256000;
+            var url = "http://" + ip + ":5002/ScaleOut?bmsguid=" + bmsguid;
+            var response = await httpClient.GetAsync(url);
+            Console.WriteLine("sent:" + url);
         }
     }
+
+
 }

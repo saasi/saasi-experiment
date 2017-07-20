@@ -47,7 +47,7 @@ namespace Monitor
                     _requestOnGoing = false;
                 }
              
-            }, null, 0, 1000);
+            }, null, 0, 3000);
 
         }
 
@@ -88,7 +88,7 @@ namespace Monitor
             CPUPercentage = await GetContainerCPUUsageAsync(tmp.stats);
             MemoryPercentage = await GetContainerMemoryUsageAsync(tmp.stats);
             IOMBps = await GetBlockIOAsync(tmp.stats);
-            Console.WriteLine("Updated cadvisor");
+            //Console.WriteLine("Updated cadvisor");
         }
 
 
@@ -120,7 +120,8 @@ namespace Monitor
             TimeSpan interval = curTime - prevTime;
             double intervalNs = interval.TotalMilliseconds * 1000000; // ms -> ns
             double cpuPercentage = 100.0 * (double)(curCPUUsage - prevCPUUsage) / intervalNs ;
-        //    Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
+            //Console.WriteLine($"prev {prevCPUUsage} cur {curCPUUsage} totaltime {intervalNs}ns, {cpuPercentage}%");
+            //Console.WriteLine($"CPU: {cpuPercentage}%");
             return cpuPercentage;
         }
 
@@ -145,7 +146,8 @@ namespace Monitor
             double intervalSeconds = interval.TotalSeconds; 
             double IODeltaMB = ((double)curIOUsage - prevIOUsage)/1024.0/1024.0; //MB delta
             double ioMBps =  IODeltaMB/ intervalSeconds;
-            Console.WriteLine($"IOIOOIOIIOIOIO prev {prevIOUsage} cur {curIOUsage} totaltime {intervalSeconds} s, {ioMBps} MB/s");
+            // Console.WriteLine($"IOIOOIOIIOIOIO prev {prevIOUsage} cur {curIOUsage} totaltime {intervalSeconds} s, {ioMBps} MB/s");
+            //Console.WriteLine($"IO {ioMBps} MB/s");
             return ioMBps;
         }
 
@@ -163,7 +165,7 @@ namespace Monitor
 
             //Console.WriteLine($"Memory {curMemoryUsage} bytes {(double)curMemoryUsage /1024.0/1024.0} Limit{(double)memoryLimit/1024.0/1024.0}");
             var totalMemory = (100.0 * curMemoryUsage ) / ((double)(memoryLimit ?? 1));
-            Console.WriteLine($"mem {totalMemory}%");
+            //Console.WriteLine($"mem {totalMemory}%");
 
             return totalMemory;
         }

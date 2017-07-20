@@ -12,35 +12,35 @@ namespace LoadGenerator.MockUsers {
         private string[] _config = new string[] {
             //io cpu memory timetorun timeout
             "0 1 0 5 10",
-            "0 0 0 5 10",
-            "0 1 0 5 10",
-            "0 0 0 5 10",
             "1 0 0 5 10",
-            "0 0 0 5 10",
-            "1 0 0 5 10",
-            "0 0 0 5 10",
-            "0 1 0 5 10",
-            "0 1 0 5 10",
-            "0 0 0 5 10",
-            "1 0 0 5 10",
-            "1 0 0 5 10",
-            "0 0 0 5 10",
-            "0 0 0 5 10",
-            "1 0 0 5 10",
-            "0 1 0 5 10",
-            "0 0 0 5 10",
-            "0 1 0 5 10",
-            "1 0 0 5 10",
-            "1 0 0 5 10",
-            "0 1 0 5 10",
-            "0 0 0 5 10",
-            "0 1 0 5 10",
-            "1 0 0 5 10",
-            "1 0 0 5 10",
-            "0 1 0 5 10",
-            "0 1 0 5 10",
-            "1 0 0 5 10",
-            "0 0 0 5 10",
+            "0 0 1 5 10",
+            "1 1 0 5 10",
+            "1 0 1 5 10",
+            "0 1 1 5 10",
+            "0 1 0 10 20",
+            "1 0 0 10 20",
+            "0 0 1 10 20",
+            "1 1 0 10 20",
+            "1 0 1 10 20",
+            "0 1 1 10 20",
+            "0 1 0 15 30",
+            "1 0 0 15 30",
+            "0 0 1 15 30",
+            "1 1 0 15 30",
+            "1 0 1 15 30",
+            "0 1 1 15 30",
+            "0 1 0 20 40",
+            "1 0 0 20 40",
+            "0 0 1 20 40",
+            "1 1 0 20 40",
+            "1 0 1 20 40",
+            "0 1 1 20 40",
+            "0 1 0 30 60",
+            "1 0 0 30 60",
+            "0 0 1 30 60",
+            "1 1 0 30 60",
+            "1 0 1 30 60",
+            "0 1 1 30 60",
 
         };
         private IConnection connection;
@@ -79,7 +79,7 @@ namespace LoadGenerator.MockUsers {
                                     {"timestart", ((DateTimeOffset)timestart).ToUnixTimeSeconds().ToString()}
                                 };
                         //var url = new Uri(QueryHelpers.AddQueryString(baseURL+"/Business", parameters));
-                        var url = new Uri(QueryHelpers.AddQueryString("http://10.137.0.81:5000" + "/Business", parameters));
+                        var url = new Uri(QueryHelpers.AddQueryString("http://localhost:5001/saasi" + "/Business", parameters));
                         /*        channel.ExchangeDeclare(exchange: "url", type: "direct");
                                 var body = Encoding.UTF8.GetBytes(url.ToString().Split('/')[3]);
                         // var properties = channel.CreateBasicProperties();
@@ -100,7 +100,7 @@ namespace LoadGenerator.MockUsers {
                         {
                             Console.WriteLine($"User {_guid} Network Error");
                         }
-                    
+                    		System.Threading.Thread.Sleep(50);
 		        }
                 System.Threading.Thread.Sleep(20000);
             }

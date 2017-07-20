@@ -38,7 +38,13 @@ namespace Monitor
                 MemoryUsage = _cadvisorClient.MemoryPercentage;
                 IOUsage = _cadvisorClient.IOMBps;
                 LogUsage();
-            }, null, 0, 100);
+                if (this.Type == ContainerType.CPUMicroservice)
+                    Console.WriteLine($"CPU {Id}:{CPUUsage}");
+                if (this.Type == ContainerType.IOMicroservice)
+                    Console.WriteLine($"IO {Id:{IOUsage}");
+                if (this.Type == ContainerType.MemoryMicroservice)
+                    Console.WriteLine($"MEM {Id:{MemoryUsage}");
+            }, null, 0, 3000);
         }
 
         ~ServiceContainer()
@@ -133,11 +139,28 @@ namespace Monitor
 
         private void LogUsage()
         {
-            Console.WriteLine(this.Type.ToString() + ":" + this.Id + ":" + CPUUsage.ToString());
-            StreamWriter sw = File.AppendText("data/apiStats.txt");
-            sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {this.Type.ToString()} {Id} CPU={CPUUsage} Memory={MemoryUsage} IO={IOUsage}");
-            sw.Flush();
-            sw.Dispose();
+            //Console.WriteLine(this.Type.ToString() + ":" + this.Id + ":" + CPUUsage.ToString());
+            if (this.Type == ContainerType.CPUMicroservice)
+            {
+                StreamWriter sw = File.AppendText("data/cpuStats.txt");
+                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} CPU={CPUUsage}");
+                sw.Flush();
+                sw.Dispose();
+            }
+            if (this.Type == ContainerType.IOMicroservice)
+            {
+                StreamWriter sw = File.AppendText("data/ioStats.txt");
+                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} IO={IOUsage}");
+                sw.Flush();
+                sw.Dispose();
+            }
+            if (this.Type == ContainerType.MemoryMicroservice)
+            {
+                StreamWriter sw = File.AppendText("data/memStats.txt");
+                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} Memory={MemoryUsage}");
+                sw.Flush();
+                sw.Dispose();
+            }
         }
 
     }

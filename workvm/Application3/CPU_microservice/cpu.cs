@@ -86,7 +86,7 @@ namespace CPU_Microservice
                     i++;
                     if (i == 50)
                     {
-                        Thread.Sleep(15); // Change the wait time here.
+                        Thread.Sleep(20); // Change the wait time here.
                         i = 0;
                     }
                   //  string comparestring2 = StringDistance.GenerateRandomString(1000);
@@ -111,14 +111,14 @@ namespace CPU_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 30, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "cpu");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine("get message:" + message);
+                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
                   //  if (order[1].Equals("1"))
                   //  {

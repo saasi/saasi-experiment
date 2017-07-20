@@ -19,6 +19,9 @@ namespace Monitor
         private static IOMicroservice ioMicroservice;
         private static MemoryMicroservice memoryMicroservice;
         private static CPUMicroservice cpuMicroservice;
+        private static Dictionary<string, int> bms = new Dictionary<string, int>();
+        private static Dictionary<string, DateTime> scaleTime = new Dictionary<string, DateTime>();
+        private static int bmsNum = 1;
 
         public static void Main(string[] args)
         {
@@ -26,6 +29,8 @@ namespace Monitor
             {
                 dockerClient = new DockerClientConfiguration(new Uri("http://127.0.0.1:4243"))
                                 .CreateClient();
+                               // dockerClient = new DockerClientConfiguration(new Uri("http://192.168.0.1:4243"))
+                              //  .CreateClient();
             }
             catch
             {
@@ -52,11 +57,11 @@ namespace Monitor
 
             //Console.ReadLine();
 
-            vmaddress = getVmAddress();
-            Console.WriteLine("IP:" + vmaddress);
-            SendVMInfo();
+        //    vmaddress = getVmAddress();
+        //    Console.WriteLine("IP:" + vmaddress);
+        //    SendVMInfo();
             //Monitor dm = new Monitor();
-            //new Thread(monitorBusinessTimeout).Start();
+            new Thread(monitorBusinessTimeout).Start();
 
             ioMicroservice = new IOMicroservice(dockerClient);
             cpuMicroservice = new CPUMicroservice(dockerClient);
@@ -93,81 +98,81 @@ namespace Monitor
         }
 
 
-        //public static void monitorBusinessTimeout() //A thread to listen message from DM about bms timeout
-        //{
+        public static void monitorBusinessTimeout() //A thread to listen message from DM about bms timeout
+        {
 
-        //    Console.WriteLine("start listening business timeout");
-        //    var factory = new ConnectionFactory() { HostName = "localhost" };
-        //    using (var connection = factory.CreateConnection())
-        //    using (var channel = connection.CreateModel())
-        //    {
-        //        channel.ExchangeDeclare(exchange: "dm", type: "direct");
-        //        var queueName = "monitor_queue";
-        //        channel.QueueDeclare(queue: queueName,
-        //                        durable: true,
-        //                        exclusive: false,
-        //                        autoDelete: false,
-        //                        arguments: null);
-        //        channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
-        //        channel.QueueBind(queue: queueName, exchange: "dm", routingKey: "scaleout");
-        //        var consumer = new EventingBasicConsumer(channel);
-        //        consumer.Received += (model, ea) =>
-        //        {
-        //            var body = ea.Body;
-        //            var message = Encoding.UTF8.GetString(body);
-        //            Console.WriteLine("scelout:" + message);
-        //            if (bms.ContainsKey(message))
-        //            {
-        //                bms[message]++;
-        //                writeBmsViolation(Guid.Parse(message));
-        //                if (bms[message] > 5)
-        //                {
-        //                    if (!scaleTime.ContainsKey(message) || scaleTime[message].AddSeconds(60).CompareTo(DateTime.Now) < 0)
-        //                    {
-        //                        bmsNum++;
-        //                        Console.WriteLine("scaleouting");
-        //                        scaleOut("bms");
-        //                        if (!scaleTime.ContainsKey(message))
-        //                            scaleTime.Add(message, DateTime.Now);
-        //                        else
-        //                            scaleTime[message] = DateTime.Now;
-        //                        writeRecord(Guid.Parse(message));
+            Console.WriteLine("start listening business timeout");
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.ExchangeDeclare(exchange: "dm", type: "direct");
+                var queueName = "monitor_queue";
+                channel.QueueDeclare(queue: queueName,
+                                durable: true,
+                                exclusive: false,
+                                autoDelete: false,
+                                arguments: null);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                channel.QueueBind(queue: queueName, exchange: "dm", routingKey: "scaleout");
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =>
+                {
+                    var body = ea.Body;
+                    var message = Encoding.UTF8.GetString(body);
+                    Console.WriteLine("scelout:" + message);
+                    if (bms.ContainsKey(message))
+                    {
+                        bms[message]++;
+                        writeBmsViolation(Guid.Parse(message));
+                        if (bms[message] > 15)
+                        {
+                            if (!scaleTime.ContainsKey(message) || scaleTime[message].AddSeconds(60).CompareTo(DateTime.Now) < 0)
+                            {
+                                bmsNum++;
+                                Console.WriteLine("scaleouting");
+                                scaleOut("bms");
+                                if (!scaleTime.ContainsKey(message))
+                                    scaleTime.Add(message, DateTime.Now);
+                                else
+                                    scaleTime[message] = DateTime.Now;
+                                writeRecord(Guid.Parse(message));
 
-        //                    }
-        //                    bms[message] = 0;
-        //                }
-        //            }
+                            }
+                            bms[message] = 0;
+                        }
+                    }
 
-        //            else
-        //                bms.Add(message, 1);
+                    else
+                        bms.Add(message, 1);
 
-        //        };
-        //        channel.BasicConsume(queue: queueName,
-        //                             noAck: true,
-        //                             consumer: consumer);
+                };
+                channel.BasicConsume(queue: queueName,
+                                     noAck: true,
+                                     consumer: consumer);
 
-        //        Console.WriteLine(" Looping ...");
-        //        Console.ReadLine();
-        //        // while (true) { Thread.Sleep(5000); };
-        //    }
-        //    while (true) { Thread.Sleep(5000); };
-        //}
+                Console.WriteLine(" Looping ...");
+                Console.ReadLine();
+                // while (true) { Thread.Sleep(5000); };
+            }
+            while (true) { Thread.Sleep(5000); };
+        }
 
 
 
-        //public static void scaleOut(string type)
-        //{
-        //    //scalebms
-        //    if (type.Equals("bms"))
-        //    {
-        //        Console.WriteLine("scaleout bms");
-        //        ProcessStartInfo statInfo1 = new ProcessStartInfo()
-        //        { FileName = "/bin/bash", Arguments = "./scalebms1.sh " + bmsNum }; //Again, scriptfile should be in working directory
-        //        Process stat = new Process() { StartInfo = statInfo1, };
-        //        stat.Start();
-        //    }
+        public static void scaleOut(string type)
+        {
+            //scalebms
+            if (type.Equals("bms"))
+            {
+                Console.WriteLine("scaleout bms");
+                ProcessStartInfo statInfo1 = new ProcessStartInfo()
+                { FileName = "/bin/bash", Arguments = "./scalebms1.sh " + bmsNum }; //Again, scriptfile should be in working directory
+                Process stat = new Process() { StartInfo = statInfo1, };
+                stat.Start();
+            }
 
-        //}
+        }
 
         /*   public static void monitorBusinessInfo()
            {

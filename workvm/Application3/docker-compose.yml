@@ -4,10 +4,10 @@ services:
   business_microservice:
     image: business_microservice
     build:
-      context: ./Business_microservice
+      context: ./saasi
       dockerfile: Dockerfile
     ports:
-      - "5001:5004"
+      - "5001:8080"
     links:
       - messagequeue:rabbitmq
     depends_on:

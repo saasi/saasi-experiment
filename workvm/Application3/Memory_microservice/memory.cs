@@ -68,14 +68,14 @@ namespace MEMORY_Microservice
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 30, global: false);
                 channel.QueueBind(queue: queueName, exchange: "call", routingKey: "memory");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine("get message:" + message);
+                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
                    // if (order[2].Equals("1"))
                    // {
@@ -93,7 +93,7 @@ namespace MEMORY_Microservice
 
                 Console.WriteLine(" Looping...");
                 //Console.ReadLine();
-                while(true){ Thread.Sleep(5000);};
+                while(true){ Thread.Sleep(10);};
             }
         }
 
@@ -135,7 +135,7 @@ namespace MEMORY_Microservice
                     i++;
                     if (i == 2000)
                     {
-                        Thread.Sleep(30); // Change the wait time here.
+                        Thread.Sleep(50); // Change the wait time here.
                         i = 0;
 
                     }

@@ -40,8 +40,11 @@ namespace BusinessFunction
             }
             bmsGuid = Guid.NewGuid();
             new Thread(businessProcessing).Start();
-            //
+	        new Thread(businessProcessing).Start();
+            new Thread(businessProcessing).Start();
+	            //
         }
+
         static void sendBMSInfo()  //send bms guid to monitor
         {
             
@@ -61,9 +64,11 @@ namespace BusinessFunction
                 Console.WriteLine(message + ":Send to Monitor");
             }
         }
+    
         static void businessProcessing()
         {
-            
+
+        
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             using (var connection = factory.CreateConnection())
             using (var channel_mono = connection.CreateModel())
@@ -73,7 +78,7 @@ namespace BusinessFunction
                 channel_mono.ExchangeDeclare(exchange: "mono", type: "direct");
                 var queueName = "business_queue";
                 channel_mono.QueueDeclare(queue: queueName,
-                                durable: true,
+                                durable: false,
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
@@ -84,14 +89,16 @@ namespace BusinessFunction
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine(message);
-                    Console.WriteLine(bmsGuid + ":call api");
-                    CallApi(message);
-                    //channel_mono.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+		            Console.WriteLine("Task recieved:" + DateTime.Now.ToString());
+                    //Console.WriteLine(message);
+                    //Console.WriteLine(bmsGuid + ":call api");
                     businessTask bt = new businessTask(message, channel_mono, ea);
                     //Thread t = new Thread(bt.Fun);
                     //t.Start();
                     ThreadPool.QueueUserWorkItem(new WaitCallback(bt.Fun));
+                    CallApi(message);
+                    //channel_mono.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+
 
 
                 };
@@ -108,10 +115,12 @@ namespace BusinessFunction
                           basicProperties: null,
                           body: body2);*/
                           
-                while (true) { Thread.Sleep(1000); };
+                while (true) { Thread.Sleep(10); };
             }
+        }        
+    
             
-        }
+        
         class businessTask
         {
             private string message;
@@ -138,21 +147,16 @@ namespace BusinessFunction
 
                 }
                 
-                //Console.WriteLine(id + " business start:" + startTime.ToString());
                 var timetorun = Convert.ToInt16(message.Split(' ')[3]);
                 var timeout = Convert.ToInt16(message.Split(' ')[4]);
                 var recieveTime = DateTime.Now;
                 Thread.Sleep(timetorun * 1000);
-                //DateTime beginTime = System.DateTime.Now;
-                //DateTime finishTime = beginTime.AddSeconds(timetorun);
-                
-                //DateTime finishTime = startTime.AddSeconds(timetorun);
+
 
                 DateTime completeRunTime = System.DateTime.Now;
                 Console.WriteLine(id + " " + recieveTime.ToString() + " " + startTime.ToString() + " " + completeRunTime.ToString() + " " + startTime.AddSeconds(timeout).ToString());
                 //Console.WriteLine(startTime.AddSeconds(timeout).ToString() + " " + completeRunTime.ToString());
                 if (startTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0) //check timeout
-                //if (startTime.AddSeconds(timeout).CompareTo(completeRunTime) < 0)
                 {
                     var message2 = bmsGuid;
                     Console.WriteLine("send to GlobalDM:" + message2);
@@ -162,20 +166,6 @@ namespace BusinessFunction
                 }
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
-         /*       var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
-                using (var connection = factory.CreateConnection())
-                using (var channel_mono = connection.CreateModel())
-                {
-                    channel.ExchangeDeclare(exchange: "reply", type: "direct");
-                    string reply = "done";
-                    var body = Encoding.UTF8.GetBytes(reply);
-                    var properties = channel.CreateBasicProperties();
-                    properties.Persistent = true;
-                    channel.BasicPublish(exchange: "mono",
-                                          routingKey: messageGuid,
-                                          basicProperties: properties,
-                                          body: body);
-                }*/
                     
             }
         }
@@ -223,8 +213,8 @@ namespace BusinessFunction
                   basicProperties: null,
                   body: body);
                 }
-                Console.WriteLine(message);
-                Console.WriteLine("Send to API microservice");
+                //Console.WriteLine(message);
+                //Console.WriteLine("Send to API microservice");
             }
         }
     }
