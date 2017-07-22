@@ -12,16 +12,14 @@ using RabbitMQ.Client.Exceptions;
 
 namespace CPU_Microservice
 {
-    
+
     class CPU
     {
         private static readonly string _rabbitMQHost = "rabbitmq";
         private string id;
-        private static int workNum;
         public CPU(string id)
         {
             this.id = id;
-            workNum = 1;
         }
         static void Main(string[] args)
         {
@@ -51,53 +49,10 @@ namespace CPU_Microservice
             
 
             CPU cpu1 = new CPU("1");
-          //  CPU cpu2 = new CPU("2");
-          //  CPU cpu3 = new CPU("3");
-            Thread t1 = new Thread(cpu1.CpuProcessing);
-           // Thread t2 = new Thread(cpu2.CpuProcessing);
-           // Thread t3 = new Thread(cpu3.CpuProcessing);
+            Thread t1 = new Thread(cpu1.CpuProcessing); //listen message
             t1.Start();
-           // t2.Start();
-           // t3.Start();
-        }
-        public class Worker
-        {
-            private int time;
-            private string id;
-            private IModel channel;
-            private BasicDeliverEventArgs ea;
-            public Worker(string id, int time, IModel channel, BasicDeliverEventArgs ea)
-            {
-                this.time = time;
-                this.channel = channel;
-                this.ea = ea;
-                this.id = id;
-            }
-            public void Fun(object state)
-            {
-                DateTime currentTime = new DateTime();
-                currentTime = System.DateTime.Now;
-                DateTime finishTime = currentTime.AddSeconds(time);
-                Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
-                int i = 0;
-                while (System.DateTime.Now.CompareTo(finishTime) < 0)
-                {
-                    string comparestring1 = StringDistance.GenerateRandomString(1000);
-                    i++;
-                    if (i == 50)
-                    {
-                        Thread.Sleep(20); // Change the wait time here.
-                        i = 0;
-                    }
-                  //  string comparestring2 = StringDistance.GenerateRandomString(1000);
-                   // StringDistance.LevenshteinDistance(comparestring1, comparestring2);
-                }
-                Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
-                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
-            }
         }
-
         public void CpuProcessing()
         {
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
@@ -118,30 +73,61 @@ namespace CPU_Microservice
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
-                  //  if (order[1].Equals("1"))
-                  //  {
-                        int time = Convert.ToInt16(order[3]);
-                        //Worker worker = new Worker(time);
-                        //Thread t = new Thread(worker.Fun);
-                        //t.Start();
-                        //t.Join(); 
-                        Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
-                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
-                   // }
+
+                    int time = Convert.ToInt16(order[3]);
+                    Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
 
                 };
                 channel.BasicConsume(queue: queueName,
-                                     noAck:false,
+                                     noAck: false,
                                      consumer: consumer);
 
 
                 Console.WriteLine(" Looping ...");
                 //Console.ReadLine();
-                while(true){ Thread.Sleep(5000);};
+                while (true) { Thread.Sleep(5000); };
             }
         }
+        public class Worker
+        {
+            private int time;
+            private string id;
+            private IModel channel;
+            private BasicDeliverEventArgs ea;
+            public Worker(string id, int time, IModel channel, BasicDeliverEventArgs ea)
+            {
+                this.time = time;
+                this.channel = channel;
+                this.ea = ea;
+                this.id = id;
+            }
+            public void Fun(object state)
+            {
+                // simulate cpu bound operation
+                DateTime currentTime = new DateTime();
+                currentTime = System.DateTime.Now;
+                DateTime finishTime = currentTime.AddSeconds(time);
+                Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+                int i = 0;
+                while (System.DateTime.Now.CompareTo(finishTime) < 0)
+                {
+                    string comparestring1 = StringDistance.GenerateRandomString(1000);
+                    i++;
+                    if (i == 50)
+                    {
+                        Thread.Sleep(30); // Change the wait time here to adjust cpu usage.
+                        i = 0;
+                    }
+                }
+                Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+
+            }
+        }
+
+
 
 
 

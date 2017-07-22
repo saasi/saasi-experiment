@@ -27,7 +27,7 @@ namespace Monitor
             Type = type;
             _dockerClient = dockerClient;
             Containers = new ConcurrentDictionary<string, ServiceContainer>();
-            this.updateTimer = new Timer(async (object o)=> { await UpdateContainerList(); }, null, 0, 5000);
+            this.updateTimer = new Timer(async (object o)=> { await UpdateContainerList(); }, null, 0, 3000);
 
             this.monitorTimer = new Timer((object o) => { CheckResourceUtilisation(); }, null, 1000, 3000);
 
@@ -69,7 +69,7 @@ namespace Monitor
             // remove stopped containers
             foreach (var pair in this.Containers)
             {
-                if (newContainers.ContainsKey(pair.Key))
+                if (!newContainers.ContainsKey(pair.Key))
                 {
                     ServiceContainer value;
                     this.Containers.TryRemove(pair.Key, out value);
@@ -86,10 +86,12 @@ namespace Monitor
                 } else
                 {
                     this.Containers.TryAdd(pair.Key, new ServiceContainer(pair.Key, this.Type, this._dockerClient));
+
                 }
             }
 
             Console.WriteLine($"[{this.Type.ToString()}] Updated container list. => {this.ActualScale} containers.");
+            //GC.Collect();
             //this.Containers.Clear();
             //this.Containers = newContainers;
         }

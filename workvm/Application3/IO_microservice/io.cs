@@ -46,30 +46,11 @@ namespace IO_Microservice
             }
 
             io io1 = new io(1);
-            Thread t1 = new Thread(io1.IoProcessing);
-            //  io io2 = new io(2);
-            //  Thread t2 = new Thread(io2.IoProcessing);
-            //  new Thread(io2.IoProcessing);
-               t1.Start();
-            //   t2.Start();
-            //io1.Fun(30);
+            Thread t1 = new Thread(io1.IoProcessing); //listen message
+            t1.Start();
 
-            // new Thread(io.IoProcessing).Start();
-            //Console.ReadLine();
         }
 
-
-        private static string GenerateRandomString(int length)
-        {
-            var r = new Random((int)DateTime.Now.Ticks);
-            var sb = new StringBuilder(length);
-            for (int i = 0; i < length; i++)
-            {
-                int c = r.Next(97, 123);
-                sb.Append(Char.ConvertFromUtf32(c));
-            }
-            return sb.ToString();
-        }
         public  void IoProcessing()
         {
             var factory = new ConnectionFactory() { HostName = _rabbitMQHost };
@@ -91,14 +72,12 @@ namespace IO_Microservice
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
-                 //   if (order[0].Equals("1"))
-                 //   {
-                        int time = Convert.ToInt16(order[3]);
-                        Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
-                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
-                 //   }
+
+                    int time = Convert.ToInt16(order[3]);
+                    Worker w = new Worker(Guid.NewGuid().ToString(), time, channel, ea);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
+
                 };
                 channel.BasicConsume(queue: queueName,
                                      noAck: false,
@@ -141,7 +120,7 @@ namespace IO_Microservice
                     String s = io.GenerateRandomString(1000);
                     sw.Write(s);
                     fs.Flush(true);
-                    Thread.Sleep(5); 
+                    //Thread.Sleep(3); 
                 }
                 sw.Dispose();
 
@@ -151,6 +130,17 @@ namespace IO_Microservice
                 Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
             }
+        }
+        private static string GenerateRandomString(int length)
+        {
+            var r = new Random((int)DateTime.Now.Ticks);
+            var sb = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
+            {
+                int c = r.Next(97, 123);
+                sb.Append(Char.ConvertFromUtf32(c));
+            }
+            return sb.ToString();
         }
     }
 }

@@ -47,10 +47,8 @@ namespace MEMORY_Microservice
             memory mem1 = new memory("1");
             memory mem2 = new memory("2");
 
-            Thread t1 = new Thread(mem1.MemoryProcessing);
-          //  Thread t2 = new Thread(mem2.MemoryProcessing);
+            Thread t1 = new Thread(mem1.MemoryProcessing); //listen message
             t1.Start();
-         //   t2.Start();
 
         }
 
@@ -75,16 +73,10 @@ namespace MEMORY_Microservice
                 {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
-                    //Console.WriteLine("get message:" + message);
                     var order = message.Split(' ');
-                   // if (order[2].Equals("1"))
-                   // {
-                        int time = Convert.ToInt16(order[3]);
-                        //this.Fun(time);
-                        worker w = new worker(Guid.NewGuid().ToString(), time, channel, ea);
-                        //new Thread(w.Fun).Start();
-                        ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
-                   // }
+                    int time = Convert.ToInt16(order[3]);
+                    worker w = new worker(Guid.NewGuid().ToString(), time, channel, ea);
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(w.Fun));
 
                 };
                 channel.BasicConsume(queue: queueName,
@@ -114,6 +106,7 @@ namespace MEMORY_Microservice
 
             public void Fun(object state)
             {
+                //simulate memory use
                 DateTime currentTime = new DateTime();
                 currentTime = System.DateTime.Now;
                 DateTime finishTime = currentTime.AddSeconds(time);
@@ -121,43 +114,26 @@ namespace MEMORY_Microservice
                 //List<IntPtr> alist = new List<IntPtr>();
                 List<byte[]> alist = new List<byte[]>();
                 int i = 0;
-                IntPtr hglobal;
                 while (System.DateTime.Now.CompareTo(finishTime) < 0)
                 {
                     byte[] b = new byte[30];
                     alist.Add(b); // Change the size here.
-                    //Thread.Sleep(5); // Change the wait time here.
-                    //double[,] a = new double[10000, 10000];
-                    //hglobal = Marshal.AllocHGlobal(1);
-                   // alist.Add(hglobal);
-                    //Thread.Sleep(1); // Change the wait time here.
 
                     i++;
                     if (i == 2000)
                     {
-                        Thread.Sleep(50); // Change the wait time here.
+                        Thread.Sleep(200); // Change the wait time here.
                         i = 0;
 
                     }
                         
 
                 }
-                /*   foreach (var item in alist)
-                   {
-                       //Marshal.FreeHGlobal(item);
-
-                   }*/
                 alist.Clear();
                 alist = null;
-                GC.Collect();
-                //Console.WriteLine("free memory");
+                GC.Collect(); // release memory
+
                 channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-
-
-                alist = null;
-                //Console.WriteLine(i.ToString());
-                //alist.Clear();
-                //alist = null;
                 Console.WriteLine(this.id + ":Done." + Convert.ToString(System.DateTime.Now));
 
 

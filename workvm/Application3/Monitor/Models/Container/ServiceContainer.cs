@@ -41,9 +41,9 @@ namespace Monitor
                 if (this.Type == ContainerType.CPUMicroservice)
                     Console.WriteLine($"CPU {Id}:{CPUUsage}");
                 if (this.Type == ContainerType.IOMicroservice)
-                    Console.WriteLine($"IO {Id:{IOUsage}");
+                    Console.WriteLine($"IO {Id}:{IOUsage}");
                 if (this.Type == ContainerType.MemoryMicroservice)
-                    Console.WriteLine($"MEM {Id:{MemoryUsage}");
+                    Console.WriteLine($"MEM {Id} :{MemoryUsage}");
             }, null, 0, 3000);
         }
 

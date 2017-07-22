@@ -1,0 +1,16 @@
+{
+    "app_name": "hellospark",
+    "services": [
+        {
+            "service_name": "hellospark-service",
+            "components": [
+                {
+                    "component_name": "sparkexample",
+                    "image": "registry.giantswarm.io/giantswarm/sparkexample",
+                    "ports": [ "4567/tcp" ],
+                    "domains": { "hellospark.gigantic.io": "4567" }
+                }
+            ]
+        }
+    ]
+}

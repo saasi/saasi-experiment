@@ -1,2 +1,0 @@
-#!/bin/sh
-> stats.txt

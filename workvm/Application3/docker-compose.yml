@@ -52,7 +52,7 @@ services:
   businessfunction:
     image: businessfunction
     build:
-      context: ./BusinessFunction
+      context: ./BusinessService
       dockerfile: Dockerfile
     links:
       - messagequeue:rabbitmq

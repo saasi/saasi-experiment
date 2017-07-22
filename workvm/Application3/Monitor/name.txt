@@ -1,6 +1,0 @@
-3857ac61e638 io_microservice
-5e306ea2994e cpu_microservice
-23a009e7da6d memory_microservice
-278aceec5ea1 businessfunction
-fc137466a50a business_microservice
-700a527fb94b rabbitmq:3
