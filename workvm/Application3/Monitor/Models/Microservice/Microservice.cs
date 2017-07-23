@@ -63,12 +63,12 @@ namespace Monitor
                 if (container.Image.Equals(ContainerTypeToString(this.Type))) {
                     newContainers.TryAdd(container.ID, "placeholder");
                 }
-                if (container.Image.Equals(ContainerTypeToString(ContainerType.IOMicroservice)))
+            /*    if (container.Image.Equals(ContainerTypeToString(ContainerType.IOMicroservice)))
                 {
                     var containerStats = await _dockerClient.Containers.GetContainerStatsAsync(container.ID,new ContainerStatsParameters(),new CancellationToken());
                     StreamReader sr = new StreamReader(containerStats);
                     Console.WriteLine(sr.ReadLine());
-                }
+                }*/
 
             }
           
