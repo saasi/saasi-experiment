@@ -43,16 +43,16 @@ namespace Monitor
             new Thread(monitorBusinessTimeout).Start();
 
             ioMicroservice = new IOMicroservice(dockerClient); // monitor io_microservice
-           // cpuMicroservice = new CPUMicroservice(dockerClient);// monitor cpu_microservice
-          //  memoryMicroservice = new MemoryMicroservice(dockerClient);// monitor memory_microservice
+            cpuMicroservice = new CPUMicroservice(dockerClient);// monitor cpu_microservice
+            memoryMicroservice = new MemoryMicroservice(dockerClient);// monitor memory_microservice
 
             while (true)
             {
                 Thread.Sleep(5000);
                 Console.WriteLine($"##########{DateTime.Now}##########");
-              //  Console.WriteLine($"CPU {cpuMicroservice.ActualScale}->{cpuMicroservice.ScaleTarget}");
+                Console.WriteLine($"CPU {cpuMicroservice.ActualScale}->{cpuMicroservice.ScaleTarget}");
                 Console.WriteLine($"IO {ioMicroservice.ActualScale}->{ioMicroservice.ScaleTarget}");
-              //  Console.WriteLine($"Memory {memoryMicroservice.ActualScale}->{memoryMicroservice.ScaleTarget}");
+                Console.WriteLine($"Memory {memoryMicroservice.ActualScale}->{memoryMicroservice.ScaleTarget}");
                 Console.WriteLine("###########################################");
             }
 
