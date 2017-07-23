@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 using System.Text;
+using System.Diagnostics;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -29,8 +30,10 @@ namespace DM.Controllers
                                       basicProperties: properties,
                                       body: body);
                 Console.WriteLine("scaleout:" + bmsguid);
-                return View();
+
+               
             }
+            return View();
         }
     }
 }

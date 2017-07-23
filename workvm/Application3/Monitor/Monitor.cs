@@ -80,7 +80,7 @@ namespace Monitor
                                 exclusive: false,
                                 autoDelete: false,
                                 arguments: null);
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 0, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
                 channel.QueueBind(queue: queueName, exchange: "dm", routingKey: "scaleout");
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
@@ -120,6 +120,7 @@ namespace Monitor
 
                 Console.WriteLine(" Looping ...");
                 // while (true) { Thread.Sleep(5000); };
+                Console.ReadLine();
             }
             while (true) { Thread.Sleep(5000); };
         }
