@@ -121,8 +121,9 @@ namespace Monitor
                 Console.WriteLine(" Looping ...");
                 // while (true) { Thread.Sleep(5000); };
                 Console.ReadLine();
+                while (true) { Thread.Sleep(10); };
             }
-            while (true) { Thread.Sleep(5000); };
+            
         }
 
 

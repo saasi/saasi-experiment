@@ -79,7 +79,7 @@ namespace LoadGenerator.MockUsers {
                                     {"timestart", ((DateTimeOffset)timestart).ToUnixTimeSeconds().ToString()}
                                 };
                         //var url = new Uri(QueryHelpers.AddQueryString(baseURL+"/Business", parameters));
-                        var url = new Uri(QueryHelpers.AddQueryString("http://10.137.0.82:5001/saasi" + "/Business", parameters));
+                        var url = new Uri(QueryHelpers.AddQueryString("http://10.137.0.84:5001/saasi" + "/Business", parameters));
                         /*        channel.ExchangeDeclare(exchange: "url", type: "direct");
                                 var body = Encoding.UTF8.GetBytes(url.ToString().Split('/')[3]);
                         // var properties = channel.CreateBasicProperties();
