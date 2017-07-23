@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using Docker.DotNet;
 using System.Threading.Tasks;
+using Docker.DotNet.Models;
 
 namespace Monitor
 {
@@ -29,8 +30,8 @@ namespace Monitor
             {
                 dockerClient = new DockerClientConfiguration(new Uri("http://127.0.0.1:4243"))
                                 .CreateClient();
-                               // dockerClient = new DockerClientConfiguration(new Uri("http://192.168.0.1:4243"))
-                              //  .CreateClient();
+                // dockerClient = new DockerClientConfiguration(new Uri("http://192.168.0.1:4243"))
+                //  .CreateClient();
             }
             catch
             {
@@ -42,16 +43,16 @@ namespace Monitor
             new Thread(monitorBusinessTimeout).Start();
 
             ioMicroservice = new IOMicroservice(dockerClient); // monitor io_microservice
-            cpuMicroservice = new CPUMicroservice(dockerClient);// monitor cpu_microservice
-            memoryMicroservice = new MemoryMicroservice(dockerClient);// monitor memory_microservice
+           // cpuMicroservice = new CPUMicroservice(dockerClient);// monitor cpu_microservice
+          //  memoryMicroservice = new MemoryMicroservice(dockerClient);// monitor memory_microservice
 
             while (true)
             {
                 Thread.Sleep(5000);
                 Console.WriteLine($"##########{DateTime.Now}##########");
-                Console.WriteLine($"CPU {cpuMicroservice.ActualScale}->{cpuMicroservice.ScaleTarget}");
+              //  Console.WriteLine($"CPU {cpuMicroservice.ActualScale}->{cpuMicroservice.ScaleTarget}");
                 Console.WriteLine($"IO {ioMicroservice.ActualScale}->{ioMicroservice.ScaleTarget}");
-                Console.WriteLine($"Memory {memoryMicroservice.ActualScale}->{memoryMicroservice.ScaleTarget}");
+              //  Console.WriteLine($"Memory {memoryMicroservice.ActualScale}->{memoryMicroservice.ScaleTarget}");
                 Console.WriteLine("###########################################");
             }
 

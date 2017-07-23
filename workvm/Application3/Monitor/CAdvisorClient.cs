@@ -22,7 +22,8 @@ namespace Monitor
         private readonly Timer _statsTimer;
 
         private readonly HttpClient _httpClient;
-
+        private int interval = 3;
+        private Int64 preIoUsage = 0;
         private bool _requestOnGoing = false;
         public CAdvisorClient(string id)
         {
@@ -133,19 +134,24 @@ namespace Monitor
                 throw new Exception("Not enough stats data");
             }
             dynamic cur = statsArray[statsArray.Count - 1];
-            dynamic prev = statsArray[statsArray.Count - 9];
+            //dynamic prev = statsArray[statsArray.Count - 9];
             string curIO = cur.diskio.io_service_bytes[0].stats.Total;
-            string prevIO = prev.diskio.io_service_bytes[0].stats.Total;;
+           // string prevIO = prev.diskio.io_service_bytes[0].stats.Total;;
             Int64 curIOUsage = 0; 
-            Int64 prevIOUsage = 0;
+           // Int64 prevIOUsage = 0;
             Int64.TryParse(curIO, out curIOUsage);
-            Int64.TryParse(prevIO, out prevIOUsage);
+           // Int64.TryParse(prevIO, out prevIOUsage);
             DateTime curTime = cur.timestamp;
-            DateTime prevTime = prev.timestamp;
-            TimeSpan interval = curTime - prevTime;
-            double intervalSeconds = interval.TotalSeconds; 
-            double IODeltaMB = ((double)curIOUsage - prevIOUsage)/1024.0/1024.0; //MB delta
-            double ioMBps =  IODeltaMB/ intervalSeconds;
+            // DateTime prevTime = prev.timestamp;
+            //TimeSpan interval = curTime - prevTime;
+            //double intervalSeconds = interval.TotalSeconds;
+            if (preIoUsage == 0)
+                preIoUsage = curIOUsage;
+            double IODeltaMB = ((double)curIOUsage - preIoUsage)/1024.0/1024.0; //MB delta
+            //double ioMBps =  IODeltaMB/ intervalSeconds;
+            double ioMBps = IODeltaMB / interval;
+            preIoUsage = curIOUsage;
+            Console.WriteLine(curIOUsage);
             // Console.WriteLine($"IOIOOIOIIOIOIO prev {prevIOUsage} cur {curIOUsage} totaltime {intervalSeconds} s, {ioMBps} MB/s");
             //Console.WriteLine($"IO {ioMBps} MB/s");
             return ioMBps;
