@@ -143,21 +143,21 @@ namespace Monitor
             if (this.Type == ContainerType.CPUMicroservice)
             {
                 StreamWriter sw = File.AppendText("data/cpuStats.txt");
-                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} CPU={CPUUsage}");
+                sw.WriteLine($"{Id} {DateTime.Now.ToString()} {CPUUsage}");
                 sw.Flush();
                 sw.Dispose();
             }
             if (this.Type == ContainerType.IOMicroservice)
             {
                 StreamWriter sw = File.AppendText("data/ioStats.txt");
-                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} IO={IOUsage}");
+                sw.WriteLine($"{Id} {DateTime.Now.ToString()}  {IOUsage}");
                 sw.Flush();
                 sw.Dispose();
             }
             if (this.Type == ContainerType.MemoryMicroservice)
             {
                 StreamWriter sw = File.AppendText("data/memStats.txt");
-                sw.WriteLine($"{Convert.ToString(System.DateTime.Now)} {Id} Memory={MemoryUsage}");
+                sw.WriteLine($"{Id} {DateTime.Now.ToString()}  {MemoryUsage}");
                 sw.Flush();
                 sw.Dispose();
             }

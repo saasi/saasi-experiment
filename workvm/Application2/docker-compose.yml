@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  businessfunction:
+    image: businessfunction
+    build:
+      context: ./BusinessFunction
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue  
+      
+  business_microservice:
+    image: business_microservice
+    build:
+      context: ./Application1
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+      
+  messagequeue:
+    image: rabbitmq:3

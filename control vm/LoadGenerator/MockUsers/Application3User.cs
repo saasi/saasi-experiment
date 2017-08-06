@@ -11,36 +11,35 @@ namespace LoadGenerator.MockUsers {
     {
         private string[] _config = new string[] {
             //io cpu memory timetorun timeout
-            "0 1 0 5 15",
-            "1 0 0 5 15",
-            "0 0 1 5 15",
-            "1 1 0 5 15",
-            "1 0 1 5 15",
-            "0 1 1 5 15",
+            "0 1 0 5 10",
+            "1 0 0 5 10",
+            "0 0 1 5 10",
+            "1 1 0 5 10",
+            "1 0 1 5 10",
+            "0 1 1 5 10",
             "0 1 0 10 30",
-            "1 0 0 10 30",
             "0 0 1 10 30",
             "1 1 0 10 30",
             "1 0 1 10 30",
             "0 1 1 10 30",
-            "0 1 0 15 45",
-            "1 0 0 15 45",
-            "0 0 1 15 45",
-            "1 1 0 15 45",
-            "1 0 1 15 45",
-            "0 1 1 15 45",
-            "0 1 0 20 60",
-            "1 0 0 20 60",
-            "0 0 1 20 60",
-            "1 1 0 20 60",
-            "1 0 1 20 60",
-            "0 1 1 20 60",
-            "0 1 0 30 90",
-            "1 0 0 30 90",
-            "0 0 1 30 90",
-            "1 1 0 30 90",
-            "1 0 1 30 90",
-            "0 1 1 30 90",
+            "0 1 0 15 60",
+            "1 0 0 15 60",
+            "0 0 1 15 60",
+            "1 1 0 15 60",
+            "1 0 1 15 60",
+            "0 1 1 15 60",
+            "0 1 0 20 80",
+            "1 0 0 20 80",
+            "0 0 1 20 80",
+            "1 1 0 20 80",
+            "1 0 1 20 80",
+            "0 1 1 20 80",
+            "0 1 0 30 120",
+            "1 0 0 30 120",
+            "0 0 1 30 120",
+            "1 1 0 30 120",
+            "1 0 1 30 120",
+            "0 1 1 30 120",
 
         };
         private IConnection connection;
@@ -61,9 +60,9 @@ namespace LoadGenerator.MockUsers {
             Console.WriteLine($"User {_guid} ");
             //while ( System.DateTime.Now.CompareTo(finishTime) < 0 ){
                 // keep looping
-            for (int j = 0; j < requestCount; j++)
-            { 
-                Console.WriteLine($"User {_guid} request #{j} of {requestCount}");
+         //   for (int j = 0; j < requestCount; j++)
+         //   { 
+         //       Console.WriteLine($"User {_guid} request #{j} of {requestCount}");
                 for (int i = 0; i< _config.Length; ++i) {
 
                         var order = _config[i].Split(' ');
@@ -79,7 +78,7 @@ namespace LoadGenerator.MockUsers {
                                     {"timestart", ((DateTimeOffset)timestart).ToUnixTimeSeconds().ToString()}
                                 };
                         //var url = new Uri(QueryHelpers.AddQueryString(baseURL+"/Business", parameters));
-                        var url = new Uri(QueryHelpers.AddQueryString("http://10.137.0.84:5001/saasi" + "/Business", parameters));
+                        var url = new Uri(QueryHelpers.AddQueryString("http://10.137.0.82:5001/saasi" + "/Business", parameters));
                         /*        channel.ExchangeDeclare(exchange: "url", type: "direct");
                                 var body = Encoding.UTF8.GetBytes(url.ToString().Split('/')[3]);
                         // var properties = channel.CreateBasicProperties();
@@ -100,10 +99,10 @@ namespace LoadGenerator.MockUsers {
                         {
                             Console.WriteLine($"User {_guid} Network Error");
                         }
-                    		System.Threading.Thread.Sleep(50);
+                    		//System.Threading.Thread.Sleep(50);
 		        }
-                System.Threading.Thread.Sleep(20000);
-            }
+                //System.Threading.Thread.Sleep(20000);
+         //   }
         }
 
         

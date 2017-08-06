@@ -134,24 +134,48 @@ namespace Monitor
                 throw new Exception("Not enough stats data");
             }
             dynamic cur = statsArray[statsArray.Count - 1];
-            //dynamic prev = statsArray[statsArray.Count - 9];
-            string curIO = cur.diskio.io_service_bytes[0].stats.Total;
-           // string prevIO = prev.diskio.io_service_bytes[0].stats.Total;;
-            Int64 curIOUsage = 0; 
-           // Int64 prevIOUsage = 0;
-            Int64.TryParse(curIO, out curIOUsage);
-           // Int64.TryParse(prevIO, out prevIOUsage);
+            dynamic prev = statsArray[statsArray.Count - 2];
+            string curIO1 = cur.diskio.io_service_bytes[0].stats.Write;
+            string curIO2 = cur.diskio.io_service_bytes[1].stats.Write;
+            string curIO3 = cur.diskio.io_service_bytes[2].stats.Write;
+            string prevIO1 = prev.diskio.io_service_bytes[0].stats.Write;
+            string prevIO2 = prev.diskio.io_service_bytes[1].stats.Write;
+            string prevIO3 = prev.diskio.io_service_bytes[2].stats.Write;
+            Int64 curIOUsage1 = 0;
+            Int64 curIOUsage2 = 0;
+            Int64 curIOUsage3 = 0;
+            Int64 curIOUsage = 0;
+            Int64 prevIOUsage1 = 0;
+            Int64 prevIOUsage2 = 0;
+            Int64 prevIOUsage3 = 0;
+            Int64 prevIOUsage = 0;
+            // Int64 prevIOUsage = 0;
+            Int64.TryParse(curIO1, out curIOUsage1);
+            Int64.TryParse(curIO2, out curIOUsage2);
+            Int64.TryParse(curIO3, out curIOUsage3);
+            curIOUsage = curIOUsage1 + curIOUsage2 + curIOUsage3;
+            Int64.TryParse(prevIO1, out prevIOUsage1);
+            Int64.TryParse(prevIO2, out prevIOUsage2);
+            Int64.TryParse(prevIO3, out prevIOUsage3);
+            prevIOUsage = prevIOUsage1 + prevIOUsage2 + prevIOUsage3;
+
+
+            // Int64.TryParse(prevIO, out prevIOUsage);
             DateTime curTime = cur.timestamp;
-            // DateTime prevTime = prev.timestamp;
-            //TimeSpan interval = curTime - prevTime;
-            //double intervalSeconds = interval.TotalSeconds;
-            if (preIoUsage == 0)
-                preIoUsage = curIOUsage;
-            double IODeltaMB = ((double)curIOUsage - preIoUsage)/1024.0/1024.0; //MB delta
-            //double ioMBps =  IODeltaMB/ intervalSeconds;
-            double ioMBps = IODeltaMB / interval;
-            preIoUsage = curIOUsage;
-            Console.WriteLine(curIOUsage);
+            DateTime prevTime = prev.timestamp;
+            TimeSpan intervalTime = curTime - prevTime;
+            double intervalSeconds = intervalTime.TotalSeconds;
+            Console.WriteLine(curTime.ToString() + " " + prevTime.ToString() + " " + intervalSeconds);
+            //Console.WriteLine(intervalSeconds);
+            // if (preIoUsage == 0)
+            //   preIoUsage = curIOUsage;
+            double IODeltaMB = ((double)curIOUsage - prevIOUsage)/1024.0/1024.0; //MB delta
+            double ioMBps =  IODeltaMB/ intervalSeconds;
+            //double ioMBps = curIOUsage / 0.1;
+            //Console.WriteLine(ioMBps);
+            Console.WriteLine($"curIO: {curIOUsage} prevIO: {prevIOUsage} ioMBps:{ioMBps}");
+            //preIoUsage = curIOUsage;
+            // Console.WriteLine(curIOUsage);
             // Console.WriteLine($"IOIOOIOIIOIOIO prev {prevIOUsage} cur {curIOUsage} totaltime {intervalSeconds} s, {ioMBps} MB/s");
             //Console.WriteLine($"IO {ioMBps} MB/s");
             return ioMBps;

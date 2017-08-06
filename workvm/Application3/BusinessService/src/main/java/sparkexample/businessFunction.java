@@ -137,7 +137,8 @@ public class businessFunction {
                 System.out.println(id);
                 try {
                     System.out.println(start /1000 +" " + recieve / 1000 +" " + finish / 1000 + " " + out / 1000);
-                    URL url = new URL("http://10.137.0.81:5001/BusinessTimeout?bmsguid=" + id);
+                    URL url = new URL("http://10.137.0.81:8080/globalMonitor/businessViolation?bms=" + id);
+                    System.out.println(url);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     InputStream is = conn.getInputStream();
 
