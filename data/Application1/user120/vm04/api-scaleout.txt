@@ -1,0 +1,9 @@
+Type=BusinessFunction ScaleTarget=2 27/07/17 11:10:17 am
+Type=BusinessFunction ScaleTarget=3 27/07/17 11:10:47 am
+Type=BusinessFunction ScaleTarget=4 27/07/17 11:11:17 am
+Type=BusinessFunction ScaleTarget=5 27/07/17 11:11:47 am
+Type=BusinessFunction ScaleTarget=6 27/07/17 11:12:17 am
+Type=BusinessFunction ScaleTarget=7 27/07/17 11:12:47 am
+Type=BusinessFunction ScaleTarget=8 27/07/17 11:13:17 am
+Type=BusinessFunction ScaleTarget=9 27/07/17 11:13:47 am
+Type=BusinessFunction ScaleTarget=10 27/07/17 11:14:59 am

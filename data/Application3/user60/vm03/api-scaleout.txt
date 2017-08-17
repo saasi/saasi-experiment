@@ -1,0 +1,4 @@
+Type=IOMicroservice ScaleTarget=2 6/08/17 8:14:09 pm
+Type=CPUMicroservice ScaleTarget=2 6/08/17 8:14:12 pm
+Type=MemoryMicroservice ScaleTarget=2 6/08/17 8:14:18 pm
+Type=MemoryMicroservice ScaleTarget=3 6/08/17 8:15:06 pm
