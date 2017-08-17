@@ -22,7 +22,9 @@ import java.util.concurrent.TimeoutException;
 public class businessFunction {
     private static String id = UUID.randomUUID().toString();
     private static final String _rabbitmqHost = "rabbitmq";
-
+    private ConnectionFactory factory = new ConnectionFactory();
+    private Connection connection;
+    private Channel channel;
     public static void main(String[] args) throws Exception {
         System.out.println("================== Waiting for RabbitMQ to start");
 
@@ -42,19 +44,18 @@ public class businessFunction {
 
         businessFunction bf1 = new businessFunction();
         bf1.run();
-        businessFunction bf2 = new businessFunction();
-        bf2.run();
-        businessFunction bf3 = new businessFunction();
-        bf3.run();
     }
 
-    public businessFunction(){
-        
+    public businessFunction() throws Exception{
+        factory.setHost(_rabbitmqHost);
+        connection = factory.newConnection();
+        channel = connection.createChannel();
+        channel.exchangeDeclare("call", "direct");
     }
 
     public  void run() throws IOException, TimeoutException {
         System.out.println("waiting call");
-        ExecutorService executor = Executors.newFixedThreadPool(20);
+        ExecutorService executor = Executors.newFixedThreadPool(60);
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(_rabbitmqHost);
         Connection connection = factory.newConnection();
@@ -62,7 +63,7 @@ public class businessFunction {
         channel.exchangeDeclare("mono", "direct");
         String queueName = "business_queue";
         channel.queueDeclare(queueName,true,false,false,null);
-        channel.basicQos(0, 20, false);
+        channel.basicQos(0, 60, false);
         channel.queueBind(queueName, "mono", "business");
         Consumer consumer = new DefaultConsumer(channel) {
             @Override
@@ -89,11 +90,11 @@ public class businessFunction {
     }
 
     public void callApi(String message) throws IOException, TimeoutException {
-        ConnectionFactory factory = new ConnectionFactory();
+/*        ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(_rabbitmqHost);
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
-        channel.exchangeDeclare("call", "direct");
+        channel.exchangeDeclare("call", "direct");*/
         String[] order = message.split(" ");
         if (order[0].equals("1")) {
             channel.basicPublish("call", "io", null, message.getBytes("UTF-8"));

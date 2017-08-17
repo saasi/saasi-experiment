@@ -5,6 +5,6 @@ using System.Threading.Tasks;
 namespace LoadGenerator.MockUsers {
     public interface IApplicationUser {
         
-        Task Run(string baseURL, int duration);
+        Task Run(string baseURL);
     }
 }

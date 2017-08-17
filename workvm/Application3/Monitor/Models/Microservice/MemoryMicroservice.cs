@@ -16,6 +16,9 @@ namespace Monitor
              
         }
 
+        /*
+         * scale container
+         */
         public override async Task DoScale()
         {
             await base.DoScale();
@@ -41,7 +44,7 @@ namespace Monitor
 
             if (MemoryViolationCounter >= 3 * ActualScale)
             {
-                if (LastScaleTime.AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in one minute.
+                if (LastScaleTime.AddSeconds(30).CompareTo(DateTime.Now) < 0) //A container can scale one time in 30 seconds.
                 {
                     LastScaleTime = DateTime.Now;
                     ScaleTarget++;

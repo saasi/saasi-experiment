@@ -16,7 +16,7 @@ namespace LoadGenerator.MockUsers {
             _httpClient.MaxResponseContentBufferSize = 256000;
             _guid = System.Guid.NewGuid().ToString();
         }
-        public virtual async Task Run(string baseURL, int duration)
+        public virtual async Task Run(string baseURL)
         {
             throw new NotImplementedException("");
         }

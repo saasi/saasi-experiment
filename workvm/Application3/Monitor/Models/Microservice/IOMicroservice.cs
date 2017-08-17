@@ -31,7 +31,7 @@ namespace Monitor
             foreach (var pair in Containers)
             {
                 var container = pair.Value;
-                if (container.IOUsage > IOViolationThresdhold)
+                if (container.IOUsage > IOViolationThresdhold && container.IOUsage < 50)
                 {
 
                     IOViolationCounter++;

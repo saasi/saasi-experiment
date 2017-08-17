@@ -53,6 +53,9 @@ namespace Monitor
 
         }
 
+        /*
+         *  update container list
+         */
         public async Task UpdateContainerList()
         {
             var containersList = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
@@ -63,16 +66,10 @@ namespace Monitor
                 if (container.Image.Equals(ContainerTypeToString(this.Type))) {
                     newContainers.TryAdd(container.ID, "placeholder");
                 }
-            /*    if (container.Image.Equals(ContainerTypeToString(ContainerType.IOMicroservice)))
-                {
-                    var containerStats = await _dockerClient.Containers.GetContainerStatsAsync(container.ID,new ContainerStatsParameters(),new CancellationToken());
-                    StreamReader sr = new StreamReader(containerStats);
-                    Console.WriteLine(sr.ReadLine());
-                }*/
+
 
             }
           
-            // diff
 
             // remove stopped containers
             foreach (var pair in this.Containers)
@@ -99,11 +96,11 @@ namespace Monitor
             }
 
             Console.WriteLine($"[{this.Type.ToString()}] Updated container list. => {this.ActualScale} containers.");
-            //GC.Collect();
-            //this.Containers.Clear();
-            //this.Containers = newContainers;
         }
 
+        /*
+         * return container type
+         */
         public ContainerType StringToContainerType(string str)
         {
             if (str.Equals("io_microservice"))
