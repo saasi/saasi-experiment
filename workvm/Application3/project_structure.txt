@@ -1,0 +1,5 @@
+saasi: web interface
+BusinessService: business microservice
+cpu,io,memory microservice: api microservice
+DM: distributed monitor interface
+monitor: monitoring and scaling program
