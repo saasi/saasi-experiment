@@ -98,7 +98,7 @@ namespace LoadGenerator
         static void RunUser3(int requestTime = 1){
             Console.WriteLine("RUN!");
             Application3User user = new Application3User();
-            var t = Task.Run(async ()=>await user.Run("http://10.137.0.81:5000/Business"));
+            var t = Task.Run(async ()=>await user.Run("http://10.137.0.81:5000/saasi/Business"));
             t.Wait(); // prevents the program from existing before this thread finishes
         }
 
