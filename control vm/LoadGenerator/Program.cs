@@ -65,7 +65,7 @@ namespace LoadGenerator
         static void RunUser1(int requestTime=1){
             Console.WriteLine("RUN!");
             IApplicationUser user = new Application1User();
-            var t =Task.Run(async()=> {await user.Run("http://10.137.0.81:5000");});
+            var t =Task.Run(async()=> {await user.Run("http://172.16.0.11:5000");});
             t.Wait();
         }
 
@@ -98,7 +98,7 @@ namespace LoadGenerator
         static void RunUser3(int requestTime = 1){
             Console.WriteLine("RUN!");
             Application3User user = new Application3User();
-            var t = Task.Run(async ()=>await user.Run("http://10.137.0.81:5000/Business"));
+            var t = Task.Run(async ()=>await user.Run("http://172.16.0.11:5000/Business"));
             t.Wait(); // prevents the program from existing before this thread finishes
         }
 
@@ -109,7 +109,7 @@ namespace LoadGenerator
         {
             HttpClient _httpClient = new HttpClient();
             _httpClient.MaxResponseContentBufferSize = 256000;
-            var url = new Uri("http://10.137.0.81:8080/globalMonitor/resetData");
+            var url = new Uri("http://172.16.0.11:8080/globalMonitor/resetData");
             try
             {
                 var response = await _httpClient.GetAsync(url);
