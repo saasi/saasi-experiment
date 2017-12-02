@@ -2,7 +2,7 @@ version: '2'
 
 services:
   business_microservice:
-    environment://设置镜像变量
+    environment: #设置镜像变量
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - "80"//绑定容器的80端口给主机任一端口,容器启动时随机分配绑定的主机端口
+      - "80" #绑定容器的80端口给主机任一端口,容器启动时随机分配绑定的主机端口
