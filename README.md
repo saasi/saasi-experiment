@@ -1,8 +1,14 @@
-## Application 1 - Monolithic
+## SmartVM experiments
 
-## Application 2 
-
-## [Application 3 - Microservices](Application3/)
+## Folder structure
+- `controlvm` Code to run on the **master** node
+  - `globalMonitor`
+  - `tools`
+- `workvm` Code to run on the **slave** nodes
+  - `Application1`
+  - `Application2`
+  - `Application3`
+- `data` Collected data
 
 ### Components
   - saasi (web interface)
