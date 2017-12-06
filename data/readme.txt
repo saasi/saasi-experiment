@@ -1,6 +1,6 @@
-ÊµÑéÊ¹ÓÃÁËËÄÌ¨workvm¡£
+å®éªŒä½¿ç”¨äº†å››å°workvmã€‚
 
-api-scaleout.txt¼ÇÂ¼ÈıÖÖapi microservice scaleµÄ´ÎÊıºÍÊ±¼ä
-business-scaleout.txt¼ÇÂ¼business scaleµÄ´ÎÊıºÍÊ±¼ä
-business-violation.txt¼ÇÂ¼business timeoutµÄ´ÎÊıºÍÊ±¼ä
-api-stats.txt¼ÇÂ¼¸÷¸ö¶ÔÓ¦µÄmicro service container×ÊÔ´Ê¹ÓÃÇé¿ö 
+api-scaleout.txtè®°å½•ä¸‰ç§api microservice scaleçš„æ¬¡æ•°å’Œæ—¶é—´
+business-scaleout.txtè®°å½•business scaleçš„æ¬¡æ•°å’Œæ—¶é—´
+business-violation.txtè®°å½•business timeoutçš„æ¬¡æ•°å’Œæ—¶é—´
+api-stats.txtè®°å½•å„ä¸ªå¯¹åº”çš„micro service containerèµ„æºä½¿ç”¨æƒ…å†µ 
