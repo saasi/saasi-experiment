@@ -84,7 +84,7 @@ namespace LoadGenerator
                     Thread.Sleep(200); // delay a little bit before creating the next thread                                       
                                        // avoid all threads generating requests at the same interval;
                 }
-                StreamWriter sw = System.IO.File.AppendText("request-time.txt");
+                StreamWriter sw = System.IO.File.AppendText("/data/request-time.txt");
                 sw.WriteLine( $"{j + 1}: {Convert.ToString(System.DateTime.Now)}");
                 sw.Flush();
                 sw.Dispose();
