@@ -9,6 +9,11 @@
   - `Application2`
   - `Application3`
 - `data` Collected data
+- `docs` Documentation
+
+## Documentation
+- [项目说明](docs/项目说明.docx)
+- [流程](docs/流程.docx)
 
 ### Components
   - saasi (web interface)
