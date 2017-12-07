@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  dm:
+    image: dm
+    build:
+      context: ./DM
+      dockerfile: Dockerfile
