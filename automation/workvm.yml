@@ -12,7 +12,7 @@
     file: path=/app state=directory
   - name: checkout code
     git:
-      repo: 'git@github.com:ztl8702/saasi-experiment.git'
+      repo: 'https://github.com/ztl8702/saasi-experiment.git'
       dest: /app
       version: master #deploy
       force: true
