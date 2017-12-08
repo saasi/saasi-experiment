@@ -11,14 +11,16 @@
 
 
 ## 部署：
- 
+
+![](app3.png)
+
 ### Control vm
-1. 将saasi-expriment.sql导入mysql数据库(数据库名：saasi 账号：root，密码 MyNewPass4!)
+1. 将saasi-expriment.sql导入mysql数据库
 
 2. 将 globalMonitor.war 部署到tomcat里（<font color=red>tomcat1 在/usr/local/下，启动和停止文件在tomcat/bin目录下，执行startup.sh的时候,用sudo startup.sh或者sudo sh startup.sh，globalMonitor.war 要放到webapps下</font>）
 
 3. 配置haproxy负载均衡，(<font color=red>要启动:/bin/systemctl start haproxy.service</font>)映射5000端口到其他vm的5001端口（saasi web interface使用）， 当前已部署在vm01上。(这一步，我已经把haproxy.cfg文件的映射ip给改了，放在github上，down下来目录要记得：/etc/haproxy/haproxy.cfg)（广州这台是和上海不同数据中心的，所以只能通过外网和上海的联通，所以haproxy和Program.cs里面都公网ip,这个时间延迟可能会有影响）
-    * http://controlvm:5000/haproxy这个网址能显示各个vm的状态,能打开说明haproxy服务已开启
+    * http://controlvm:5000/haproxy 这个网址能显示各个vm的状态,能打开说明haproxy服务已开启
 
 ### Work vm  
 
