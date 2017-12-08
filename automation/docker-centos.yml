@@ -7,20 +7,22 @@
     easy_install: name=pip
     tags: docker
 
--   name: Install docker-py
-    pip: name=docker-py state=latest
-    tags: docker
-
 -   name: Install Docker
     yum: name=docker state=latest
     tags: docker
 
--   name: Install Docker Compose
-    yum: name=docker-compose state=latest
-    tags: docker
-
 -   name: Uninstal docker pip
     pip: name=docker state=absent
+
+-   name: Install docker-py
+    pip: name=docker-py state=latest
+    extra_args: --ignore-installed
+    tags: docker
+
+
+-   name: Install Docker Compose
+    pip: name=docker-compose state=latest
+    tags: docker
 
 -   name: Make sure Docker is started
     service: name=docker state=started
