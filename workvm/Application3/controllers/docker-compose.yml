@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  dm_for_api:  # Monitor for API microservices
+    image: distributed_monitor_api
+    build:
+      context: ./Monitor
+      dockerfile: Dockerfile
+    depends_on:
+      - cadvisor
+    volumes:
+      - ./Monitor/data:/data
+    network_mode: host
+  dm_for_business:
+    image: distributed_monitor_business  # Monitor for business service
+    build:
+      context: ./DM/DM
+      dockerfile: Dockerfile
+  cadvisor:
+     image: google/cadvisor:latest
+     volumes:
+       - "/:/rootfs:ro"
+       - "/var/run:/var/run:rw"
+       - "/sys:/sys:ro"
+       - "/var/lib/docker:/var/lib/docker:ro"
+       - "/cgroup:/cgroup:ro"
+     ports:
+       - 127.0.0.1:8080:8080
+     privileged: true
