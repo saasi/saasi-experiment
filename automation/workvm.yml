@@ -7,58 +7,22 @@
   become: true
 
   tasks:
-  # - name: ensure rabbitmq started
-  #   service:
-  #     name: rabbitmq-server
-  #     state: restarted
   - name: ensure docker started
     service:
       name: docker
       state: started
   - name: create dir
     file: path=/app state=directory
-  - name: stop all dotnet processes
-    shell: killall -q dotnet || echo "ok"
   - name: checkout code
     git:
       repo: 'git@github.com:ztl8702/saasi-experiment.git'
       dest: /app
-      version: deploy
+      version: master #deploy
       force: true
       accept_hostkey: true
-  - name: add permissions
+  - name: add executable permissions
     shell: chmod +x /app/workvm/Application3/run.sh && chmod -R o+r /app && chmod -R o+x /app && chmod -R o+w /app
-  - name: restore cpu microservice
-    shell: dotnet restore
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/CPU_microservice
-  - name: publish cpu microservice
-    shell: dotnet publish -o obj/Docker/publish
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/CPU_microservice
-  - name: restore io microservice
-    shell: dotnet restore
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/IO_microservice
-  - name: publish io microservice
-    shell: dotnet publish -o obj/Docker/publish
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/IO_microservice
-  - name: restore memory microservice
-    shell: dotnet restore
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/Memory_microservice
-  - name: publish memory microservice
-    shell: dotnet publish -o obj/Docker/publish
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/Memory_microservice
-  - name: run microservices
+  - name: build and run everything
     shell: ./run.sh
     args:
       chdir: /app/workvm/Application3/
@@ -66,27 +30,3 @@
     shell: 'docker-compose up -d'
     args:
       chdir: /app/workvm/Application3/Monitor/
-  - name: run Monitor - restore
-    shell: dotnet restore
-    become: false 
-    args:
-      chdir: /app/workvm/Application3/Monitor/
-  - name: run Monitor 
-    shell: dotnet run > data/monitor.log 
-    async: 2592000
-    poll: 0
-    become: false
-    args:
-      chdir: /app/workvm/Application3/Monitor/
-  - name: run DM - restore
-    shell: dotnet restore
-    become: false
-    args:
-      chdir: /app/workvm/Application3/DM/DM/ 
-  - name: run DM
-    shell: dotnet run
-    async: 2592000
-    poll: 0
-    args:
-      chdir: /app/workvm/Application3/DM/DM/
-    become: false

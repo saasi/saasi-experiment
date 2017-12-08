@@ -1,5 +1,34 @@
 #!/bin/sh
-docker-compose -f docker-compose.yml -f docker-compose.override.yml down #有多个-f参数可做替换操作，down:停止
-docker-compose -f docker-compose.yml -f docker-compose.override.yml build #重建镜像
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d #后台运行
-#echo "**Run `docker-compose -f docker-compose.yml -f docker-compose.override.yml logs` to see output**"
+
+echo "=== run.sh ==="
+
+echo "Starting Script Agent"
+cd ./script_agent
+pkill script_agent
+./script_agent &
+cd ..
+
+echo "Building Controllers"
+
+cd ./controllers
+docker-compose build
+cd ..
+
+echo "Building Microservices"
+cd ./microservices
+docker-compose build
+cd ..
+
+echo "Starting Microservices"
+cd ./microservices
+docker-compose down
+docker-compose up -d
+cd ..
+
+echo "Starting Controllers"
+cd ./controllers
+docker-compose down
+docker-compose up -d
+cd ..
+
+echo "=== END OF run.sh ==="
