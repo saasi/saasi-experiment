@@ -1,22 +1,18 @@
 ---
-- name: Install dotnet and rabbitmq
-  hosts: all
-  remote_user: saasi
-  become_method: sudo
-  become_user: root
-  become: true
+- name: Install dependencies on workvms
+  hosts: workvm
+  remote_user: root
 
   tasks:
+  - name: install git
+    package:
+      name: git
+      state: latest
+  - include_tasks: docker-centos.yml
   - name: install erlang
     package:
       name: erlang
       state: latest
-  - name: check rabbitmq
-    stat: path=/sbin/rabbitmq-server
-    register: rmq_r
-  - name: install rabbitmq
-    shell: curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | bash
-    when: rmq_r.stat.exists == False
   - name: check if dotnet is installed
     stat: path=/opt/dotnet/dotnet
     register: dotnet_r
