@@ -9,13 +9,20 @@ services:
     depends_on:
       - cadvisor
     volumes:
-      - ./Monitor/data:/data
+      - ./data:/data
     network_mode: host
   dm_for_business:
     image: distributed_monitor_business  # Monitor for business service
     build:
       context: ./DM/DM
       dockerfile: Dockerfile
+    volumes:
+      - ./data:/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - 5002:5002
+    network_mode: host
   cadvisor:
      image: google/cadvisor:latest
      volumes:

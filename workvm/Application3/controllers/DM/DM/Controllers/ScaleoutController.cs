@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
@@ -14,42 +15,52 @@ namespace DM.Controllers
 {
     public class ScaleoutController : Controller
     {
+        protected static string ScriptAgentHost = "127.0.0.1:9090";
         // GET: /<controller>/
         public IActionResult Index(string bmsGuid, int bmsCount)
         {
             Console.WriteLine(bmsGuid);
-            scaleOut("bms", bmsCount);
-            writeRecord(bmsGuid);
+            ScaleOut("bms", bmsCount);
+            WriteRecord(bmsGuid);
 
             return View();
         }
-        public static void writeRecord(string bmsguid) //record bms scaleout
+
+        public static void WriteRecord(string bmsguid) //record bms scaleout
         {
-            StreamWriter sw = System.IO.File.AppendText("data/business-scaleout.txt");
-            sw.WriteLine(bmsguid.ToString() + " " + Convert.ToString(System.DateTime.Now));
+            StreamWriter sw = System.IO.File.AppendText("/data/business-scaleout.txt");
+            sw.WriteLine(bmsguid?.ToString() ?? "UNKNOWN_GUID"+ " " + Convert.ToString(System.DateTime.Now));
             sw.Flush();
             sw.Dispose();
         }
-        public static void scaleOut(string type, int bmsNum)
+
+        public static void ScaleOut(string type, int bmsNum)
         {
             //scalebms
             if (type.Equals("bms"))
             {
                 Console.WriteLine("scaleout bms");
-                ProcessStartInfo statInfo1 = new ProcessStartInfo()
-                { FileName = "/bin/bash", Arguments = "./scalebms1.sh " + bmsNum }; //scale bms
-                Process stat = new Process() { StartInfo = statInfo1, };
-                stat.Start();
+                RunScriptOnHost("scalebms1.sh", bmsNum);
             }
 
         }
 
+        protected static void RunScriptOnHost(string ScriptFileName, int ScaleTo) {
+            var _httpClient = new HttpClient();
+            _httpClient.MaxResponseContentBufferSize = 256000;
+            var url = $"http://{ScriptAgentHost}/run?script={ScriptFileName}&args[]={ScaleTo.ToString()}";
+            Console.WriteLine($"Calling {url}");
 
+            using (HttpResponseMessage response = _httpClient.GetAsync(url).Result)
+            {
+                using (HttpContent content = response.Content)
+                {
+                    string result = content.ReadAsStringAsync().Result;
 
-
-
-
-
+                    Console.WriteLine($"StatusCode={response.StatusCode} Output={result}");
+                }
+            }
+        }
     }
 
 }
