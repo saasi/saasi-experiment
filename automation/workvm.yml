@@ -7,10 +7,10 @@
   become: true
 
   tasks:
-  - name: ensure docker started
+  - name: restart docker
     service:
       name: docker
-      state: started
+      state: restarted
   - name: create dir
     file: path=/app state=directory
   - name: checkout code
@@ -26,7 +26,3 @@
     shell: ./run.sh
     args:
       chdir: /app/workvm/Application3/
-  - name: run cadvisor
-    shell: 'docker-compose up -d'
-    args:
-      chdir: /app/workvm/Application3/Monitor/
