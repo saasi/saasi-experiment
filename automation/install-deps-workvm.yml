@@ -9,16 +9,4 @@
       name: git
       state: latest
   - include_tasks: docker-centos.yml
-  - name: install erlang
-    package:
-      name: erlang
-      state: latest
-  - name: check if dotnet is installed
-    stat: path=/opt/dotnet/dotnet
-    register: dotnet_r
-  - name: install dotnet sdk
-    when: dotnet_r.stat.exists == False
-    shell: yum install -y libunwind libicu && curl -sSL -o dotnet.tar.gz https://go.microsoft.com/fwlink/?linkid=848821 mkdir -p /opt/dotnet && tar zxf dotnet.tar.gz -C /opt/dotnet 
-  - name: link dotnet
-    shell: ln -s /opt/dotnet/dotnet /usr/local/bin
      

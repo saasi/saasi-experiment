@@ -15,6 +15,6 @@
     yum: name=docker state=latest
     tags: docker
 
--   name: Make sure Docker is running
-    service: name=docker state=running
+-   name: Make sure Docker is started
+    service: name=docker state=started
     tags: docker
