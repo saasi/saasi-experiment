@@ -1,3 +1,16 @@
+// script_agent
+//
+// This is used to execute shell script on the host,
+// so that Monitor can run side a Docker container,
+// but call "docker-compose" outside of the container
+//
+// This script listens on localhost:9090
+// Monitor should use Docker network type "host" and
+// send http requests to 127.0.0.1:9090
+
+// For example
+// http://127.0.0.1:9090/run?script=scaleout.sh&args[]=10
+
 package main
 
 import (
@@ -66,7 +79,8 @@ func main() {
 	log.Print("Starting script agent...")
     http.HandleFunc("/", sayhelloName) // set router
     http.HandleFunc("/run", executeScript) // set router
-    err := http.ListenAndServe(":9090", nil) // set listen port
+	err := http.ListenAndServe("127.0.0.1:9090", nil) // set listen port; 
+													  // localhost only; no external access	
     if err != nil {
         log.Fatal("ListenAndServe: ", err)
     }
