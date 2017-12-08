@@ -1,0 +1,65 @@
+version: '2'
+
+services:
+  business_microservice: #一个服务(容器)
+    image: business_microservice
+    build:              #构建镜像
+      context: ./saasi  #上下文环境
+      dockerfile: Dockerfile #指定的构建文件
+    ports: #端口映射:服务的8080端口到本地的5001端口
+      - "5001:8080"
+    links: #容器协同工作，rabbitmq给messagequeue提供服务
+      - messagequeue:rabbitmq #rabbitmq用于在分布式系统中储存转发消息
+    depends_on: #解决容器依赖，启动顺序的问题
+      - messagequeue
+      - businessfunction
+
+
+  cpu_microservice:
+    image: cpu_microservice
+    build:
+      context: ./CPU_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+
+  memory_microservice:
+    image: memory_microservice
+    build:
+      context: ./Memory_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    mem_limit: 512m #内存使用限制
+    depends_on:
+      - messagequeue
+
+
+  io_microservice:
+    image: io_microservice
+    build:
+      context: ./IO_microservice
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+  businessfunction:
+    image: businessfunction
+    build:
+      context: ./BusinessService
+      dockerfile: Dockerfile
+    links:
+      - messagequeue:rabbitmq
+    depends_on:
+      - messagequeue
+
+  messagequeue:
+    image: rabbitmq:3
+
+
+
