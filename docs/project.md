@@ -15,61 +15,83 @@
 ![](app3.png)
 
 ### Control vm
-1. 将saasi-expriment.sql导入mysql数据库
+> Control vm 上的 haproxy 也已经放到 docker-compose.yml 里面了，请确保原本 VM 上的 haproxy 已经卸载。`yum remove haproxy`
 
-2. 将 globalMonitor.war 部署到tomcat里（<font color=red>tomcat1 在/usr/local/下，启动和停止文件在tomcat/bin目录下，执行startup.sh的时候,用sudo startup.sh或者sudo sh startup.sh，globalMonitor.war 要放到webapps下</font>）
+1. clone git repository
+```
+git clone https://github.com/ztl8702/saasi-experiment.git
+```
 
-3. 配置haproxy负载均衡，(<font color=red>要启动:/bin/systemctl start haproxy.service</font>)映射5000端口到其他vm的5001端口（saasi web interface使用）， 当前已部署在vm01上。(这一步，我已经把haproxy.cfg文件的映射ip给改了，放在github上，down下来目录要记得：/etc/haproxy/haproxy.cfg)（广州这台是和上海不同数据中心的，所以只能通过外网和上海的联通，所以haproxy和Program.cs里面都公网ip,这个时间延迟可能会有影响）
-    * http://controlvm:5000/haproxy 这个网址能显示各个vm的状态,能打开说明haproxy服务已开启
+2. Build
+> 腾讯云上要配置一下 Docker Hub 的镜像，不然非常慢。
+```
+cd saasi-experiment/controlvm
+docker-compose build
+```
+
+3. Run
+```
+docker-compose up -d
+```
+
+> haproxy 的配置文件在 `controlvm/haproxy/haproxy.cfg`, 映射到 haproxy 的 container 里面了。修改完记得重启 haproxy (`docker-compose restart haproxy`) 
+> 负载均衡，映射5000端口到其他vm的5001端口（saasi web interface使用）， 当前已部署在vm01上。（广州这台是和上海不同数据中心的，所以只能通过外网和上海的联通，所以haproxy和Program.cs里面都公网ip,这个时间延迟可能会有影响）
+
+> http://controlvm:5000/haproxy 这个网址能显示各个vm的状态,能打开说明haproxy服务已开启
 
 ### Work vm  
 
+### 环境
 1. 安装docker（centos7下命令 yum install docker,然后docker version检查版本号,然后启动service docker start即可）
+   版本号要 > 17
 
-2. 将Application3 文件夹上传到vm
-- 安装.Net Core1.0.4:
-https://github.com/dotnet/core/blob/master/release-notes/download-archives/1.0.4-sdk-download.md
-```
-sudo mkdir -p /opt/dotnet
-sudo tar zxf [tar.gz filename] -C /opt/dotnet
-sudo ln -s /opt/dotnet/dotnet /usr/local/bin
-```
-这样的话是全局都是net Core1.0.4
-
-3. (<font color=red>这个脚本单独开一个putty</font>)运行./run.sh 将saasi、business service、api microservice部署到docker container中,（这里特别注意，要先在IO，CPU，Mem下dotnet restore,dotnet build,dotnet publish再去run ）
-- 需要安装docker-compose,安装前需要安装python-pip
-
-```
-yum install python-pip
-pip install --upgrade pip
-```
-
-   若提示没有python-pip包:yum -y install epel-release,成功后再次执行 yum install python-pip
-    对安装好的pip进行升级 pip install --upgrade pip
-
-
-- 安装Docker-Compose:
+2. 安装Docker-Compose:
 ```
 pip install docker-compose
 pip install --upgrade backports.ssl_match_hostname
 docker-compose  --version 
 ```
+ 
+3. 安装 git
 
-4. (<font color=red>新开一个putty</font>)在vm上运行DM(<font color=red>进入到DM/DM文件夹下 再dotnet run，若是报错先运行dotnet restore,再dotnet run</font>)(DM在Application3下面)
-5. (<font color=red>开第三个putty</font>)进入Monitor文件夹，运行docker-compose up -d启动cadvisor； 
+### 部署 (Application3)
+> 以下是手动部署的步骤。实际上应该要用 Anisble `automation/workvm.yml` 这个脚本。
 
-6. 运行monitor(进入Monitor然后dotnet run) 
+1. clone git repository
+```
+git clone https://github.com/ztl8702/saasi-experiment.git
+```
 
-7. <font color=red>关闭所有程序时先关掉cadvisor(sudo docker-compose stop) 再关掉其他container(在run.sh脚本的运行框里ctrl c即可关掉其他容器)</font>（DM monitor运行在vm上，其他程序运行在docker container里）(<font color=red>LoadGenerator里面的网址应该 user.Run("http://localhost/saasi/Bussiness:5000")即刚开始发到本机的5000端口,第一次测试可以发到vm3的5001端口上，即绕过loadBalance</font>)
-8. <font color=red>在自己电脑或者control vm上，vm1上的代码不对 </font>运行load generator  
-           dotnet run <application type>, <user number>, <request time>
-例如 dotnet run 3 60 3: 一共60个用户，分成3个批次发送请求(meet error:dotnet restore)
- 
-Application1 和 2 只有business service，没有 api microservice。
+2. Run
+
+```
+cd saasi-experiment/workvm/Application3/
+chmod +x ./run.sh
+./run.sh
+```
+
+这样会运行 Monitor，DM和所有的microservices。
+
+3. 查看 Monitor 的命令行输出请用：
+```
+cd saasi-experiment/workvm/Application3/controllers
+docker-compose logs -f dm_for_api
+```
+
+4.<font color=red>关闭所有程序时先关掉cadvisor(sudo docker-compose stop) 再关掉其他container(在run.sh脚本的运行框里ctrl c即可关掉其他容器)</font>(<font color=red>LoadGenerator里面的网址应该 user.Run("http://localhost/saasi/Bussiness:5000")即刚开始发到本机的5000端口,第一次测试可以发到vm3的5001端口上，即绕过loadBalance</font>)
+
+5. <font color=red>在自己电脑或者control vm上，vm1上的代码不对 </font>运行load generator  
+
+> LoadGenerator 的使用方法见 [这里](../tools/LoadGenerator/README.md)。
+
+> TODO: LoadGenerator 要改成可以变化的 ip 地址，IP地址不要写死在代码里。
+
+
+> Application1 和 2 只有business service，没有 api microservice。
  
 ## 自动化部署
 
-> 使用ansible，收集数据的路径需要更改，目前存在的问题时从 github pull 项目后， linux 下 dotnet build 输出的目录和 dockfile 输出目录不一致，导致 docker container 无法正 常生成。这个问题解决后可以自动部署和测试整个实验。
+> 使用ansible，收集数据的路径需要更改，目前存在的问题时从 github pull 项目后， linux 下 dotnet build 输出的目录和 dockfile 输出目录不一致，导致 docker container 无法正常生成。这个问题解决后可以自动部署和测试整个实验。
 
 
 ## 实验过程
