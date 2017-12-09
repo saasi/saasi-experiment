@@ -53,6 +53,13 @@ docker-compose  --version 
 ```
  
 3. 安装 git
+```
+yum install git
+```
+
+4. Docker 要开启 4243 API 端口 (否则 Monitor 无法正常工作)
+方法是在dockerd的启动参数加入： `-H tcp://0.0.0.0:4243` 具体见： https://github.com/ztl8702/saasi-experiment/issues/17#issuecomment-350433217
+
 
 ### 部署 (Application3)
 > 以下是手动部署的步骤。实际上应该要用 Anisble `automation/workvm.yml` 这个脚本。
