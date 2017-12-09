@@ -3,7 +3,7 @@ services:
   globalMonitor:
     image: global_monitor
     build:
-      context: ./ 
+      context: ./globalMonitor/
       dockerfile: Dockerfile
     ports:
       - "5001:8080"
@@ -26,5 +26,10 @@ services:
       MYSQL_PASSWORD: NewPass4!
     volumes:
       - /var/lib/mysql
-      - ./sql:/docker-entrypoint-initdb.d # DB Seeding 初始化数据库
+      - ./globalMonitor/sql:/docker-entrypoint-initdb.d # DB Seeding 初始化数据库
   
+  haproxy:
+    image: haproxy
+    network_mode: host
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy:ro
