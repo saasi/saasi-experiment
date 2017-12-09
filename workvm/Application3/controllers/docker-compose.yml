@@ -11,6 +11,7 @@ services:
     volumes:
       - ./data:/data
     network_mode: host
+    restart: always
   dm_for_business:
     image: distributed_monitor_business  # Monitor for business service
     build:
@@ -23,14 +24,16 @@ services:
     ports:
       - 5002:5002
     network_mode: host
+    restart: always
   cadvisor:
-     image: google/cadvisor:latest
-     volumes:
-       - "/:/rootfs:ro"
-       - "/var/run:/var/run:rw"
-       - "/sys:/sys:ro"
-       - "/var/lib/docker:/var/lib/docker:ro"
-       - "/cgroup:/cgroup:ro"
-     ports:
-       - 127.0.0.1:8080:8080
-     privileged: true
+    image: google/cadvisor:latest
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker:/var/lib/docker:ro"
+      - "/cgroup:/cgroup:ro"
+    ports:
+      - 127.0.0.1:8080:8080
+    privileged: true
+    restart: always
