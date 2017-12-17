@@ -13,7 +13,7 @@ namespace DM
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-		.UseUrls("http://*:5002")
+		        .UseUrls("http://*:5002")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

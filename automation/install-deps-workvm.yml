@@ -1,0 +1,12 @@
+---
+- name: Install dependencies on workvms
+  hosts: workvm
+  remote_user: root
+
+  tasks:
+  - name: install git
+    package:
+      name: git
+      state: latest
+  - include_tasks: docker-centos.yml
+     
