@@ -1,3 +1,6 @@
+## IO_microservice:     ip:5003/api/io?time
+## CPU_microservice:    ip:5004/api/cpu?time
+## Memory_microservice  ip:5005/api/memory?time
 # Application 3
 
 
