@@ -8,11 +8,20 @@ using System.Text;
 
 namespace IO_microservice.Controllers
 {
+    [Route("api")]
     public class HomeController : Controller
     {
         private static readonly long _fileSize = 10L * 1024L * 1024L * 1024L; //10 G
 
-        public void ioProcess(int time)
+        // HTTP GET api/io?time=xxx
+        [HttpGet("io")]
+        public string Run(int time)
+        {
+            DiskIoProcess(time);
+            return $"OK. Disk I/O job done. File size = {_fileSize / 1024L / 1024L} MB.";
+        }
+
+        public void DiskIoProcess(int time)
         {
             // simulate block i/o use
             DateTime currentTime = new DateTime();
@@ -27,8 +36,6 @@ namespace IO_microservice.Controllers
             StreamWriter sw = new StreamWriter(fs);
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
-
-
                 String s = GenerateRandomString(1000);
                 sw.Write(s);
                 fs.Flush(true);
