@@ -17,8 +17,9 @@ public class BusinessWorker {
     private final boolean RunCpuMicroservice;
     private final boolean RunMemoryMicroservice;
 
-    private static String URL_REPORT_BUSINESS_VIOLATION = "http://10.137.0.81:8080/globalMonitor/businessViolation?bms=";
-
+    private static String URL_REPORT_BUSINESS_VIOLATION = 
+        "http://"+System.getenv("BV_REPORT_HOST")+"/globalMonitor/businessViolation?bms=";
+    
     public BusinessWorker(boolean runIo, boolean runCpu, boolean runMem, long startTimestamp, int secondsToRun, int timeoutSeconds) {
         this.StartTimestamp = startTimestamp;
         this.SecondsToRun = secondsToRun;
