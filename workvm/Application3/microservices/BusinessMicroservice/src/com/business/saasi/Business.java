@@ -2,6 +2,7 @@ package com.business.saasi;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,7 +18,7 @@ import com.rabbitmq.client.Channel;
 @WebServlet("/Business")
 public class Business extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+	public static String id = UUID.randomUUID().toString();
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -39,17 +40,19 @@ public class Business extends HttpServlet {
 		String timestart = request.getParameter("timestart");
 		String timetorun = request.getParameter("timetorun");
 		String timeout = request.getParameter("timeout");
-		String order = io + " " + cpu + " " + memory + " " + timetorun + " " + timeout + " " + timestart;
-		System.out.println("111");
-		try{			
-			doBusiness(order);
-			PrintWriter out = null;  
-			out.println("ok");
-		} catch(Exception e) {
-			System.out.println("send message error");
+
+		PrintWriter out = response.getWriter();
+		BusinessWorker bw = new BusinessWorker(io.equals("1"), cpu.equals("1"), memory.equals("1"),
+				Long.parseLong(timestart), Integer.parseInt(timetorun), Integer.parseInt(timeout));
+		try {
+			bw.CallMicroservices();
+		} catch (Exception ex) {
+			out.println("Exception:" +ex);
 		}
-		//response.sendRedirect("business.jsp");
 		
+		
+		out.println("OK.");
+		//response.sendRedirect("business.jsp")
 	}
 
 	/**
@@ -60,15 +63,4 @@ public class Business extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private void doBusiness(String order) throws Exception {
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("rabbitmq");
-		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
-		channel.exchangeDeclare("mono", "direct");
-		channel.basicPublish("mono", "business", null, order.getBytes("UTF-8"));
-		
-		channel.close();
-		connection.close();
-	}
 }
