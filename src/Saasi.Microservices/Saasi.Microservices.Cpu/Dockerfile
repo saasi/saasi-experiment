@@ -12,4 +12,4 @@ RUN dotnet publish -c Release -o out
 FROM microsoft/dotnet:1.1-runtime
 WORKDIR /app
 COPY --from=build-env /app/out ./
-ENTRYPOINT ["dotnet", "CPU_microservice.dll"]
+ENTRYPOINT ["dotnet", "Saasi.Microservices.Cpu.dll"]
