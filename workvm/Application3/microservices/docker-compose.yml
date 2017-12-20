@@ -1,13 +1,14 @@
-version: '2'
+# This file is intended for use with "docker stack"
+# Might not work with docker-compose
+
+version: '3'
 
 services:
   business_microservice: #一个服务(容器)
-    image: business_microservice
+    image: regserv:5000/business_microservice
     build:              #构建镜像
       context: ./BusinessMicroservice  #上下文环境
       dockerfile: Dockerfile #指定的构建文件
-    ports: #端口映射:服务的8080端口到本地的5001端口
-      - "5001:8080"
     depends_on:
       - io_microservice
       - cpu_microservice
@@ -18,28 +19,61 @@ services:
       - memory_microservice:memory
     environment:
       - BV_REPORT_HOST=10.137.0.81:8080
+    deploy:
+      replicas: 5
+      placement:
+        constraints: [node.role != controlvm]
+    networks:
+      - appnet
+    ports: 
+      - "8080:8080"
 
   io_microservice:
-    image: io_microservice
+    image: regserv:5000/io_microservice
     build:
       context: ./IoMicroservice
       dockerfile: Dockerfile
-    ports: 
-      - "5003:80"
+    deploy:
+      replicas: 5
+      placement:
+        constraints: [node.role != controlvm]
+    networks:
+      - appnet
+
+#    ports: 
+#      - "5003:80"
 
   cpu_microservice:
-    image: cpu_microservice
+    image: regserv:5000/cpu_microservice
     build:
       context: ./CpuMicroservice
       dockerfile: Dockerfile
-    ports: 
-      - "5004:80"
+    deploy:
+      replicas: 5
+      placement:
+        constraints: [node.role != controlvm]
+    networks:
+      - appnet
+
+#    ports: 
+#      - "5004:80"
 
   memory_microservice:
-    image: memory_microservice
+    image: regserv:5000/memory_microservice
     build:
       context: ./MemoryMicroservice
       dockerfile: Dockerfile
-    ports: 
-      - "5005:80"
-    mem_limit: 512m #内存使用限制
+    networks:
+      - appnet
+#    ports: 
+#      - "5005:80"
+    deploy:
+      replicas: 5
+      resources:
+        limits:
+          memory: 512M #内存使用限制
+      placement:
+        constraints: [node.role != controlvm]
+
+networks: # Overlay network 跨VM的网络
+  appnet: 
