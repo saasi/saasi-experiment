@@ -12,7 +12,7 @@
     - `controllers` The controlling/supporting services such as Monitor and DM
     - `script_agent` The agent for running bash script on the host (required by Monitor)
 - `tools` Command line tools such as LoadGenerator
-- `data` Collected data
+- `results` Collected data
 - `docs` Documentation
 
 ## Documentation
