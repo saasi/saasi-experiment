@@ -1,0 +1,3 @@
+[submodule "automation/regserv/roles/docker-registry"]
+	path = automation/regserv/roles/docker-registry
+	url = git://github.com/fupelaqu/ansible-docker-registry.git

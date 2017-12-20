@@ -1,0 +1,1 @@
+# Ansible files for setting up local Docker registry
