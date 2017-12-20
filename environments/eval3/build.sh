@@ -1,5 +1,6 @@
 #/bin/sh
+cd ../../src
 docker build -t regserv:5000/business_microservice ./BusinessMicroservice
-docker build -t regserv:5000/io_microservice ./IoMicroservice
-docker build -t regserv:5000/cpu_microservice ./CpuMicroservice
-docker build -t regserv:5000/memory_microservice ./MemoryMicroservice
+docker build -t regserv:5000/io_microservice ./Saasi.Microservices/Saasi.Microservices.Io
+docker build -t regserv:5000/cpu_microservice ./Saasi.Microservices/Saasi.Microservices.Cpu
+docker build -t regserv:5000/memory_microservice ./Saasi.Microservices/Saasi.Microservices.Memory

@@ -4,25 +4,18 @@
 version: '3'
 
 services:
-  business_microservice: #一个服务(容器)
+  business_microservice:
     image: regserv:5000/business_microservice
-    build:              #构建镜像
-      context: ./BusinessMicroservice  #上下文环境
-      dockerfile: Dockerfile #指定的构建文件
     depends_on:
       - io_microservice
       - cpu_microservice
       - memory_microservice
-    links:
-      - io_microservice:io
-      - cpu_microservice:cpu
-      - memory_microservice:memory
     environment:
       - BV_REPORT_HOST=10.137.0.81:8080
     deploy:
       replicas: 5
       placement:
-        constraints: [node.role != controlvm]
+        constraints: [node.role != manager]
       restart_policy:
         condition: any
     networks:
@@ -32,54 +25,63 @@ services:
 
   io_microservice:
     image: regserv:5000/io_microservice
-    build:
-      context: ./IoMicroservice
-      dockerfile: Dockerfile
     deploy:
       replicas: 5
       placement:
-        constraints: [node.role != controlvm]
+        constraints: [node.role != manager]
       restart_policy:
         condition: any
     networks:
-      - appnet
+      appnet:
+        aliases:
+          - io
     ports: 
       - "5003:80"
 
   cpu_microservice:
     image: regserv:5000/cpu_microservice
-    build:
-      context: ./CpuMicroservice
-      dockerfile: Dockerfile
     deploy:
       replicas: 5
       placement:
-        constraints: [node.role != controlvm]
+        constraints: [node.role != manager]
       restart_policy:
         condition: any
     networks:
-      - appnet
+      appnet:
+        aliases:
+          - cpu
     ports: 
       - "5004:80"
 
   memory_microservice:
     image: regserv:5000/memory_microservice
-    build:
-      context: ./MemoryMicroservice
-      dockerfile: Dockerfile
     networks:
-      - appnet
+      appnet:
+        aliases:
+          - memory
     ports: 
       - "5005:80"
     deploy:
       replicas: 5
       resources:
         limits:
-          memory: 512M #内存使用限制
+          memory: 512M
       placement:
-        constraints: [node.role != controlvm]
+        constraints: [node.role != manager]
       restart_policy:
         condition: any
 
-networks: # Overlay network 跨VM的网络
-  appnet: 
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports: 
+     - "80:8080"
+    volumes:
+     - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+     - appnet
+
+networks: # Overlay network 
+  appnet:
