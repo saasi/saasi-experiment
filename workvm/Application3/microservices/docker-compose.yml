@@ -23,6 +23,8 @@ services:
       replicas: 5
       placement:
         constraints: [node.role != controlvm]
+      restart_policy:
+        condition: any
     networks:
       - appnet
     ports: 
@@ -37,11 +39,12 @@ services:
       replicas: 5
       placement:
         constraints: [node.role != controlvm]
+      restart_policy:
+        condition: any
     networks:
       - appnet
-
-#    ports: 
-#      - "5003:80"
+    ports: 
+      - "5003:80"
 
   cpu_microservice:
     image: regserv:5000/cpu_microservice
@@ -52,11 +55,12 @@ services:
       replicas: 5
       placement:
         constraints: [node.role != controlvm]
+      restart_policy:
+        condition: any
     networks:
       - appnet
-
-#    ports: 
-#      - "5004:80"
+    ports: 
+      - "5004:80"
 
   memory_microservice:
     image: regserv:5000/memory_microservice
@@ -65,8 +69,8 @@ services:
       dockerfile: Dockerfile
     networks:
       - appnet
-#    ports: 
-#      - "5005:80"
+    ports: 
+      - "5005:80"
     deploy:
       replicas: 5
       resources:
@@ -74,6 +78,8 @@ services:
           memory: 512M #内存使用限制
       placement:
         constraints: [node.role != controlvm]
+      restart_policy:
+        condition: any
 
 networks: # Overlay network 跨VM的网络
   appnet: 
