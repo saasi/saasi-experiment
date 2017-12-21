@@ -11,8 +11,10 @@ services:
       - cpu_microservice
       - memory_microservice
     environment:
-      - BV_REPORT_HOST=10.137.0.81:8080
+      - BV_REPORT_HOST=10.137.0.81:8080 # This is broken at the moment
     deploy:
+      labels:
+        saasi.microservices.type: "business"
       replicas: 5
       placement:
         constraints: [node.role != manager]
@@ -26,6 +28,8 @@ services:
   io_microservice:
     image: regserv:5000/io_microservice
     deploy:
+      labels:
+        saasi.microservices.type: "api"
       replicas: 5
       placement:
         constraints: [node.role != manager]
@@ -41,6 +45,8 @@ services:
   cpu_microservice:
     image: regserv:5000/cpu_microservice
     deploy:
+      labels:
+        saasi.microservices.type: "api"
       replicas: 5
       placement:
         constraints: [node.role != manager]
@@ -62,6 +68,8 @@ services:
     ports: 
       - "5005:80"
     deploy:
+      labels:
+        saasi.microservices.type: "api"
       replicas: 5
       resources:
         limits:
@@ -83,5 +91,27 @@ services:
     networks:
      - appnet
 
+
+  cadvisor:
+    image: google/cadvisor:latest
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker:/var/lib/docker:ro"
+      - "/cgroup:/cgroup:ro"
+    ports:
+      - "8088:8080"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      mode: global
+      restart_policy:
+        condition: on-failure
+    privileged: true
+    networks:
+      - controlnet
+
 networks: # Overlay network 
-  appnet:
+  appnet: # Network for the microservices
+  controlnet: # Network for the controllers
