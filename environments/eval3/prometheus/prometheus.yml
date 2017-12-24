@@ -1,6 +1,6 @@
 # my global config
 global:
-  scrape_interval:     5s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  scrape_interval: 1s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
 
 # Alertmanager configuration
 alerting:
@@ -25,4 +25,4 @@ scrape_configs:
     - names:
       - 'tasks.cadvisor'
       type: 'A'
-      port: 8088
+      port: 8080
