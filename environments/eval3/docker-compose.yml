@@ -92,6 +92,8 @@ services:
      - appnet
 
 
+  # Monitoring Components
+
   cadvisor:
     image: google/cadvisor:latest
     volumes:
@@ -103,14 +105,28 @@ services:
     ports:
       - "8088:8080"
     deploy:
-      placement:
-        constraints: [node.role == manager]
+      #placement:
+      #  constraints: [node.role == manager]
       mode: global
       restart_policy:
         condition: on-failure
     privileged: true
     networks:
-      - controlnet
+      - appnet
+
+  prometheus:
+    image: regserv:5000/prometheus:latest
+    ports:
+      - "9090:9090"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - appnet
 
 networks: # Overlay network 
   appnet: # Network for the microservices

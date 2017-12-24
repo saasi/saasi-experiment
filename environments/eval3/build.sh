@@ -1,4 +1,5 @@
 #/bin/sh
+docker build -t regserv:5000/prometheus ./prometheus
 cd ../../src
 docker build -t regserv:5000/business_microservice ./BusinessMicroservice
 docker build -t regserv:5000/io_microservice ./Saasi.Microservices/Saasi.Microservices.Io
