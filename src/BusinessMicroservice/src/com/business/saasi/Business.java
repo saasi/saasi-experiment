@@ -31,17 +31,19 @@ public class Business extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		//response.getWriter().append("Served at: ").append(request.getContextPath());
 		request.setCharacterEncoding("utf-8");
+		// Get URL parameters
 		String io = request.getParameter("io");
 		String cpu = request.getParameter("cpu");
 		String memory = request.getParameter("memory");
 		String timestart = request.getParameter("timestart");
 		String timetorun = request.getParameter("timetorun");
-		String timeout = request.getParameter("timeout");
+		String timeout = request.getParameter("timeout");       // We will compare this with the actual processing time,
+		                                                        // to determine if there is a business violation
 
 		PrintWriter out = response.getWriter();
+
+		// Start a new BusinessWorker to process this request
 		BusinessWorker bw = new BusinessWorker(io.equals("1"), cpu.equals("1"), memory.equals("1"),
 				Long.parseLong(timestart), Integer.parseInt(timetorun), Integer.parseInt(timeout));
 		try {
@@ -52,7 +54,6 @@ public class Business extends HttpServlet {
 		
 		
 		out.println("OK.");
-		//response.sendRedirect("business.jsp")
 	}
 
 	/**
