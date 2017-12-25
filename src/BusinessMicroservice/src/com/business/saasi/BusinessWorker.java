@@ -37,7 +37,7 @@ public class BusinessWorker {
         Date StartTimeDateTime = new Date(StartTimestampMs);
         long ReceivedTimeMs = new Date().getTime();
 
-        // Call API Microservices and wait for them 
+        // Call API Microservices and wait for them to finish
         try {
             int count = 0;
             if (RunCpuMicroservice) ++count;
@@ -57,8 +57,11 @@ public class BusinessWorker {
 
         long FinishedTimeMs = new Date().getTime();
         if (FinishedTimeMs > ExpectedFinishTimeMs) {
+            // There is a business violation, so we need to report it
+            
             System.out.println(Business.id);
             try {
+                // Send an HTTP request to Monitor (deprecated)
                 System.out.println(StartTimestamp +" " + ReceivedTimeMs / 1000 +" " + FinishedTimeMs / 1000 + " " + ExpectedFinishTimeMs / 1000);
                 URL url = new URL(URL_REPORT_BUSINESS_VIOLATION + Business.id);
                 System.out.println(url);
