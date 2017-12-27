@@ -16,7 +16,7 @@ grafana_api() {
   local response
   local cmd
 
-  cmd="curl -L -s --fail -H \"Accept: application/json\" -H \"Content-Type: application/json\" -X ${verb} -k ${GRAFANA_URL}${url}"
+  cmd="curl -L -s -v --fail -H \"Accept: application/json\" -H \"Content-Type: application/json\" -X ${verb} -k ${GRAFANA_URL}${url}"
   [[ -n "${params}" ]] && cmd="${cmd} -d \"${params}\""
   [[ -n "${bodyfile}" ]] && cmd="${cmd} --data @${bodyfile}"
   echo "Running ${cmd}"
