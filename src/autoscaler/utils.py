@@ -93,6 +93,7 @@ class DockerClientHelper(object):
     def get_service_by_name(self, nameRegExp):
         serviceList = self._client.services.list()
         for s in serviceList:
+            print('matching', nameRegExp, 'with', s.name)
             if (re.match(nameRegExp, s.name) != None):
                 return s
         return None 

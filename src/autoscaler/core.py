@@ -44,10 +44,11 @@ class CpuMicroserviceMG(MicroserviceMonitoringGroup):
 
     def _do_scale(self, target):
         print('Scaling', self._microservice_name,'from',self._swarm.GetScaleTarget(), 'to', target)
-        service = self._dockerClient.get_service_by_name(self._microservice_name)
+        service = self._dockerClient.get_service_by_name("\\w+_"+self._microservice_name)
         if (service != None):
             newMode = docker.types.ServiceMode('replicated', target)
             service.update(mode = newMode)
+            print('updated')
 
 class DummyMG(MicroserviceMonitoringGroup):
     CPU_THRESHOLD = 80.0

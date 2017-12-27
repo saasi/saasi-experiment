@@ -33,14 +33,14 @@ def GetServicesStatus(services, nodes, tasks):
         if ('Replicated' in service.attrs['Spec']['Mode'] and 'Replicas' in service.attrs['Spec']['Mode']['Replicated']):
             info[service.id] = {
                 'Mode': 'replicated',
-                'Running': running[service.id],
+                'Running': running.get(service.id, 0),
                 'Target': service.attrs['Spec']['Mode']['Replicated']['Replicas']
             }
         elif ('Global' in service.attrs['Spec']['Mode']):
             info[service.id] = {
                 'Mode': 'global',
-                'Running': running[service.id],
-                'Target': tasksNoShutdown[service.id]
+                'Running': running.get(service.id, 0),
+                'Target': tasksNoShutdown.get(service.id, 0)
             }
     return info
     
