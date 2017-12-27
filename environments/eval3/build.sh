@@ -7,3 +7,4 @@ docker build -t regserv:5000/io_microservice ./Saasi.Microservices/Saasi.Microse
 docker build -t regserv:5000/cpu_microservice ./Saasi.Microservices/Saasi.Microservices.Cpu
 docker build -t regserv:5000/memory_microservice ./Saasi.Microservices/Saasi.Microservices.Memory
 docker build -t regserv:5000/docker-swarm-exporter ./docker-swarm-exporter
+docker build -t regserv:5000/autoscaler ./autoscaler

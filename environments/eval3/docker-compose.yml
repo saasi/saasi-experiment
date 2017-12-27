@@ -165,16 +165,20 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 
-  #autoscaler:
-  #  image: regserv:5000/autoscaler:latest
-  #  deploy:
-  #    mode: replicated
-  #    replicas: 1
-  #    placement:
-  #      contraints:
-  #        - node.role == manager
-  #  volumes:
-  #    - /var/run/docker.sock:/var/run/docker.sock:ro
+  autoscaler:
+    image: regserv:5000/autoscaler:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - AUTOSCALER_PROM_HOST=http://tasks.prometheus:9090
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - appnet
 
 networks: # Overlay network 
   appnet: # Network for the microservices

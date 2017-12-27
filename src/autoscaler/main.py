@@ -1,9 +1,11 @@
 import docker
+import requests
+import utils
+import core
 
-client = docker.from_env()
 
-imgList = client.images.list()
-print(imgList)
+core.register(core.CpuMicroserviceMG())
+core.register(core.DummyMG())
+core.start_event_loop()
 
-srvList = client.services.list()
-print(srvList)
+    
