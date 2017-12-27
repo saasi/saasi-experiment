@@ -149,6 +149,31 @@ services:
         reservations:
           memory: 64M
 
+  swarm-exporter:
+    image: regserv:5000/docker-swarm-exporter:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        contraints:
+          - node.role == manager
+    ports:
+      - "5051:5051"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+  #autoscaler:
+  #  image: regserv:5000/autoscaler:latest
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 1
+  #    placement:
+  #      contraints:
+  #        - node.role == manager
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock:ro
+
 networks: # Overlay network 
   appnet: # Network for the microservices
   controlnet: # Network for the controllers

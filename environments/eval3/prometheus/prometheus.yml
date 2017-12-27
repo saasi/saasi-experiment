@@ -26,3 +26,10 @@ scrape_configs:
       - 'tasks.cadvisor'
       type: 'A'
       port: 8080
+  
+  - job_name: 'docker-swarm'
+    dns_sd_configs:
+    - names:
+      - 'tasks.swarm-exporter'
+      type: 'A'
+      port: 5051
