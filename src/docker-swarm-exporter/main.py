@@ -1,4 +1,5 @@
-from prometheus_client import start_http_server, GaugeMetricFamily, REGISTRY
+from prometheus_client import start_http_server
+from prometheus_client.core import GaugeMetricFamily, REGISTRY
 import docker
 import requests
 import sys
@@ -6,7 +7,7 @@ import time
 
 
 client = docker.from_env()
-
+api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
 
 def GetServicesStatus(services, nodes, tasks):
     running = {}
@@ -51,31 +52,33 @@ class SwarmServiceCollector(object):
     # Number of Docker Swarm services
     metric = GaugeMetricFamily('docker_swarm_services_total',
         'Number of Docker Swarm services')
-    metric.add_metric(labels={}, value=len(serviceList))
+    metric.add_metric(labels=[], value=len(serviceList))
     yield metric
 
 
-    serviceStatus = GetServicesStatus(serviceList, client.nodes.list(), client.tasks())
+    serviceStatus = GetServicesStatus(serviceList, client.nodes.list(), api_client.tasks())
     # 
     metric = GaugeMetricFamily('docker_swarm_service_target_replicas',
-        'Target Replicas')
+        'Target Replicas',
+        labels = ['service_name', 'service_id'])
     for serv in serviceList:
         try: 
             target = serviceStatus[serv.id]['Target']
         except KeyError:
             target = 0
-        metric.add_metric(labels={'service_name' : serv.attrs['Spec']['Name'], 'service_id': serv.id}, value=target)
+        metric.add_metric(labels = [serv.attrs['Spec']['Name'], serv.id], value = target)
     yield metric
 
     # 
     metric = GaugeMetricFamily('docker_swarm_service_running_replicas',
-        'Running Replicas')
+        'Running Replicas',
+        labels = ['service_name', 'service_id'])
     for serv in serviceList:
         try: 
             rr = serviceStatus[serv.id]['Running']
         except KeyError:
             rr = 0
-        metric.add_metric(labels={'service_name' : serv.attrs['Spec']['Name'], 'service_id': serv.id}, value=target)
+        metric.add_metric(labels = [serv.attrs['Spec']['Name'], serv.id], value = rr)
     yield metric
 
 if __name__ == '__main__':
