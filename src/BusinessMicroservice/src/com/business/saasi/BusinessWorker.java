@@ -58,7 +58,7 @@ public class BusinessWorker {
         long FinishedTimeMs = new Date().getTime();
         if (FinishedTimeMs > ExpectedFinishTimeMs) {
             // There is a business violation, so we need to report it
-            
+            Metrics.bms_business_violation_total.inc();
             System.out.println(Business.id);
             try {
                 // Send an HTTP request to Monitor (deprecated)
