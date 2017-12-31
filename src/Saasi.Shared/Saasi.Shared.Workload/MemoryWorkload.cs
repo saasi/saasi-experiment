@@ -2,25 +2,38 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Saasi.Shared.Workload
 {
-    public class GenerateMemoryWorkload
+    public class MemoryWorkload : IWorkload
     {
-        public string Run(int time)
+        public async Task<ExecutionResult> Run(int time)
         {
-            MemoryProcess(time);
-            return "OK";
+            var startTime = DateTime.Now;
+            var exceptions = false;
+
+            try {
+                await MemoryProcess(time);
+            } catch {
+                exceptions = true;
+            }
+
+            return new ExecutionResult {
+                HasExceptions = exceptions,
+                TaskFinishedAt = System.DateTime.Now,
+                TaskStartedAt = startTime,
+                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString()
+            };
         }
 
-        public void MemoryProcess(int time)
+        public async Task MemoryProcess(int time)
         {
             //simulate memory use
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;
             DateTime finishTime = currentTime.AddSeconds(time);
-            Guid id = Guid.NewGuid();
-            Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+
             //List<IntPtr> alist = new List<IntPtr>();
             List<byte[]> alist = new List<byte[]>();
             int i = 0;
@@ -32,12 +45,12 @@ namespace Saasi.Shared.Workload
                 i++;
                 if (i == 2000)
                 {
-                    Thread.Sleep(200); // Change the wait time here to control memory usage.
+                    await Task.Delay(200);
+                     // Change the wait time here to control memory usage.
                     i = 0;
-
+                    
                 }
             }
-            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
             alist.Clear();
             alist = null;
             GC.Collect(); // release memory

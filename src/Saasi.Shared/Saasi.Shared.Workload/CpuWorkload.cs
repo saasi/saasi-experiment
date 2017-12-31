@@ -2,25 +2,37 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Saasi.Shared.Workload
 {
-    public class GenerateCpuWorkload
+    public class CpuWorkload : IWorkload
     {
-        public string Run(int time)
+        public async Task<ExecutionResult> Run(int time)
         {
-            CpuProcess(time);
-            return $"OK. CPU task finished. Seconds run = {time}.";
+            var startTime = DateTime.Now;
+            var exceptions = false;
+
+            try {
+                await CpuProcess(time);
+            } catch {
+                exceptions = true;
+            }
+
+            return new ExecutionResult {
+                HasExceptions = exceptions,
+                TaskStartedAt = startTime,
+                TaskFinishedAt = DateTime.Now,
+                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString()
+            };
         }
 
-        private void CpuProcess(int time)
+        private async Task CpuProcess(int time)
         {
             // simulate cpu bound operation for `time` seconds
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;
             DateTime finishTime = currentTime.AddSeconds(time);
-            Guid id = Guid.NewGuid();
-            Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
             int i = 0;
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
@@ -28,11 +40,10 @@ namespace Saasi.Shared.Workload
                 i++;
                 if (i == 50)
                 {
-                    Thread.Sleep(30); // Change the wait time here to adjust cpu usage.
+                    await Task.Delay(30); // Change the wait time here to adjust cpu usage.
                     i = 0;
                 }
             }
-            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
         }
 
         class StringDistance
