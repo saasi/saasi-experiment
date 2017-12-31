@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace BusinessSimulation
+namespace Saasi.Monolithic.BusinessWeb
 {
     public class Startup
     {
@@ -24,6 +24,7 @@ namespace BusinessSimulation
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Saasi.Shared\Saasi.Shared.Workload\Saasi.Shared.Workload.csproj" />
+    <ProjectReference Include="..\Saasi.Shared\Saasi.Shared.Workload\Saasi.Shared.Workload.csproj" />
   </ItemGroup>
 
 </Project>
