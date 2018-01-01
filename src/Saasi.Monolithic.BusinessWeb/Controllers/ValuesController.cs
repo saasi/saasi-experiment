@@ -6,12 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using Saasi.Shared.Workload;
 using Newtonsoft.Json.Serialization;
+using Nexogen.Libraries.Metrics.Prometheus;
 
 namespace Saasi.Monolithic.BusinessWeb.Controllers
 {
     [Route("api")]
     public class ValuesController : Controller
     {
+
+        private readonly IMetricsContainer _metrics;
+        public ValuesController(IMetricsContainer metrics)
+        {
+            this._metrics = metrics;
+        }
+
         // GET api/Business
         [HttpGet("Business")]
         /*
@@ -30,12 +38,14 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                                                               int timeout)
         {
             Guid TranscationID = Guid.NewGuid();
-
+            _metrics.GetGauge("bms_active_transactions")
+                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Increment();
 
             long StartTimestampMs = timestart * 1000;
             long ExpectedFinishTimeMs = (timestart + timeout) * 1000;
             DateTime StartTimeDateTime = new DateTime(StartTimestampMs); //don't know if it's need to add the 1970
-            long ReceivedTimeMs = new DateTime().Ticks; //don't know if it's reasonable
+            long ReceivedTimeMs = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds; //don't know if it's reasonable
             Console.WriteLine($"Transcation {TranscationID}: Started at {DateTime.Now.ToString()}");
 
             var tasks = new List<Task<ExecutionResult>>();
@@ -75,10 +85,25 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             }
 
             Console.WriteLine($"Transcation {TranscationID}: Finished at {DateTime.Now.ToString()}");
+            _metrics.GetGauge("bms_active_transactions")
+                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Decrement();
+
+            var finishedTime = DateTime.Now;
+            var violated = false;
+            if (finishedTime - StartTimeDateTime > new TimeSpan(0,0,timeout)) {
+                Console.WriteLine($"Transcation {TranscationID}: Business violation");            
+                _metrics.GetCounter("bms_business_violation_total")
+                    .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                    .Increment();
+                violated = true;
+            } 
             return new JsonResult(new {
-                Tasks = resultList.ToArray(),
-                Started = StartTimeDateTime.ToString(),
-                Finished = DateTime.Now.ToString()
+                Tasks = resultList,
+                StartedAt = StartTimeDateTime.ToString(),
+                FinishedAt = finishedTime,
+                ExpectedToFinishAt = new DateTime(ExpectedFinishTimeMs).ToString(),
+                BusinessViolation = violated
             });
         }
 

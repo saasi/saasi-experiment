@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Nexogen.Libraries.Metrics;
+using Nexogen.Libraries.Metrics.Prometheus;
+using Nexogen.Libraries.Metrics.Prometheus.AspCore;
 
 namespace Saasi.Monolithic.BusinessWeb
 {
@@ -24,7 +27,11 @@ namespace Saasi.Monolithic.BusinessWeb
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            
+            services.AddPrometheus();
+            services.AddSingleton<IMetricsContainer, MetricsContainer>();
+           
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,6 +42,8 @@ namespace Saasi.Monolithic.BusinessWeb
                 app.UseDeveloperExceptionPage();
             }
 
+
+            app.UsePrometheus();
             app.UseMvc();
         }
     }
