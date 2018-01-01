@@ -1,27 +1,42 @@
 ﻿using System;
-
-using System.IO;
-
+using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace BusinessFunction
+
+namespace Saasi.Shared.Workload
 {
-    public class io
+    public class IoWorkload : IWorkload
     {
-        private  int timetorun;
         private static readonly long _fileSize = 10L * 1024L * 1024L * 1024L; //10 G
-        public io(String timetorun)
+
+        public async Task<ExecutionResult> Run(int time)
         {
-            this.timetorun = Convert.ToInt16(timetorun);
+            var startTime = System.DateTime.Now;
+            var exceptions = false;
+
+            try {
+                await DiskIoProcess(time);
+            } catch {
+                exceptions = true;
+            }
+            
+            return new ExecutionResult {
+                TaskStartedAt = startTime,
+                TaskFinishedAt = System.DateTime.Now,
+                HasExceptions = exceptions,
+                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString()
+            };
         }
 
-        public  void Fun(object state)
+        public async Task DiskIoProcess(int time)
         {
+            // simulate block i/o use
             DateTime currentTime = new DateTime();
             currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(timetorun);
-            Console.WriteLine("IO Start." + Convert.ToString(currentTime));
+            DateTime finishTime = currentTime.AddSeconds(time);
             String st = Guid.NewGuid().ToString();
             String fileName = "write" + st + ".tmp";
             FileStream fs = new FileStream(fileName, FileMode.Create);
@@ -29,20 +44,19 @@ namespace BusinessFunction
             StreamWriter sw = new StreamWriter(fs);
             while (System.DateTime.Now.CompareTo(finishTime) < 0)
             {
-
-
-                String s = io.GenerateRandomString(1000);
-                sw.Write(s);
+                String s = GenerateRandomString(1000);
+                await sw.WriteAsync(s);
                 fs.Flush(true);
-                //Thread.Sleep(1);
+                // change sleep time to control block write speed
+                //Thread.Sleep(3); 
             }
             sw.Dispose();
 
             fs.Dispose();
             var fi = new System.IO.FileInfo(fileName);
             fi.Delete();
-            Console.WriteLine( "IO Done." + Convert.ToString(System.DateTime.Now));
         }
+
         private static string GenerateRandomString(int length)
         {
             var r = new Random((int)DateTime.Now.Ticks);

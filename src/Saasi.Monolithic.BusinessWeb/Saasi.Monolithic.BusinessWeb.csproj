@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Nexogen.Libraries.Metrics.Extensions" Version="2.6.0" />
+    <PackageReference Include="Nexogen.Libraries.Metrics.Prometheus" Version="2.6.0" />
+    <PackageReference Include="Nexogen.Libraries.Metrics.Prometheus.AspCore" Version="2.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Saasi.Shared\Saasi.Shared.Workload\Saasi.Shared.Workload.csproj" />
+  </ItemGroup>
+
+</Project>
