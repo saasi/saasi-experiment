@@ -10,8 +10,6 @@ services:
       - io_microservice
       - cpu_microservice
       - memory_microservice
-    environment:
-      - BV_REPORT_HOST=10.137.0.81:8080 # This is broken at the moment
     deploy:
       labels:
         saasi.microservices.type: "business"
@@ -73,7 +71,7 @@ services:
       replicas: 5
       resources:
         limits:
-          memory: 512M
+          memory: 128M
       placement:
         constraints: [node.role != manager]
       restart_policy:

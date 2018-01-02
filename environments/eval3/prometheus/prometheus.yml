@@ -33,3 +33,9 @@ scrape_configs:
       - 'tasks.swarm-exporter'
       type: 'A'
       port: 5051
+  - job_name: 'business_microservices'
+    dns_sd_configs:
+    - names:
+      - 'business_microservice'
+      type: 'A'
+      port: 8080
