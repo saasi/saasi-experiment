@@ -17,7 +17,7 @@ namespace Saasi.Microservices.Cpu
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://*:8081")
+                .UseUrls("http://*:80")
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
                 .Build();
