@@ -17,9 +17,6 @@ public class BusinessWorker {
     private final boolean RunCpuMicroservice;
     private final boolean RunMemoryMicroservice;
 
-    private static String URL_REPORT_BUSINESS_VIOLATION = 
-        "http://"+System.getenv("BV_REPORT_HOST")+"/globalMonitor/businessViolation?bms=";
-    
     public BusinessWorker(boolean runIo, boolean runCpu, boolean runMem, long startTimestamp, int secondsToRun, int timeoutSeconds) {
         this.StartTimestamp = startTimestamp;
         this.SecondsToRun = secondsToRun;
@@ -29,7 +26,7 @@ public class BusinessWorker {
         this.RunMemoryMicroservice = runMem;
     }
 
-    public void CallMicroservices() {
+    public BusinessWorkerResult CallMicroservices() {
 
         long StartTimestampMs =  StartTimestamp * 1000;
         long ExpectedFinishTimeMs = (StartTimestamp + TimeoutSeconds) * 1000;
@@ -55,23 +52,13 @@ public class BusinessWorker {
             e.printStackTrace();
         }
 
+        BusinessWorkerResult result = new BusinessWorkerResult();
+
         long FinishedTimeMs = new Date().getTime();
         if (FinishedTimeMs > ExpectedFinishTimeMs) {
             // There is a business violation, so we need to report it
-            
-            System.out.println(Business.id);
-            try {
-                // Send an HTTP request to Monitor (deprecated)
-                System.out.println(StartTimestamp +" " + ReceivedTimeMs / 1000 +" " + FinishedTimeMs / 1000 + " " + ExpectedFinishTimeMs / 1000);
-                URL url = new URL(URL_REPORT_BUSINESS_VIOLATION + Business.id);
-                System.out.println(url);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                InputStream is = conn.getInputStream();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            result.violated = true;
         }
+        return result;
     }
 }
