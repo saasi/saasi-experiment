@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Threading;
+using Saasi.Shared.Workload;
 
 namespace Saasi.Microservices.Cpu.Controllers
 {
@@ -13,47 +14,16 @@ namespace Saasi.Microservices.Cpu.Controllers
     {
         // GET api/cpu
         [HttpGet("cpu")]
-        public string Run(int time)
+        public async Task<string> Run(int time)
         {
-            CpuProcess(time);
+            DateTime currentTime = System.DateTime.Now;
+            Guid id = Guid.NewGuid();
+            Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
+            var task = new CpuWorkload();
+            await task.Run(time);
+            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
             return $"OK. CPU task finished. Seconds run = {time}.";
         }
 
-        private void CpuProcess(int time)
-        {
-            // simulate cpu bound operation for `time` seconds
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            Guid id = Guid.NewGuid();
-            Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
-            int i = 0;
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-                string comparestring1 = StringDistance.GenerateRandomString(1000);
-                i++;
-                if (i == 50)
-                {
-                    Thread.Sleep(30); // Change the wait time here to adjust cpu usage.
-                    i = 0;
-                }
-            }
-            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
-        }
-
-        class StringDistance
-        {
-            public static string GenerateRandomString(int length)
-            {
-                var r = new Random((int)DateTime.Now.Ticks);
-                var sb = new StringBuilder(length);
-                for (int i = 0; i < length; i++)
-                {
-                    int c = r.Next(97, 123);
-                    sb.Append(Char.ConvertFromUtf32(c));
-                }
-                return sb.ToString();
-            }
-        }
     }
 }
