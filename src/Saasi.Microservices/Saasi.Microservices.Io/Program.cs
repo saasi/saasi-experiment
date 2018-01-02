@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Saasi.Microservices.Io
@@ -11,6 +12,8 @@ namespace Saasi.Microservices.Io
     {
         public static void Main(string[] args)
         {
+            BuildWebHost(args).Run();
+
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseUrls("http://*:80")
@@ -21,5 +24,11 @@ namespace Saasi.Microservices.Io
 
             host.Run();
         }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+          WebHost.CreateDefaultBuilder(args)
+            .UseUrls("http://*:80")
+            .UseStartup<Startup>()
+            .Build();
     }
 }
