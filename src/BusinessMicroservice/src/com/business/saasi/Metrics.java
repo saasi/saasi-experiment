@@ -11,9 +11,7 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.MetricsServlet;
 
-/**
- * Created by aaa on 2017/12/29.
- */
+
 @WebServlet("/metrics")
 public class Metrics extends MetricsServlet {
 
