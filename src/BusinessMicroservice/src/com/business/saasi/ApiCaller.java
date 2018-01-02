@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.io.BufferedReader;
+import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
 public class ApiCaller implements Runnable {
@@ -60,10 +61,8 @@ public class ApiCaller implements Runnable {
             } finally {
                 is.close();
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } 
+        }
     }
 }
