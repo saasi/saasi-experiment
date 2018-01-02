@@ -1,10 +1,19 @@
 from locust import HttpLocust, TaskSet, task
 import time
+import random
+from datetime import datetime
+random.seed(datetime.now())
 
 class BusinessUserBehaviour(TaskSet):
 
     config = [
         # io cpu memory timetorun timeout
+        [0, 1, 0, 1, 2],
+        [1, 0, 0, 1, 2],
+        [0, 0, 1, 1, 2],
+        [1, 1, 0, 1, 2],
+        [1, 0, 1, 1, 2],
+        [0, 1, 1, 5, 10],
         [0, 1, 0, 5, 10],
         [1, 0, 0, 5, 10],
         [0, 0, 1, 5, 10],
@@ -27,21 +36,17 @@ class BusinessUserBehaviour(TaskSet):
         [0, 0, 1, 20, 80],
         [1, 1, 0, 20, 80],
         [1, 0, 1, 20, 80],
-        [0, 1, 1, 20, 80],
-        [0, 1, 0, 30, 120],
-        [1, 0, 0, 30, 120],
-        [0, 0, 1, 30, 120],
-        [1, 1, 0, 30, 120],
-        [1, 0, 1, 30, 120],
-        [0, 1, 1, 30, 120]
+        [0, 1, 1, 20, 80]
     ]
             
     def on_start(self):
         self.current_config_no = 0 # We will iterate through all the configs 
-     
+        self._shuffled = BusinessUserBehaviour.config
+        random.shuffle(self._shuffled)
+
     @task
     def business_request(self):
-        current_config = BusinessUserBehaviour.config[self.current_config_no]
+        current_config = self._shuffled[self.current_config_no]
         run_io = current_config[0]
         run_cpu = current_config[1]
         run_memory = current_config[2]
