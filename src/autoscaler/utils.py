@@ -36,6 +36,15 @@ class ResourceUsageQuerier(PrometheusClient):
             )
         )    """
 
+    QUERY_MEMORY_SUM = """
+        scalar(
+            sum(
+                avg_over_time(
+                    container_memory_rss{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )    """
+
     QUERY_CPU = """
         scalar(avg(
         rate(
@@ -58,6 +67,11 @@ class ResourceUsageQuerier(PrometheusClient):
 
     def GetMemoryUsage(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_MEMORY).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        print(query)
+        return float(self.GetInstantValue(query)[1])
+
+    def GetMemoryUsageSum(self, timespan='1m'):
+        query = Template(ResourceUsageQuerier.QUERY_MEMORY_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
         print(query)
         return float(self.GetInstantValue(query)[1])
 

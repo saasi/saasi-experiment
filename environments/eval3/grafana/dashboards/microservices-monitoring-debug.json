@@ -14,7 +14,7 @@
     "rows": [
       {
         "collapse": false,
-        "height": 130,
+        "height": 175,
         "panels": [
           {
             "cacheTimeout": null,
@@ -389,7 +389,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -632,7 +632,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -1034,7 +1034,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -1277,7 +1277,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -1519,7 +1519,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -1762,7 +1762,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "Bps",
                 "label": null,
                 "logBase": 1,
                 "max": null,

@@ -36,9 +36,40 @@ class CpuMicroserviceMG(MicroserviceMonitoringGroup):
         super().__init__('cpu_microservice')        
         
     def _check(self):
-        cpuTotal = self._res.GetCPUUsageSum()
-        targetScale = math.ceil(cpuTotal / self.CPU_THRESHOLD)
+        cpuTotalFast = self._res.GetCPUUsageSum(timespan='20s')
+        cpuTotalSlow = self._res.GetCPUUsageSum(timespan='1m')
+        targetScaleFast = math.ceil(cpuTotalFast / self.CPU_THRESHOLD)
+        targetScaleSlow = math.ceil(cpuTotalSlow / self.CPU_THRESHOLD)
         currentScale = float(self._swarm.GetScaleTarget())
+        if targetScaleFast < 5:
+            targetScaleFast = 5 # Lower bound
+        if targetScaleSlow < 5:
+            targetScaleSlow = 5 # Lower bound
+        if ((targetScaleFast -currentScale) / currentScale > 0.05):
+            self._do_scale(targetScaleFast)
+        elif ((currentScale - targetScaleSlow) / currentScale > 0.05):
+            self._do_scale(targetScaleSlow)
+
+    def _do_scale(self, target):
+        print('Scaling', self._microservice_name,'from',self._swarm.GetScaleTarget(), 'to', target)
+        service = self._dockerClient.get_service_by_name("\\w+_"+self._microservice_name)
+        if (service != None):
+            newMode = docker.types.ServiceMode('replicated', target)
+            service.update(mode = newMode)
+            print('updated')
+
+class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
+    MEMORY_THRESHOLD = 100 * 1024.0 * 1024.0 # 100MB
+
+    def __init__(self):
+        super().__init__('memory_microservice')        
+        
+    def _check(self):
+        memTotal = self._res.GetMemoryUsageSum()
+        targetScale = math.ceil(memTotal / self.MEMORY_THRESHOLD)
+        currentScale = float(self._swarm.GetScaleTarget())
+        if targetScale < 5:
+            targetScale = 5 # Lower bound
         if (abs(targetScale-currentScale) / currentScale > 0.05):
             self._do_scale(targetScale)
 
@@ -49,6 +80,7 @@ class CpuMicroserviceMG(MicroserviceMonitoringGroup):
             newMode = docker.types.ServiceMode('replicated', target)
             service.update(mode = newMode)
             print('updated')
+
 
 class DummyMG(MicroserviceMonitoringGroup):
     CPU_THRESHOLD = 80.0

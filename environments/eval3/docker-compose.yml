@@ -71,7 +71,7 @@ services:
       replicas: 5
       resources:
         limits:
-          memory: 128M
+          memory: 512M
       placement:
         constraints: [node.role != manager]
       restart_policy:
