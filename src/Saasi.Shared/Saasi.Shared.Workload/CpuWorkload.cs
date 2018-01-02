@@ -38,7 +38,7 @@ namespace Saasi.Shared.Workload
             {
                 string comparestring1 = StringDistance.GenerateRandomString(1000);
                 i++;
-                if (i == 50)
+                if (i == 500)
                 {
                     await Task.Delay(30); // Change the wait time here to adjust cpu usage.
                     i = 0;
