@@ -90,6 +90,7 @@ class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
     def _check(self):
         currentRate = self._res.GetBusinessViolationRate()
         currentScale = self._swarm.GetScaleTarget()
+        targetScale = currentScale
         if (currentRate > 0.20):
             targetScale = currentScale + 1
         elif (currentRate < 0.05):
