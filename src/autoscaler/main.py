@@ -3,9 +3,22 @@ import utils
 import core
 
 
-core.register(core.CpuMicroserviceMG())
-core.register(core.MemoryMicroserviceMG())
-core.register(core.DummyMG())
+with open("config.txt", "r") as f:
+    for line in f:
+        l = line.strip()
+        print("Registering",l)
+        if l == "cpu_microservice":
+            core.register(core.CpuMicroserviceMG())
+        elif l == "memory_microservice":
+            core.register(core.MemoryMicroserviceMG())
+        elif l == "io_microservice":
+            pass
+        elif l == "business_microservice":
+            core.register(core.BusinessMicroserviceMG())
+        elif l == "business_microservice2":  # eval 2
+            core.register(core.CpuMicroserviceMG('business_microservice'))
+        elif l == "business_web":
+            core.register(core.CpuMicroserviceMG('business_web'))
+
 core.start_event_loop()
 
-    

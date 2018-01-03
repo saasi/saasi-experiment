@@ -1,6 +1,7 @@
 #/bin/sh
 docker build -t regserv:5000/prometheus ./prometheus
 docker build -t regserv:5000/grafana ./grafana
+cp -f ./autoscaler/config.txt ../../src/autoscaler/config.txt
 cd ../../src
 docker build -t regserv:5000/business_microservice ./BusinessMicroservice
 docker build -t regserv:5000/io_microservice -f ./Saasi.Microservices/Saasi.Microservices.Io/Dockerfile ./

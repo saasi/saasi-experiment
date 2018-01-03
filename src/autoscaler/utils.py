@@ -61,6 +61,10 @@ class ResourceUsageQuerier(PrometheusClient):
         ) * 100)
     """
 
+    QUERY_BUSINESS_VIOLATION_RATE = """
+        scalar(sum(increase(bms_business_violation_total[$timespan])) / sum(increase(bms_requests_served[$timespan])))
+    """
+
     def __init__(self, endpoint, microservice_name):
         super().__init__(endpoint)
         self._microservice_name = microservice_name
@@ -82,6 +86,11 @@ class ResourceUsageQuerier(PrometheusClient):
 
     def GetCPUUsageSum(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_CPU_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        print(query)
+        return float(self.GetInstantValue(query)[1])
+
+    def GetBusinessViolationRate(self, timespan='1m'):
+        query = Template(ResourceUsageQuerier.QUERY_BUSINESS_VIOLATION_RATE).substitute({'timespan': timespan})
         print(query)
         return float(self.GetInstantValue(query)[1])
 

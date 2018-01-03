@@ -32,8 +32,8 @@ class MicroserviceMonitoringGroup(object):
 class CpuMicroserviceMG(MicroserviceMonitoringGroup):
     CPU_THRESHOLD = 80.0
 
-    def __init__(self):
-        super().__init__('cpu_microservice')        
+    def __init__(self, microservice_name = 'cpu_microservice'):
+        super().__init__(microservice_name)        
         
     def _check(self):
         cpuTotalFast = self._res.GetCPUUsageSum(timespan='20s')
@@ -65,12 +65,38 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         super().__init__('memory_microservice')        
         
     def _check(self):
-        memTotal = self._res.GetMemoryUsageSum()
+        memTotal = self._res.GetMemoryUsageSum('2m')
         targetScale = math.ceil(memTotal / self.MEMORY_THRESHOLD)
         currentScale = float(self._swarm.GetScaleTarget())
         if targetScale < 5:
             targetScale = 5 # Lower bound
         if (abs(targetScale-currentScale) / currentScale > 0.05):
+            self._do_scale(targetScale)
+
+    def _do_scale(self, target):
+        print('Scaling', self._microservice_name,'from',self._swarm.GetScaleTarget(), 'to', target)
+        service = self._dockerClient.get_service_by_name("\\w+_"+self._microservice_name)
+        if (service != None):
+            newMode = docker.types.ServiceMode('replicated', target)
+            service.update(mode = newMode)
+            print('updated')
+
+class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
+    BUSINESS_VIOLATION_RATE_THRESHOLD = 0.20
+
+    def __init__(self):
+        super().__init__('business_microservice')        
+        
+    def _check(self):
+        currentRate = self._res.GetBusinessViolationRate()
+        currentScale = self._swarm.GetScaleTarget()
+        if (currentRate > 0.20):
+            targetScale = currentScale + 1
+        elif (currentRate < 0.05):
+            targetScale = currentScale - 1
+        if targetScale < 5:
+            targetScale = 5 # Lower bound
+        if (targetScale != currentScale):
             self._do_scale(targetScale)
 
     def _do_scale(self, target):
