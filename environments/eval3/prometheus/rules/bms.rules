@@ -1,0 +1,7 @@
+groups:
+  - name: bms 
+    rules:
+    - record: bms_business_violation_total_sum
+      expr: sum(bms_business_violation_total)
+    - record: bms_requests_served_sum
+      expr: sum(bms_requests_served)

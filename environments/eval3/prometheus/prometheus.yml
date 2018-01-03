@@ -2,6 +2,9 @@
 global:
   scrape_interval: 1s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
 
+rule_files:
+  - "/etc/prometheus/rules/bms.rules"
+
 # Alertmanager configuration
 alerting:
   alertmanagers:

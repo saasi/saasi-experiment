@@ -62,7 +62,7 @@ class ResourceUsageQuerier(PrometheusClient):
     """
 
     QUERY_BUSINESS_VIOLATION_RATE = """
-        scalar(sum(increase(bms_business_violation_total[$timespan])) / sum(increase(bms_requests_served[$timespan])))
+        scalar(sum(increase(bms_business_violation_total[$timespan])) / (sum(increase(bms_requests_served[$timespan]))+1) )
     """
 
     def __init__(self, endpoint, microservice_name):
