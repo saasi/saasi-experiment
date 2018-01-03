@@ -1,6 +1,7 @@
 # my global config
 global:
   scrape_interval: 1s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 1s 
 
 rule_files:
   - "/etc/prometheus/rules/bms.rules"
