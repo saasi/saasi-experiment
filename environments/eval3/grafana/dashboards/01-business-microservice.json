@@ -13,7 +13,7 @@
         "rows": [
             {
                 "collapse": false,
-                "height": 203,
+                "height": 211,
                 "panels": [
                     {
                         "aliasColors": {},
@@ -221,7 +221,7 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": " sum(bms_requests_served)",
+                                "expr": "increase(bms_requests_served_sum[2000d])",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -297,19 +297,12 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(bms_business_violation_total) ",
+                                "expr": "increase(bms_business_violation_total_sum[1000d])",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
                                 "legendFormat": "",
                                 "refId": "A"
-                            },
-                            {
-                                "expr": "",
-                                "format": "time_series",
-                                "instant": true,
-                                "intervalFactor": 2,
-                                "refId": "B"
                             }
                         ],
                         "thresholds": "",
@@ -678,7 +671,7 @@
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum(increase(bms_business_violation_total[30s])) / (sum(increase(bms_requests_served[30s]))+1)",
+                                "expr": "increase(bms_business_violation_total_sum[2m]) / (increase(bms_requests_served_sum[2m])+1)",
                                 "format": "time_series",
                                 "instant": false,
                                 "interval": "",
@@ -768,6 +761,6 @@
         },
         "timezone": "",
         "title": "Business Microservice",
-        "version": 3
+        "version": 4
     }
 }
