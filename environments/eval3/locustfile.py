@@ -42,10 +42,13 @@ class BusinessUserBehaviour(TaskSet):
     def on_start(self):
         self.current_config_no = 0 # We will iterate through all the configs 
         self._shuffled = BusinessUserBehaviour.config
+        self._round = 0
         random.shuffle(self._shuffled)
 
     @task
     def business_request(self):
+        if (self._round >= 5):
+            return
         current_config = self._shuffled[self.current_config_no]
         run_io = current_config[0]
         run_cpu = current_config[1]
@@ -57,7 +60,9 @@ class BusinessUserBehaviour(TaskSet):
         self.current_config_no = self.current_config_no + 1
         if (self.current_config_no >= len(BusinessUserBehaviour.config)): # Finished a cycle, restart from the first config
             self.current_config_no = 0
+            self._round = self._round + 1
         self.client.get("/Business?io="+str(run_io)+"&cpu="+str(run_cpu)+"&memory="+str(run_memory)+"&timestart="+ str(current_timestamp) +"&timetorun="+str(time_to_run)+"&timeout="+str(timeout))
+
 
 
 class BusinessUser(HttpLocust):
