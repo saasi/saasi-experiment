@@ -47,7 +47,7 @@ class BusinessUserBehaviour(TaskSet):
 
     @task
     def business_request(self):
-        if (self._round >= 5):
+        if (self._round >= 2):
             return
         current_config = self._shuffled[self.current_config_no]
         run_io = current_config[0]
