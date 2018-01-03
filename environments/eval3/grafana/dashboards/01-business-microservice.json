@@ -350,7 +350,7 @@
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_microservice\"}",
+                                "expr": "docker_swarm_service_target_replicas_sum{service_name=~\"\\\\w+_business_microservice\"}",
                                 "format": "time_series",
                                 "hide": false,
                                 "instant": false,
@@ -359,7 +359,7 @@
                                 "refId": "A"
                             },
                             {
-                                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_microservice\"}",
+                                "expr": "docker_swarm_service_running_replicas_sum{service_name=~\"\\\\w+_business_microservice\"}",
                                 "format": "time_series",
                                 "hide": false,
                                 "intervalFactor": 2,
@@ -731,7 +731,7 @@
             "list": []
         },
         "time": {
-            "from": "now-1h",
+            "from": "now-5m",
             "to": "now"
         },
         "timepicker": {
@@ -761,6 +761,6 @@
         },
         "timezone": "",
         "title": "Business Microservice",
-        "version": 4
+        "version": 5
     }
 }
