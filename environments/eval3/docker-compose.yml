@@ -22,6 +22,12 @@ services:
       - appnet
     ports: 
       - "8080:8080"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async-connect: true
+        tag: microservice.business.main
 
   io_microservice:
     image: regserv:5000/io_microservice
@@ -39,6 +45,12 @@ services:
           - io
     ports: 
       - "5003:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async-connect: true
+        tag: microservice.api.io
 
   cpu_microservice:
     image: regserv:5000/cpu_microservice
@@ -56,6 +68,12 @@ services:
           - cpu
     ports: 
       - "5004:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async-connect: true
+        tag: microservice.api.cpu
 
   memory_microservice:
     image: regserv:5000/memory_microservice
@@ -76,6 +94,15 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async-connect: true
+        tag: microservice.api.memory
+
+
+  # Monitoring Components
 
   visualizer:
     image: dockersamples/visualizer:stable
@@ -88,9 +115,6 @@ services:
         constraints: [node.role == manager]
     networks:
      - appnet
-
-
-  # Monitoring Components
 
   cadvisor:
     image: google/cadvisor:latest
@@ -177,6 +201,47 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - appnet
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async-connect: true
+        tag: controller.autoscaler
+
+  fluentd:
+    image: regserv:5000/fluentd:latest
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  elasticsearch:
+    image: elasticsearch
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: kibana
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "5601:5601"
+
 
 networks: # Overlay network 
   appnet: # Network for the microservices
