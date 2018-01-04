@@ -25,7 +25,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         fluentd-async-connect: 
         tag: microservice.business.main
 
@@ -48,7 +48,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         fluentd-async-connect: 
         tag: microservice.api.io
 
@@ -71,7 +71,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         fluentd-async-connect:
         tag: microservice.api.cpu
 
@@ -97,7 +97,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         fluentd-async-connect:
         tag: microservice.api.memory
 
@@ -204,7 +204,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluentd:24224
+        fluentd-address: localhost:24224
         fluentd-async-connect:
         tag: controller.autoscaler
 
