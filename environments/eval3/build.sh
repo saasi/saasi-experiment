@@ -1,6 +1,8 @@
 #/bin/sh
 docker build -t regserv:5000/prometheus ./prometheus
 docker build -t regserv:5000/grafana ./grafana
+docker build -t regserv:5000/fluentd ./fluentd
+
 cp -f ./autoscaler/config.txt ../../src/autoscaler/config.txt
 cd ../../src
 docker build -t regserv:5000/business_microservice ./BusinessMicroservice
