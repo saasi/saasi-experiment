@@ -14,18 +14,23 @@ namespace Saasi.Microservices.Memory.Controllers
 
         // HTTP GET api/memory
         [HttpGet("memory")]
-        public async Task<string> Run(int time)
+        public async Task<JsonResult> Run(int time)
         {
             DateTime currentTime = System.DateTime.Now;
             Guid id = Guid.NewGuid();
             Console.WriteLine(id.ToString() + ":Start." + Convert.ToString(currentTime));
   
             var task = new MemoryWorkload();
-            await task.Run(time);
+            var result = await task.Run(time);
 
             Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
 
-            return $"OK. Memory job done. ";
+            return new JsonResult(
+                new {
+                    Status = "OK",
+                    MemoryWorkload = result
+                }
+            );
         }
 
 

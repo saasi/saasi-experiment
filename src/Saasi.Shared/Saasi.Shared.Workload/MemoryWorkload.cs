@@ -12,9 +12,9 @@ namespace Saasi.Shared.Workload
         {
             var startTime = DateTime.Now;
             var exceptions = false;
-
+            long result = 0;
             try {
-                await MemoryProcess(time);
+                result = await MemoryProcess(time);
             } catch {
                 exceptions = true;
             }
@@ -23,37 +23,30 @@ namespace Saasi.Shared.Workload
                 HasExceptions = exceptions,
                 TaskFinishedAt = System.DateTime.Now,
                 TaskStartedAt = startTime,
-                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString()
+                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString(),
+                ExecutedLoops = result
             };
         }
 
-        public async Task MemoryProcess(int time)
+        public async Task<long> MemoryProcess(int time)
         {
-            //simulate memory use
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
+            // simulate memory use (1s = 2500 rounds)
 
-            //List<IntPtr> alist = new List<IntPtr>();
             List<byte[]> alist = new List<byte[]>();
             int i = 0;
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-                byte[] b = new byte[1024];
-                alist.Add(b); // Change the size here.
-
-                i++;
-                if (i == 500)
-                {
-                    await Task.Delay(200);
-                     // Change the wait time here to control memory usage.
-                    i = 0;
-                    
+            for (var j = 0; j < time; ++j){
+                for (i = 1; i <= 1000; ++i) {
+                    byte[] b = new byte[1024];
+                    alist.Add(b); 
                 }
+                await Task.Delay(500);
             }
+            await Task.Delay(500*time);
+
             alist.Clear();
             alist = null;
             GC.Collect(); // release memory
+            return time * 2500;
         }
     }
 }
