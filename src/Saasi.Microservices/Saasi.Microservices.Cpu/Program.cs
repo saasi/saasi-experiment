@@ -17,7 +17,7 @@ namespace Saasi.Microservices.Cpu
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://*:80")
+                .UseUrls("http://*:8088")
                 .UseStartup<Startup>()
                 .UseShutdownTimeout(new TimeSpan(0,5,0)) // 5 minutes shutdown time
                 .UseApplicationInsights()

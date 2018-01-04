@@ -14,15 +14,20 @@ namespace Saasi.Microservices.Cpu.Controllers
     {
         // GET api/cpu
         [HttpGet("cpu")]
-        public async Task<string> Run(int time)
+        public async Task<JsonResult> Run(int time)
         {
             DateTime currentTime = System.DateTime.Now;
             Guid id = Guid.NewGuid();
             Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
             var task = new CpuWorkload();
-            await task.Run(time);
-            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
-            return $"OK. CPU task finished. Seconds run = {time}.";
+            var result = await task.Run(time);
+            Console.WriteLine($"{id} :Done. {Convert.ToString(System.DateTime.Now)}");
+            return new JsonResult(
+                new {
+                    Status = "OK",
+                    CPULoad = result
+                }
+            );
         }
 
     }

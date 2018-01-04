@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Saasi.Shared.Workload
 {
@@ -12,38 +13,34 @@ namespace Saasi.Shared.Workload
         {
             var startTime = DateTime.Now;
             var exceptions = false;
-
+            long loops = 0;
             try {
-                await CpuProcess(time);
+                loops = await CpuProcess(time);
             } catch {
                 exceptions = true;
             }
+            
 
             return new ExecutionResult {
                 HasExceptions = exceptions,
                 TaskStartedAt = startTime,
                 TaskFinishedAt = DateTime.Now,
-                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString()
+                ThreadOfExecution = Thread.CurrentThread.GetHashCode().ToString(),
+                ExecutedLoops = loops,
+                ThreadsCount = Process.GetCurrentProcess().Threads.Count
             };
         }
 
-        private async Task CpuProcess(int time)
+        private async Task<long> CpuProcess(int time)
         {
             // simulate cpu bound operation for `time` seconds
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
-            int i = 0;
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-                string comparestring1 = StringDistance.GenerateRandomString(1000);
-                i++;
-                if (i == 500)
-                {
-                    await Task.Delay(30); // Change the wait time here to adjust cpu usage.
-                    i = 0;
+            for (var i = 1; i <= time; ++i) {
+                for (int k = 0; k < 10000; ++k) {
+                    string comparestring1 = StringDistance.GenerateRandomString(1000);
                 }
+                await Task.Delay(100);
             }
+            return time * 10000L;
         }
 
         class StringDistance
