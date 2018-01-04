@@ -20,6 +20,7 @@ namespace Saasi.Monolithic.BusinessWeb
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseShutdownTimeout(new TimeSpan(0,5,0)) // 5 minutes shutdown time
                 .Build();
     }
 }

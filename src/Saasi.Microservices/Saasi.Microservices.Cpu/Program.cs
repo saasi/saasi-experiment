@@ -19,6 +19,7 @@ namespace Saasi.Microservices.Cpu
             WebHost.CreateDefaultBuilder(args)
                 .UseUrls("http://*:80")
                 .UseStartup<Startup>()
+                .UseShutdownTimeout(new TimeSpan(0,5,0)) // 5 minutes shutdown time
                 .UseApplicationInsights()
                 .Build();
     }

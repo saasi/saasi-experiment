@@ -43,7 +43,7 @@ namespace Saasi.Shared.Workload
                 alist.Add(b); // Change the size here.
 
                 i++;
-                if (i == 2000)
+                if (i == 500)
                 {
                     await Task.Delay(200);
                      // Change the wait time here to control memory usage.
