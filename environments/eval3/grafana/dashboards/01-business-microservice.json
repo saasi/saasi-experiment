@@ -13,7 +13,7 @@
         "rows": [
             {
                 "collapse": false,
-                "height": 211,
+                "height": 210,
                 "panels": [
                     {
                         "aliasColors": {},
@@ -174,7 +174,7 @@
                             "rgba(237, 129, 40, 0.89)",
                             "#d44a3a"
                         ],
-                        "datasource": null,
+                        "datasource": "Elasticsearch",
                         "format": "none",
                         "gauge": {
                             "maxValue": 100,
@@ -221,14 +221,37 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "increase(bms_requests_served_sum[2000d])",
+                                "bucketAggs": [
+                                    {
+                                        "field": "@timestamp",
+                                        "id": "2",
+                                        "settings": {
+                                            "interval": "1000d",
+                                            "min_doc_count": 1,
+                                            "trimEdges": 0
+                                        },
+                                        "type": "date_histogram"
+                                    }
+                                ],
+                                "dsType": "elasticsearch",
+                                "expr": "container_name: *business** AND log: *started*",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
-                                "refId": "A"
+                                "metrics": [
+                                    {
+                                        "field": "select field",
+                                        "id": "1",
+                                        "type": "count"
+                                    }
+                                ],
+                                "query": "container_name: *business** AND log: *finished*",
+                                "refId": "A",
+                                "timeField": "@timestamp"
                             }
                         ],
                         "thresholds": "",
+                        "timeFrom": "100d",
                         "title": "Requests served",
                         "type": "singlestat",
                         "valueFontSize": "80%",
@@ -250,7 +273,7 @@
                             "rgba(237, 129, 40, 0.89)",
                             "#d44a3a"
                         ],
-                        "datasource": null,
+                        "datasource": "Elasticsearch",
                         "format": "none",
                         "gauge": {
                             "maxValue": 100,
@@ -259,7 +282,7 @@
                             "thresholdLabels": false,
                             "thresholdMarkers": true
                         },
-                        "id": 5,
+                        "id": 11,
                         "interval": null,
                         "links": [],
                         "mappingType": 1,
@@ -297,16 +320,37 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "increase(bms_business_violation_total_sum[1000d])",
+                                "bucketAggs": [
+                                    {
+                                        "field": "@timestamp",
+                                        "id": "2",
+                                        "settings": {
+                                            "interval": "100d",
+                                            "min_doc_count": 1,
+                                            "trimEdges": 0
+                                        },
+                                        "type": "date_histogram"
+                                    }
+                                ],
+                                "dsType": "elasticsearch",
+                                "expr": "container_name: *business** AND log: *violated*",
                                 "format": "time_series",
-                                "instant": true,
                                 "intervalFactor": 2,
-                                "legendFormat": "",
-                                "refId": "A"
+                                "metrics": [
+                                    {
+                                        "field": "select field",
+                                        "id": "1",
+                                        "type": "count"
+                                    }
+                                ],
+                                "query": "container_name: *business** AND log: *violated*",
+                                "refId": "A",
+                                "timeField": "@timestamp"
                             }
                         ],
                         "thresholds": "",
-                        "title": "BusinessViolations",
+                        "timeFrom": "100d",
+                        "title": "Business Violation",
                         "type": "singlestat",
                         "valueFontSize": "80%",
                         "valueMaps": [
@@ -761,6 +805,6 @@
         },
         "timezone": "",
         "title": "Business Microservice",
-        "version": 5
+        "version": 6
     }
 }
