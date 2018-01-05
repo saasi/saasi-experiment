@@ -119,7 +119,7 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
             self._scale_down_rule.setInactive()
 
 class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
-    BUSINESS_VIOLATION_RATE_THRESHOLD = 0.20
+    BUSINESS_VIOLATION_RATE_THRESHOLD = 0.15
 
     def __init__(self, min_scale = 1, max_scale = 20):
         super().__init__('business_microservice')        
@@ -134,7 +134,7 @@ class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
         
         if (currentRate > 0.30):
             self._scale_up_rule.setActive()
-            if (self._scale_up_rule.activeFor().total_seconds() > 10):
+            if (self._scale_up_rule.activeFor().total_seconds() > 15):
                 targetScale = currentScale + 2
                 targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
                 self._do_scale(targetScale)

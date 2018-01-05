@@ -715,12 +715,26 @@
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "increase(bms_business_violation_total_sum[2m]) / (increase(bms_requests_served_sum[2m])+1)",
+                                "expr": "sum(increase(bms_business_violation_total[2m])) / (sum(increase(bms_requests_served[2m]))+1)",
                                 "format": "time_series",
                                 "instant": false,
                                 "interval": "",
                                 "intervalFactor": 2,
                                 "refId": "A"
+                            },
+                            {
+                                "expr": "sum(increase(bms_business_violation_total[2m]))",
+                                "format": "time_series",
+                                "hide": true,
+                                "intervalFactor": 2,
+                                "refId": "B"
+                            },
+                            {
+                                "expr": "sum(increase(bms_requests_served[2m]))",
+                                "format": "time_series",
+                                "hide": true,
+                                "intervalFactor": 2,
+                                "refId": "C"
                             }
                         ],
                         "thresholds": [],
@@ -805,6 +819,6 @@
         },
         "timezone": "",
         "title": "Business Microservice",
-        "version": 6
+        "version": 7
     }
 }
