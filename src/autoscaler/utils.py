@@ -124,8 +124,9 @@ class DelayedActionHelper(object):
         self._is_active = False
 
     def setActive(self):
-        self._is_active = True
-        self._last_active_time = datetime.datetime.now()
+        if (self._is_active == False):
+            self._is_active = True
+            self._last_active_time = datetime.datetime.now()
 
     def setInactive(self):
         self._is_active = False
