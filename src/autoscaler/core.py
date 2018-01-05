@@ -41,7 +41,7 @@ class MicroserviceMonitoringGroup(object):
         service = self._dockerClient.get_service_by_name("\\w+_"+self._microservice_name)
         if (service != None):
             newMode = docker.types.ServiceMode('replicated', target)
-            service.update(mode = newMode, args=['--stop-grace-period=1h'])
+            service.update(mode = newMode) #args=['--stop-grace-period=1h'])
             print('updated')
 
 class CpuMicroserviceMG(MicroserviceMonitoringGroup):
@@ -94,7 +94,7 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         memTotal = self._res.GetMemoryUsage('30s')
         currentScale = self._swarm.GetScaleTarget()
          
-        if ((memTotal - MEMORY_THRESHOLD) / MEMORY_THRESHOLD > 0.1):
+        if ((memTotal - MemoryMicroserviceMG.MEMORY_THRESHOLD) / MemoryMicroserviceMG.MEMORY_THRESHOLD > 0.1):
             # scale up rule
             self._scale_up_rule.setActive()
             if (self._scale_up_rule.activeFor().total_seconds() > 10):
@@ -105,7 +105,7 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         else:
             self._scale_up_rule.setInactive()
 
-        if ((MEMORY_THRESHOLD - memTotal) / MEMORY_THRESHOLD > 0.05):
+        if ((MemoryMicroserviceMG.MEMORY_THRESHOLD - memTotal) / MemoryMicroserviceMG.MEMORY_THRESHOLD > 0.05):
             # scale down rule
             self._scale_down_rule.setActive()
             if (self._scale_down_rule.activeFor().total_seconds() > 30):
