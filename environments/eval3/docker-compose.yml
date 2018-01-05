@@ -219,6 +219,8 @@ services:
     ports:
       - "24224:24224"
       - "24224:24224/udp"
+    networks:
+      - appnet
 
   elasticsearch:
     image: elasticsearch
@@ -230,6 +232,8 @@ services:
           - node.role == manager
     ports:
       - "9200:9200"
+    networks:
+      - appnet
 
   kibana:
     image: kibana
@@ -241,7 +245,8 @@ services:
           - node.role == manager
     ports:
       - "5601:5601"
-
+    networks:
+      - appnet
 
 networks: # Overlay network 
   appnet: # Network for the microservices
