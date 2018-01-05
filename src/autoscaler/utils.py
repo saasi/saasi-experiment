@@ -86,7 +86,7 @@ class ResourceUsageQuerier(PrometheusClient):
         query = Template(ResourceUsageQuerier.QUERY_CPU_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 
-    def GetBusinessViolationRate(self, timespan='1m'):
+    def GetBusinessViolationRate(self, timespan='30s'):
         query = Template(ResourceUsageQuerier.QUERY_BUSINESS_VIOLATION_RATE).substitute({'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 

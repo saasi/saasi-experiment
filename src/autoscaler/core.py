@@ -82,7 +82,7 @@ class CpuMicroserviceMG(MicroserviceMonitoringGroup):
 
 
 class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
-    MEMORY_THRESHOLD = 100 * 1024.0 * 1024.0 # 100MB
+    MEMORY_THRESHOLD = 128 * 1024.0 * 1024.0 # 128MB
 
     def __init__(self, microservice_name = 'memory_microservice', min_scale = 1, max_scale = 40):
         super().__init__(microservice_name)
