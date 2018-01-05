@@ -8,9 +8,9 @@ with open("config.txt", "r") as f:
         l = line.strip()
         print("Registering",l)
         if l == "cpu_microservice":
-            core.register(core.CpuMicroserviceMG(min_scale=1, max_scale=10))
+            core.register(core.CpuMicroserviceMG(min_scale=2, max_scale=15))
         elif l == "memory_microservice":
-            core.register(core.MemoryMicroserviceMG())
+            core.register(core.MemoryMicroserviceMG(min_scale=2, max_scale=30))
         elif l == "io_microservice":
             pass
         elif l == "business_microservice":
