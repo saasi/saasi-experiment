@@ -2,6 +2,7 @@ import docker
 import requests
 import re
 import math
+import datetime
 from string import Template
 
 class PrometheusClient(object):
@@ -71,27 +72,22 @@ class ResourceUsageQuerier(PrometheusClient):
 
     def GetMemoryUsage(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_MEMORY).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
     def GetMemoryUsageSum(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_MEMORY_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
     def GetCPUUsage(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_CPU).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
     def GetCPUUsageSum(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_CPU_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
     def GetBusinessViolationRate(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_BUSINESS_VIOLATION_RATE).substitute({'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
 class SwarmServiceStatusQuerier(PrometheusClient):
@@ -120,3 +116,26 @@ class DockerClientHelper(object):
             if (re.match(nameRegExp, s.name) != None):
                 return s
         return None 
+
+
+class DelayedActionHelper(object):
+    def __init__(self):
+        self._last_active_time = None
+        self._is_active = False
+
+    def setActive(self):
+        self._is_active = True
+        self._last_active_time = datetime.datetime.now()
+
+    def setInactive(self):
+        self._is_active = False
+        self._last_active_time = None
+
+    def activeFor(self):
+        if self._is_active:
+            return datetime.datetime.now() - self._last_active_time
+        else:
+            return datetime.timedelta(0)
+
+    def isActive(self):
+        return self._is_active
