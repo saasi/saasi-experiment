@@ -59,7 +59,7 @@ class CpuMicroserviceMG(MicroserviceMonitoringGroup):
         targetScale = math.ceil(cpuTotal / self.CPU_THRESHOLD)
         targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
         currentScale = float(self._swarm.GetScaleTarget())
-        print("###CPU", cpuTotal, targetScale)
+        print("###CPU", cpuTotal, targetScale, self._scale_up_rule.activeFor().total_seconds(),(targetScale - currentScale) / currentScale)
         if ((targetScale - currentScale) / currentScale > 0.05):
             # scale up rule
             self._scale_up_rule.setActive()
