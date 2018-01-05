@@ -1,8 +1,8 @@
 #!/bin/sh
 echo $1
-$STYX=~/go/bin/styx
-$TIME_SPAN=$1
-$OUTPUT_DIR=$2
+STYX=~/go/bin/styx
+TIME_SPAN=$1
+OUTPUT_DIR=$2
 
 $STYX -d $TIME_SPAN 'bms_business_violation_total' > $OUTPUT_DIR/bms_business_violation_total.csv
 $STYX -d $TIME_SPAN 'docker_swarm_service_target_replicas{service_name=~"\\w+_memory_microservice"}' > $OUTPUT_DIR/scale_memory.csv
