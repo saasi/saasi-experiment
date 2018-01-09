@@ -1,7 +1,7 @@
 # This file is intended for use with "docker stack"
 # Might not work with docker-compose
 
-version: '3'
+version: '3.3'
 
 services:
   business_microservice:
@@ -22,10 +22,9 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
+      endpoint_mode: dnsrr
     networks:
       - appnet
-    ports: 
-      - "8080"
     logging:
       driver: "fluentd"
       options:
@@ -111,16 +110,17 @@ services:
   visualizer:
     image: dockersamples/visualizer:stable
     ports: 
-     - "8080"
+     - "5009:8080"
     volumes:
      - "/var/run/docker.sock:/var/run/docker.sock"
-    labels:
-      traefik.docker.network: appnet
-      traefik.port: 8080
-      traefik.frontend.rule: "PathPrefixStrip: /visualizer"
     deploy:
       placement:
         constraints: [node.role == manager]
+      labels:
+        traefik.docker.network: appnet
+        traefik.port: 8080
+        traefik.frontend.rule: "PathPrefixStrip: /visualizer"
+        traefik.enable: "true"
     networks:
      - appnet
 
