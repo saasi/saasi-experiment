@@ -11,11 +11,7 @@ services:
       - cpu_microservice
       - memory_microservice
     labels:
-      - "traefik.backend=bms"
-      - "traefik.docker.network=appnet"
-      - "traefik.port=8080"
-      - "traefik.frontend.rule=PathPrefix:/Business, /status"
-      - "traefik.enable=true"
+
       - "traefik.backend.healthcheck.path=/health"
       - "traefik.backend.healthcheck.interval=1s"
       - "traefik.backend.healthcheck.path.port=8080"
@@ -23,6 +19,11 @@ services:
     deploy:
       labels:
         saasi.microservices.type: "business"
+        traefik.backend: bms
+        traefik.docker.network: "appnet"
+        traefik.port: 8080
+        traefik.frontend.rule: "PathPrefix:/Business, /status"
+        traefik.enable: "true"
       replicas: 1
       placement:
         constraints: [node.role != manager]
@@ -261,6 +262,7 @@ services:
              --docker.swarmmode \
              --docker.domain=saasi \
              --docker.watch \
+             --logLevel=DEBUG \
              --web
     ports:
       - "8080:8080"
