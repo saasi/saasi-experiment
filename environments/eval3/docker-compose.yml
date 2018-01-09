@@ -13,7 +13,7 @@ services:
     labels:
       - "traefik.backend.healthcheck.path=/health"
       - "traefik.backend.healthcheck.interval=1s"
-      - "traefik.backend.healthcheck.path.port=8080"
+      - "traefik.backend.healthcheck.port=8080"
       - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
@@ -26,6 +26,7 @@ services:
         traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
         traefik.backend.healthcheck.path: "/health"
         traefik.backend.healthcheck.interval: "1s"
+        traefik.backend.healthcheck.port: "8080"
       replicas: 1
       placement:
         constraints: [node.role != manager]
