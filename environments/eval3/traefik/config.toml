@@ -1,5 +1,5 @@
 [backends]
     [backends.bms]
         [backends.bms.healthcheck]
-        path=/health
-        interval=1s
+        path = "/health"
+        interval = "1s"
