@@ -264,6 +264,8 @@ services:
              --docker.swarmmode \
              --docker.domain=saasi \
              --docker.watch \
+             --backends.bms.healthcheck.path=/health \
+             --backends.bms.healthcheck.interval=1s \
              --logLevel=DEBUG \
              --web
     ports:
