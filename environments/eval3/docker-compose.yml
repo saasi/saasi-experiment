@@ -109,17 +109,13 @@ services:
 
   visualizer:
     image: dockersamples/visualizer:stable
+    ports: 
+     - "5009:8080"
     volumes:
      - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
       placement:
         constraints: [node.role == manager]
-      labels:
-        traefik.docker.network: appnet
-        traefik.port: 8080
-        traefik.frontend.rule: "Host: visualizer"
-        traefik.enable: "true"
-      endpoint_mode: dnsrr
     networks:
      - appnet
 
