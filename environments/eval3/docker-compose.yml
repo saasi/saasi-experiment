@@ -11,15 +11,15 @@ services:
       - cpu_microservice
       - memory_microservice
     labels:
-      traefik.backend: bms
-      traefik.docker.network: appnet
-      traefik.port: 8080
-      traefik.frontend.rule: "PathPrefix: /Business, /status"
-      traefik.enable: "true"
-      traefik.backend.healthcheck.path: /health
-      traefik.backend.healthcheck.interval: 1s
-      traefik.backend.healthcheck.path.port: 8080
-      traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
+      - "traefik.backend=bms"
+      - "traefik.docker.network=appnet"
+      - "traefik.port=8080"
+      - "traefik.frontend.rule=PathPrefix:/Business, /status"
+      - "traefik.enable=true"
+      - "traefik.backend.healthcheck.path=/health"
+      - "traefik.backend.healthcheck.interval=1s"
+      - "traefik.backend.healthcheck.path.port=8080"
+      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
         saasi.microservices.type: "business"
