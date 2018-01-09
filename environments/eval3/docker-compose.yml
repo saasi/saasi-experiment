@@ -13,6 +13,7 @@ services:
     deploy:
       labels:
         saasi.microservices.type: "business"
+        traefik.backend: bms
         traefik.docker.network: appnet
         traefik.port: 8080
         traefik.frontend.rule: "PathPrefix: /Business, /status"
@@ -21,7 +22,6 @@ services:
         traefik.backend.healthcheck.interval: 1s
         traefik.backend.healthcheck.path.port: 8080
         traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
-        traefik.backend: bms
       replicas: 1
       placement:
         constraints: [node.role != manager]
