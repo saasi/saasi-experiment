@@ -10,9 +10,13 @@ services:
       - io_microservice
       - cpu_microservice
       - memory_microservice
+    labels:
+      traefik.docker.network: appnet
     deploy:
       labels:
         saasi.microservices.type: "business"
+        traefik.bms.port: 8080
+        traefik.bms.frontend.rule: "PathPrefix: /Business, /status"
       replicas: 1
       placement:
         constraints: [node.role != manager]
@@ -21,7 +25,7 @@ services:
     networks:
       - appnet
     ports: 
-      - "8080:8080"
+      - "8080"
     logging:
       driver: "fluentd"
       options:
@@ -107,12 +111,17 @@ services:
   visualizer:
     image: dockersamples/visualizer:stable
     ports: 
-     - "80:8080"
+     - "8080"
     volumes:
      - "/var/run/docker.sock:/var/run/docker.sock"
+    labels:
+      traefik.docker.network: appnet
     deploy:
       placement:
         constraints: [node.role == manager]
+      labels:
+        traefik.visualizer.port: 8080
+        traefik.visualizer.frontend.rule: "PathPrefixStrip: /visualizer"
     networks:
      - appnet
 
@@ -127,8 +136,6 @@ services:
     ports:
       - "8088:8080"
     deploy:
-      #placement:
-      #  constraints: [node.role == manager]
       mode: global
       restart_policy:
         condition: on-failure
@@ -185,7 +192,6 @@ services:
       - appnet
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-
 
   autoscaler:
     image: regserv:5000/autoscaler:latest
@@ -247,6 +253,27 @@ services:
       - "5601:5601"
     networks:
       - appnet
+
+  traefik:
+    image: traefik
+    command: traefik \
+             --docker \
+             --docker.swarmmode \
+             --docker.domain=saasi \
+             --docker.watch \
+             --web
+    ports:
+      - "8080:8080"
+      - "80:80"
+    networks:
+      - appnet
+    deployment:
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks: # Overlay network 
   appnet: # Network for the microservices
