@@ -260,7 +260,7 @@ services:
   traefik:
     image: regserv:5000/traefik:latest
     command: traefik \
-             -c /config/config.toml \
+             -c /config.toml \
              --docker \
              --docker.swarmmode \
              --docker.domain=saasi \
