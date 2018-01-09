@@ -121,6 +121,7 @@ services:
         traefik.port: 8080
         traefik.frontend.rule: "Host: visualizer"
         traefik.enable: "true"
+      endpoint_mode: dnsrr
     networks:
      - appnet
 
