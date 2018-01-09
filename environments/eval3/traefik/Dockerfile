@@ -1,2 +1,2 @@
-FROM traefik:v1.4.6
+FROM containous/traefik:experimental
 COPY ./config.toml /
