@@ -703,8 +703,8 @@
             "list": []
         },
         "time": {
-            "from": "2018-01-04T05:14:59.059Z",
-            "to": "2018-01-05T05:14:59.059Z"
+            "from": "now-5m",
+            "to": "now"
         },
         "timepicker": {
             "refresh_intervals": [

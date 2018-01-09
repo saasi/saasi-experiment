@@ -1,8 +1,7 @@
 {
   "dashboard": {
     "annotations": {
-      "list": [
-      ]
+      "list": []
     },
     "editable": false,
     "gnetId": null,
@@ -1304,8 +1303,168 @@
       },
       {
         "collapse": false,
-        "height": 237,
+        "height": 235,
         "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+            ],
+            "datasource": null,
+            "decimals": null,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": true,
+              "thresholdLabels": true,
+              "thresholdMarkers": true
+            },
+            "id": 25,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "80%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "__name__",
+            "targets": [
+              {
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "format": "time_series",
+                "instant": true,
+                "intervalFactor": 2,
+                "refId": "A"
+              }
+            ],
+            "thresholds": "",
+            "title": "Scale",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus",
+            "fill": 1,
+            "id": 26,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 2,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "target",
+                "refId": "A"
+              },
+              {
+                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "actual",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Scaling History",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "decimals": 0,
+                "format": "short",
+                "label": "Target scale",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          },
           {
             "aliasColors": {},
             "bars": false,
@@ -1333,7 +1492,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 4,
+            "span": 2,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -1489,7 +1648,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 4,
+            "span": 3,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -1826,6 +1985,6 @@
     },
     "timezone": "",
     "title": "Microservices Monitoring (Debug)",
-    "version": 3
+    "version": 4
   }
 }
