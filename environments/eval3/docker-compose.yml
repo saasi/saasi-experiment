@@ -118,8 +118,8 @@ services:
         constraints: [node.role == manager]
       labels:
         traefik.docker.network: appnet
-        traefik.port: 8080
-        traefik.frontend.rule: "PathPrefixStrip: /visualizer"
+        traefik.port: 5009
+        traefik.frontend.rule: "Host: visualizer"
         traefik.enable: "true"
     networks:
      - appnet
