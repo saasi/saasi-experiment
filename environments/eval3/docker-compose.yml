@@ -31,7 +31,6 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
-      endpoint_mode: dnsrr
     networks:
       - appnet
     logging:
