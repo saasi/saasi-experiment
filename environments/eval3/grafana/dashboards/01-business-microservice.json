@@ -234,7 +234,7 @@
                                     }
                                 ],
                                 "dsType": "elasticsearch",
-                                "expr": "container_name: *business** AND log: *started*",
+                                "expr": "container_name: *business** AND log: *started* AND log: Transcation",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -245,7 +245,7 @@
                                         "type": "count"
                                     }
                                 ],
-                                "query": "container_name: *business** AND log: *finished*",
+                                "query": "container_name: *business** AND log: *finished* AND log: Transcation",
                                 "refId": "A",
                                 "timeField": "@timestamp"
                             }
@@ -333,7 +333,7 @@
                                     }
                                 ],
                                 "dsType": "elasticsearch",
-                                "expr": "container_name: *business** AND log: *violated*",
+                                "expr": "container_name: *business** AND log: *violated* AND log: Transcation",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "metrics": [
@@ -343,7 +343,7 @@
                                         "type": "count"
                                     }
                                 ],
-                                "query": "container_name: *business** AND log: *violated*",
+                                "query": "container_name: *business** AND log: *violated* AND log: Transcation",
                                 "refId": "A",
                                 "timeField": "@timestamp"
                             }
