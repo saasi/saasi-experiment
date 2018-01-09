@@ -267,7 +267,7 @@ services:
       - "80:80"
     networks:
       - appnet
-    deployment:
+    deploy:
       mode: replicated
       placement:
         constraints:
