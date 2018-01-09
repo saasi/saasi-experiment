@@ -258,14 +258,13 @@ services:
       - appnet
 
   traefik:
-    image: traefik
+    image: regserv:5000/traefik:latest
     command: traefik \
+             -c /config/config.toml \
              --docker \
              --docker.swarmmode \
              --docker.domain=saasi \
              --docker.watch \
-             --backends.bms.healthcheck.path=/health \
-             --backends.bms.healthcheck.interval=1s \
              --logLevel=DEBUG \
              --web
     ports:

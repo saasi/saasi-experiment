@@ -2,6 +2,7 @@
 docker build -t regserv:5000/prometheus ./prometheus
 docker build -t regserv:5000/grafana ./grafana
 docker build -t regserv:5000/fluentd ./fluentd
+docker build -t regserv:5000/traefik ./traefik
 
 cp -f ./autoscaler/config.txt ../../src/autoscaler/config.txt
 cd ../../src

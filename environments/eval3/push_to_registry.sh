@@ -8,3 +8,4 @@ docker push regserv:5000/memory_microservice
 docker push regserv:5000/docker-swarm-exporter
 docker push regserv:5000/autoscaler
 docker push regserv:5000/fluentd
+docker push regserv:5000/traefik
