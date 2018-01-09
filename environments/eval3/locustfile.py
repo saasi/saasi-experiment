@@ -58,7 +58,7 @@ class BusinessUserBehaviour(TaskSet):
 
         current_timestamp =  int(time.time())
         r = self.client.get("/Business?io="+str(run_io)+"&cpu="+str(run_cpu)+"&memory="+str(run_memory)+"&timestart="+ str(current_timestamp) +"&timetorun="+str(time_to_run)+"&timeout="+str(timeout))
-        if r.response_code == 200:
+        if r.status_code == 200:
             self.current_config_no = self.current_config_no + 1
             if (self.current_config_no >= len(BusinessUserBehaviour.config)): # Finished a cycle, restart from the first config
                 self.current_config_no = 0
