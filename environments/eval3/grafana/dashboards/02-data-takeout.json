@@ -13,7 +13,7 @@
         "rows": [
             {
                 "collapse": false,
-                "height": "250px",
+                "height": 107,
                 "panels": [
                     {
                         "cacheTimeout": null,
@@ -61,7 +61,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -136,7 +136,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -154,6 +154,81 @@
                         ],
                         "thresholds": "",
                         "title": "avg scale cpu",
+                        "type": "singlestat",
+                        "valueFontSize": "80%",
+                        "valueMaps": [
+                            {
+                                "op": "=",
+                                "text": "N/A",
+                                "value": "null"
+                            }
+                        ],
+                        "valueName": "avg"
+                    },
+                    {
+                        "cacheTimeout": null,
+                        "colorBackground": false,
+                        "colorValue": false,
+                        "colors": [
+                            "#299c46",
+                            "rgba(237, 129, 40, 0.89)",
+                            "#d44a3a"
+                        ],
+                        "datasource": null,
+                        "format": "none",
+                        "gauge": {
+                            "maxValue": 100,
+                            "minValue": 0,
+                            "show": false,
+                            "thresholdLabels": false,
+                            "thresholdMarkers": true
+                        },
+                        "id": 12,
+                        "interval": null,
+                        "links": [],
+                        "mappingType": 1,
+                        "mappingTypes": [
+                            {
+                                "name": "value to text",
+                                "value": 1
+                            },
+                            {
+                                "name": "range to text",
+                                "value": 2
+                            }
+                        ],
+                        "maxDataPoints": 100,
+                        "nullPointMode": "connected",
+                        "nullText": null,
+                        "postfix": "",
+                        "postfixFontSize": "50%",
+                        "prefix": "",
+                        "prefixFontSize": "50%",
+                        "rangeMaps": [
+                            {
+                                "from": "null",
+                                "text": "N/A",
+                                "to": "null"
+                            }
+                        ],
+                        "span": 3,
+                        "sparkline": {
+                            "fillColor": "rgba(31, 118, 189, 0.18)",
+                            "full": false,
+                            "lineColor": "rgb(31, 120, 193)",
+                            "show": false
+                        },
+                        "tableColumn": "",
+                        "targets": [
+                            {
+                                "expr": "avg_over_time(docker_swarm_service_running_replicas{service_name=~\"\\\\w+_io_microservice\"}[10d])",
+                                "format": "time_series",
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": "",
+                        "title": "avg scale io",
                         "type": "singlestat",
                         "valueFontSize": "80%",
                         "valueMaps": [
@@ -211,7 +286,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -250,7 +325,7 @@
             },
             {
                 "collapse": false,
-                "height": 250,
+                "height": 82,
                 "panels": [
                     {
                         "cacheTimeout": null,
@@ -298,7 +373,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -373,7 +448,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -391,6 +466,81 @@
                         ],
                         "thresholds": "",
                         "title": "max scale cpu",
+                        "type": "singlestat",
+                        "valueFontSize": "80%",
+                        "valueMaps": [
+                            {
+                                "op": "=",
+                                "text": "N/A",
+                                "value": "null"
+                            }
+                        ],
+                        "valueName": "avg"
+                    },
+                    {
+                        "cacheTimeout": null,
+                        "colorBackground": false,
+                        "colorValue": false,
+                        "colors": [
+                            "#299c46",
+                            "rgba(237, 129, 40, 0.89)",
+                            "#d44a3a"
+                        ],
+                        "datasource": null,
+                        "format": "none",
+                        "gauge": {
+                            "maxValue": 100,
+                            "minValue": 0,
+                            "show": false,
+                            "thresholdLabels": false,
+                            "thresholdMarkers": true
+                        },
+                        "id": 13,
+                        "interval": null,
+                        "links": [],
+                        "mappingType": 1,
+                        "mappingTypes": [
+                            {
+                                "name": "value to text",
+                                "value": 1
+                            },
+                            {
+                                "name": "range to text",
+                                "value": 2
+                            }
+                        ],
+                        "maxDataPoints": 100,
+                        "nullPointMode": "connected",
+                        "nullText": null,
+                        "postfix": "",
+                        "postfixFontSize": "50%",
+                        "prefix": "",
+                        "prefixFontSize": "50%",
+                        "rangeMaps": [
+                            {
+                                "from": "null",
+                                "text": "N/A",
+                                "to": "null"
+                            }
+                        ],
+                        "span": 3,
+                        "sparkline": {
+                            "fillColor": "rgba(31, 118, 189, 0.18)",
+                            "full": false,
+                            "lineColor": "rgb(31, 120, 193)",
+                            "show": false
+                        },
+                        "tableColumn": "",
+                        "targets": [
+                            {
+                                "expr": "max_over_time(docker_swarm_service_running_replicas{service_name=~\"\\\\w+_io_microservice\"}[10d])",
+                                "format": "time_series",
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": "",
+                        "title": "max scale io",
                         "type": "singlestat",
                         "valueFontSize": "80%",
                         "valueMaps": [
@@ -448,7 +598,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 4,
+                        "span": 3,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -487,7 +637,7 @@
             },
             {
                 "collapse": false,
-                "height": 250,
+                "height": 90,
                 "panels": [
                     {
                         "cacheTimeout": null,
@@ -575,7 +725,7 @@
                         ],
                         "thresholds": "",
                         "timeFrom": "100d",
-                        "timeShift": null,
+                        "timeShift": "0s",
                         "title": "Total requests",
                         "type": "singlestat",
                         "valueFontSize": "80%",
@@ -674,7 +824,7 @@
                         ],
                         "thresholds": "",
                         "timeFrom": "100d",
-                        "timeShift": null,
+                        "timeShift": "0s",
                         "title": "Violations",
                         "type": "singlestat",
                         "valueFontSize": "80%",
@@ -686,6 +836,174 @@
                             }
                         ],
                         "valueName": "avg"
+                    }
+                ],
+                "repeat": null,
+                "repeatIteration": null,
+                "repeatRowId": null,
+                "showTitle": false,
+                "title": "Dashboard Row",
+                "titleSize": "h6"
+            },
+            {
+                "collapse": false,
+                "height": 250,
+                "panels": [
+                    {
+                        "columns": [],
+                        "datasource": null,
+                        "fontSize": "100%",
+                        "id": 9,
+                        "links": [],
+                        "pageSize": null,
+                        "scroll": true,
+                        "showHeader": true,
+                        "sort": {
+                            "col": 1,
+                            "desc": true
+                        },
+                        "span": 4,
+                        "styles": [
+                            {
+                                "alias": "Time",
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                                "pattern": "Time",
+                                "type": "date"
+                            },
+                            {
+                                "alias": "",
+                                "colorMode": null,
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)",
+                                    "rgba(237, 129, 40, 0.89)",
+                                    "rgba(50, 172, 45, 0.97)"
+                                ],
+                                "decimals": 2,
+                                "pattern": "/.*/",
+                                "thresholds": [],
+                                "type": "number",
+                                "unit": "short"
+                            }
+                        ],
+                        "targets": [
+                            {
+                                "expr": "avg_over_time(microservice_cpu_average{container_label_com_docker_swarm_service_name=~\"\\\\w+_microservice\"}[100d])",
+                                "format": "table",
+                                "hide": false,
+                                "instant": true,
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "timeFrom": "100d",
+                        "timeShift": "0s",
+                        "title": "CPU usage",
+                        "transform": "table",
+                        "type": "table"
+                    },
+                    {
+                        "columns": [],
+                        "datasource": null,
+                        "fontSize": "100%",
+                        "id": 10,
+                        "links": [],
+                        "pageSize": null,
+                        "scroll": true,
+                        "showHeader": true,
+                        "sort": {
+                            "col": 1,
+                            "desc": true
+                        },
+                        "span": 4,
+                        "styles": [
+                            {
+                                "alias": "Time",
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                                "pattern": "Time",
+                                "type": "date"
+                            },
+                            {
+                                "alias": "",
+                                "colorMode": null,
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)",
+                                    "rgba(237, 129, 40, 0.89)",
+                                    "rgba(50, 172, 45, 0.97)"
+                                ],
+                                "decimals": 2,
+                                "pattern": "/.*/",
+                                "thresholds": [],
+                                "type": "number",
+                                "unit": "decbytes"
+                            }
+                        ],
+                        "targets": [
+                            {
+                                "expr": "avg_over_time(microservice_memory_average{container_label_com_docker_swarm_service_name=~\"\\\\w+_microservice\"}[100d])",
+                                "format": "table",
+                                "hide": false,
+                                "instant": true,
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "timeFrom": "100d",
+                        "timeShift": "0s",
+                        "title": "Memory Usage",
+                        "transform": "table",
+                        "type": "table"
+                    },
+                    {
+                        "columns": [],
+                        "datasource": null,
+                        "fontSize": "100%",
+                        "id": 11,
+                        "links": [],
+                        "pageSize": null,
+                        "scroll": true,
+                        "showHeader": true,
+                        "sort": {
+                            "col": 1,
+                            "desc": true
+                        },
+                        "span": 4,
+                        "styles": [
+                            {
+                                "alias": "Time",
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                                "pattern": "Time",
+                                "type": "date"
+                            },
+                            {
+                                "alias": "",
+                                "colorMode": null,
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)",
+                                    "rgba(237, 129, 40, 0.89)",
+                                    "rgba(50, 172, 45, 0.97)"
+                                ],
+                                "decimals": 2,
+                                "pattern": "/.*/",
+                                "thresholds": [],
+                                "type": "number",
+                                "unit": "Bps"
+                            }
+                        ],
+                        "targets": [
+                            {
+                                "expr": "avg_over_time(microservice_io_average{container_label_com_docker_swarm_service_name=~\"\\\\w+_microservice\"}[100d])",
+                                "format": "table",
+                                "hide": false,
+                                "instant": true,
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "timeFrom": "100d",
+                        "timeShift": "0s",
+                        "title": "CPU usage",
+                        "transform": "table",
+                        "type": "table"
                     }
                 ],
                 "repeat": null,
@@ -733,6 +1051,6 @@
         },
         "timezone": "",
         "title": "Data takeout",
-        "version": 1
+        "version": 3
     }
 }

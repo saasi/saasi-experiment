@@ -6,6 +6,7 @@ global:
 rule_files:
   - "/etc/prometheus/rules/bms.rules"
   - "/etc/prometheus/rules/swarm.rules"
+  - "/etc/prometheus/rules/resource.rules"
 
 # Alertmanager configuration
 alerting:
