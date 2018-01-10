@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
+using Saasi.Shared.Workload;
 
 namespace Saasi.Microservices.Memory.Controllers
 {
@@ -13,40 +14,25 @@ namespace Saasi.Microservices.Memory.Controllers
 
         // HTTP GET api/memory
         [HttpGet("memory")]
-        public string Run(int time)
+        public async Task<JsonResult> Run(int time)
         {
-            MemoryProcess(time);
-            return "OK";
-        }
-
-        public void MemoryProcess(int time)
-        {
-            //simulate memory use
-            DateTime currentTime = new DateTime();
-            currentTime = System.DateTime.Now;
-            DateTime finishTime = currentTime.AddSeconds(time);
+            DateTime currentTime = System.DateTime.Now;
             Guid id = Guid.NewGuid();
-            Console.WriteLine(id + ":Start." + Convert.ToString(currentTime));
-            //List<IntPtr> alist = new List<IntPtr>();
-            List<byte[]> alist = new List<byte[]>();
-            int i = 0;
-            while (System.DateTime.Now.CompareTo(finishTime) < 0)
-            {
-                byte[] b = new byte[1024];
-                alist.Add(b); // Change the size here.
+            Console.WriteLine(id.ToString() + ":Start." + Convert.ToString(currentTime));
+  
+            var task = new MemoryWorkload();
+            var result = await task.Run(time);
 
-                i++;
-                if (i == 2000)
-                {
-                    Thread.Sleep(200); // Change the wait time here to control memory usage.
-                    i = 0;
-
-                }
-            }
             Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
-            alist.Clear();
-            alist = null;
-            GC.Collect(); // release memory
+
+            return new JsonResult(
+                new {
+                    Status = "OK",
+                    MemoryWorkload = result
+                }
+            );
         }
+
+
     }
 }

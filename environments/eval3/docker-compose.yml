@@ -1,7 +1,7 @@
 # This file is intended for use with "docker stack"
 # Might not work with docker-compose
 
-version: '3'
+version: '3.3'
 
 services:
   business_microservice:
@@ -10,20 +10,36 @@ services:
       - io_microservice
       - cpu_microservice
       - memory_microservice
-    environment:
-      - BV_REPORT_HOST=10.137.0.81:8080 # This is broken at the moment
+    labels:
+      - "traefik.backend.healthcheck.path=/health"
+      - "traefik.backend.healthcheck.interval=1s"
+      - "traefik.backend.healthcheck.port=8080"
+      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
         saasi.microservices.type: "business"
-      replicas: 5
+        traefik.backend: bms
+        traefik.docker.network: "eval3_appnet"
+        traefik.port: 8080
+        traefik.frontend.rule: "PathPrefix:/Business, /status"
+        traefik.enable: "true"
+        traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
+        traefik.backend.healthcheck.path: "/health"
+        traefik.backend.healthcheck.interval: "1s"
+        traefik.backend.healthcheck.port: "8080"
+      replicas: 1
       placement:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
     networks:
       - appnet
-    ports: 
-      - "8080:8080"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 
+        tag: microservice.business.main
 
   io_microservice:
     image: regserv:5000/io_microservice
@@ -41,13 +57,19 @@ services:
           - io
     ports: 
       - "5003:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 
+        tag: microservice.api.io
 
   cpu_microservice:
     image: regserv:5000/cpu_microservice
     deploy:
       labels:
         saasi.microservices.type: "api"
-      replicas: 5
+      replicas: 1
       placement:
         constraints: [node.role != manager]
       restart_policy:
@@ -58,6 +80,12 @@ services:
           - cpu
     ports: 
       - "5004:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect:
+        tag: microservice.api.cpu
 
   memory_microservice:
     image: regserv:5000/memory_microservice
@@ -70,7 +98,7 @@ services:
     deploy:
       labels:
         saasi.microservices.type: "api"
-      replicas: 5
+      replicas: 1
       resources:
         limits:
           memory: 512M
@@ -78,11 +106,20 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect:
+        tag: microservice.api.memory
+
+
+  # Monitoring Components
 
   visualizer:
     image: dockersamples/visualizer:stable
     ports: 
-     - "80:8080"
+     - "5009:8080"
     volumes:
      - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
@@ -90,9 +127,6 @@ services:
         constraints: [node.role == manager]
     networks:
      - appnet
-
-
-  # Monitoring Components
 
   cadvisor:
     image: google/cadvisor:latest
@@ -105,8 +139,6 @@ services:
     ports:
       - "8088:8080"
     deploy:
-      #placement:
-      #  constraints: [node.role == manager]
       mode: global
       restart_policy:
         condition: on-failure
@@ -164,7 +196,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-
   autoscaler:
     image: regserv:5000/autoscaler:latest
     deploy:
@@ -179,6 +210,73 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - appnet
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect:
+        tag: controller.autoscaler
+
+  fluentd:
+    image: regserv:5000/fluentd:latest
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - appnet
+
+  elasticsearch:
+    image: elasticsearch
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "9200:9200"
+    networks:
+      - appnet
+
+  kibana:
+    image: kibana
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "5601:5601"
+    networks:
+      - appnet
+
+  traefik:
+    image: regserv:5000/traefik:latest
+    command: traefik \
+             --docker \
+             --docker.swarmmode \
+             --docker.domain=saasi \
+             --docker.watch \
+             --web
+    ports:
+      - "8080:8080"
+      - "80:80"
+    networks:
+      - appnet
+    deploy:
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks: # Overlay network 
   appnet: # Network for the microservices

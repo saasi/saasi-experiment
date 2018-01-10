@@ -2,6 +2,7 @@ import docker
 import requests
 import re
 import math
+import datetime
 from string import Template
 
 class PrometheusClient(object):
@@ -36,6 +37,15 @@ class ResourceUsageQuerier(PrometheusClient):
             )
         )    """
 
+    QUERY_MEMORY_SUM = """
+        scalar(
+            sum(
+                avg_over_time(
+                    container_memory_rss{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )    """
+
     QUERY_CPU = """
         scalar(avg(
         rate(
@@ -52,23 +62,60 @@ class ResourceUsageQuerier(PrometheusClient):
         ) * 100)
     """
 
+    QUERY_IO = """
+        scalar(
+            avg(
+                rate(
+                    container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )
+    """
+
+    QUERY_IO_SUM = """
+        scalar(
+            sum(
+                rate(
+                    container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )    
+    """
+
+    QUERY_BUSINESS_VIOLATION_RATE = """
+        scalar(sum(increase(bms_business_violation_total[$timespan])) / (sum(increase(bms_requests_served[$timespan]))+1) )
+    """
+
     def __init__(self, endpoint, microservice_name):
         super().__init__(endpoint)
         self._microservice_name = microservice_name
 
     def GetMemoryUsage(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_MEMORY).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
+        return float(self.GetInstantValue(query)[1])
+
+    def GetMemoryUsageSum(self, timespan='1m'):
+        query = Template(ResourceUsageQuerier.QUERY_MEMORY_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 
     def GetCPUUsage(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_CPU).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
         return float(self.GetInstantValue(query)[1])
 
     def GetCPUUsageSum(self, timespan='1m'):
         query = Template(ResourceUsageQuerier.QUERY_CPU_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
-        print(query)
+        return float(self.GetInstantValue(query)[1])
+
+    def GetIOUsage(self, timespan='1m'):
+        query = Template(ResourceUsageQuerier.QUERY_IO).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        return float(self.GetInstantValue(query)[1])
+
+    def GetIOUsageSum(self, timespan='1m'):
+        query = Template(ResourceUsageQuerier.QUERY_IO_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        return float(self.GetInstantValue(query)[1])
+
+    def GetBusinessViolationRate(self, timespan='30s'):
+        query = Template(ResourceUsageQuerier.QUERY_BUSINESS_VIOLATION_RATE).substitute({'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 
 class SwarmServiceStatusQuerier(PrometheusClient):
@@ -97,3 +144,27 @@ class DockerClientHelper(object):
             if (re.match(nameRegExp, s.name) != None):
                 return s
         return None 
+
+
+class DelayedActionHelper(object):
+    def __init__(self):
+        self._last_active_time = None
+        self._is_active = False
+
+    def setActive(self):
+        if (self._is_active == False):
+            self._is_active = True
+            self._last_active_time = datetime.datetime.now()
+
+    def setInactive(self):
+        self._is_active = False
+        self._last_active_time = None
+
+    def activeFor(self):
+        if self._is_active:
+            return datetime.datetime.now() - self._last_active_time
+        else:
+            return datetime.timedelta(0)
+
+    def isActive(self):
+        return self._is_active

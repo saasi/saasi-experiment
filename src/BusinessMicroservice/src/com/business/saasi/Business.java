@@ -31,6 +31,11 @@ public class Business extends HttpServlet {
 		.labelNames("io", "cpu", "memory", "timetorun")
 		.help("bms_active_transactions.")
 		.register();
+    static final Counter bms_requests_served = Counter.build()
+		.name("bms_requests_served")
+		.labelNames("io", "cpu", "memory", "timetorun")
+		.help("Total requests served.")
+		.register();
 
 	private static final long serialVersionUID = 1L;
 
@@ -121,6 +126,12 @@ public class Business extends HttpServlet {
                     new Integer(memory).toString(),
                     new Integer(timetorun).toString())
             .dec();
+        bms_requests_served
+            .labels(new Integer(io).toString(),
+                    new Integer(cpu).toString(),
+                    new Integer(memory).toString(),
+                    new Integer(timetorun).toString())
+            .inc();
 		out.println("OK.");
 	}
 

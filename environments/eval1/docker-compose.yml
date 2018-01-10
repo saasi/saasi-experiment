@@ -1,0 +1,125 @@
+# This file is intended for use with "docker stack"
+# Might not work with docker-compose
+
+version: '3'
+
+services:
+  business_web:
+    image: regserv:5000/business_web
+    deploy:
+      labels:
+        saasi.microservices.type: "business"
+      replicas: 5
+      placement:
+        constraints: [node.role != manager]
+      restart_policy:
+        condition: any
+    networks:
+      - appnet
+    ports: 
+      - "8080:80"
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports: 
+     - "80:8080"
+    volumes:
+     - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+     - appnet
+
+
+  # Monitoring Components
+
+  cadvisor:
+    image: google/cadvisor:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8088:8080"
+    deploy:
+      #placement:
+      #  constraints: [node.role == manager]
+      mode: global
+      restart_policy:
+        condition: on-failure
+    networks:
+      - appnet
+
+  prometheus:
+    image: regserv:5000/prometheus:latest
+    ports:
+      - "9090:9090"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - appnet
+
+  grafana:
+    image: regserv:5000/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - appnet
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  swarm-exporter:
+    image: regserv:5000/docker-swarm-exporter:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "5051:5051"
+    networks:
+      - appnet
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+  autoscaler:
+    image: regserv:5000/autoscaler:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - AUTOSCALER_PROM_HOST=http://tasks.prometheus:9090
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - appnet
+
+networks: # Overlay network 
+  appnet: # Network for the microservices
+  controlnet: # Network for the controllers

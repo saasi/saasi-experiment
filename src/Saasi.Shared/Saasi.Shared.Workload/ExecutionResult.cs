@@ -8,5 +8,7 @@ namespace Saasi.Shared.Workload {
         public DateTime TaskFinishedAt { get; set; }
         public TimeSpan ActualExecutationTime { get { return TaskFinishedAt - TaskStartedAt; } }
         public string ThreadOfExecution {get; set;}
+        public long ExecutedLoops { get; set; }
+        public int ThreadsCount {get; set;}
     } 
 }
