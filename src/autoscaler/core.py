@@ -45,7 +45,7 @@ class MicroserviceMonitoringGroup(object):
             print('updated')
 
 class CpuMicroserviceMG(MicroserviceMonitoringGroup):
-    CPU_THRESHOLD = 80.0
+    CPU_THRESHOLD = 80.0 * 2 # 2 cores
 
     def __init__(self, microservice_name = 'cpu_microservice', min_scale = 1, max_scale = 10):
         super().__init__(microservice_name)
@@ -113,7 +113,7 @@ class IoMicroserviceMG(MicroserviceMonitoringGroup):
             self._scale_down_rule.setInactive()
 
 class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
-    MEMORY_THRESHOLD = 128 * 1024.0 * 1024.0 # 128MB
+    MEMORY_THRESHOLD = 150 * 1024.0 * 1024.0 # 150MB
 
     def __init__(self, microservice_name = 'memory_microservice', min_scale = 1, max_scale = 40):
         super().__init__(microservice_name)
