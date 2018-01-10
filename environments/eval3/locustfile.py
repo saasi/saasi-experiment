@@ -8,35 +8,36 @@ class BusinessUserBehaviour(TaskSet):
 
     config = [
         # io cpu memory timetorun timeout
-        [0, 1, 0, 1, 5],
-        [1, 0, 0, 1, 5],
         [0, 0, 1, 1, 5],
-        [1, 1, 0, 1, 5],
+        [0, 1, 0, 1, 5],
+        [0, 1, 1, 1, 5],
+        [1, 0, 0, 1, 5],
         [1, 0, 1, 1, 5],
-        [0, 1, 1, 5, 10],
-        [0, 1, 0, 5, 10],
-        [1, 0, 0, 5, 10],
+        [1, 1, 0, 1, 5],
         [0, 0, 1, 5, 10],
-        [1, 1, 0, 5, 10],
-        [1, 0, 1, 5, 10],
+        [0, 1, 0, 5, 10],
         [0, 1, 1, 5, 10],
-        [0, 1, 0, 10, 30],
+        [1, 0, 0, 5, 10],
+        [1, 0, 1, 5, 10],
+        [1, 1, 0, 5, 10],
         [0, 0, 1, 10, 30],
-        [1, 1, 0, 10, 30],
-        [1, 0, 1, 10, 30],
+        [0, 1, 0, 10, 30],
         [0, 1, 1, 10, 30],
-        [0, 1, 0, 15, 60],
-        [1, 0, 0, 15, 60],
+        [1, 0, 0, 10, 30],
+        [1, 0, 1, 10, 30],
+        [1, 1, 0, 10, 30],
         [0, 0, 1, 15, 60],
-        [1, 1, 0, 15, 60],
-        [1, 0, 1, 15, 60],
+        [0, 1, 0, 15, 60],
         [0, 1, 1, 15, 60],
-        [0, 1, 0, 20, 80],
-        [1, 0, 0, 20, 80],
+        [1, 0, 0, 15, 60],
+        [1, 0, 1, 15, 60],
+        [1, 1, 0, 15, 60],
         [0, 0, 1, 20, 80],
-        [1, 1, 0, 20, 80],
+        [0, 1, 0, 20, 80],
+        [0, 1, 1, 20, 80],
+        [1, 0, 0, 20, 80],
         [1, 0, 1, 20, 80],
-        [0, 1, 1, 20, 80]
+        [1, 1, 0, 20, 80]
     ]
             
     def on_start(self):
@@ -57,7 +58,8 @@ class BusinessUserBehaviour(TaskSet):
         timeout = current_config[4]
 
         current_timestamp =  int(time.time())
-        r = self.client.get("/Business?io="+str(run_io)+"&cpu="+str(run_cpu)+"&memory="+str(run_memory)+"&timestart="+ str(current_timestamp) +"&timetorun="+str(time_to_run)+"&timeout="+str(timeout))
+        r = self.client.get("/Business?io="+str(run_io)+"&cpu="+str(run_cpu)+"&memory="+str(run_memory)+"&timestart="+ str(current_timestamp) +"&timetorun="+str(time_to_run)+"&timeout="+str(timeout),
+            name="/Business?io="+str(run_io)+"&cpu="+str(run_cpu)+"&memory="+str(run_memory)+"&timetorun="+str(time_to_run))
         if r.status_code == 200:
             self.current_config_no = self.current_config_no + 1
             if (self.current_config_no >= len(BusinessUserBehaviour.config)): # Finished a cycle, restart from the first config
@@ -70,4 +72,4 @@ class BusinessUser(HttpLocust):
     task_set = BusinessUserBehaviour
     # Waiting (resting) time between requests
     min_wait = 500 # ms
-    max_wait = 2000 # ms
+    max_wait = 1000 # ms

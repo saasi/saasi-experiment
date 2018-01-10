@@ -264,7 +264,6 @@ services:
              --docker.swarmmode \
              --docker.domain=saasi \
              --docker.watch \
-             --logLevel=DEBUG \
              --web
     ports:
       - "8080:8080"
@@ -278,12 +277,6 @@ services:
           - node.role == manager
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        fluentd-async-connect: 
-        tag: controller.traefik
 
 networks: # Overlay network 
   appnet: # Network for the microservices
