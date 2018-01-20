@@ -12,21 +12,28 @@ namespace Saasi.Microservices.Io.Controllers
     [Route("api")]
     public class HomeController : Controller
     {
-
-        // HTTP GET api/io?time=xxx
+        // HTTP GET api/io?read=xxx
         [HttpGet("io")]
-        public async Task<string> Run(int time)
+        public async Task<JsonResult> Run(int read)
         {
-            DateTime currentTime = System.DateTime.Now;
-            Guid id = Guid.NewGuid();
-            Console.WriteLine(id.ToString() + ":Start." + Convert.ToString(currentTime));
+            var r = new Random();
+            Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
+            Int64 length = read * Program.cellSize;
+            //DateTime currentTime = System.DateTime.Now;
+            //Guid id = Guid.NewGuid();
+            Console.WriteLine("IO Microsevices: is running.");
   
             var task = new IoWorkload();
-            await task.Run(time);
+            ExecutionResult result = await task.Run(startByte, length);
 
-            Console.WriteLine(id + ":Done." + Convert.ToString(System.DateTime.Now));
+            Console.WriteLine("IO Microsevices:Done." );
 
-            return $"OK. Disk I/O job done. ";
+            return new JsonResult(
+                new {
+                    Status = "OK",
+                    IOLoad = result
+                }
+            ); 
         }
 
     }
