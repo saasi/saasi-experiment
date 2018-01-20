@@ -1,10 +1,7 @@
 ---
 - name: Clean up
   hosts: workvm
-  remote_user: saasi
-  become_method: sudo
-  become_user: root
-  become: true
+  remote_user: root
 
   tasks:
   - name: restart docker

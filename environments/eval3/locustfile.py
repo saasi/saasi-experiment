@@ -8,36 +8,14 @@ class BusinessUserBehaviour(TaskSet):
 
     config = [
         # io cpu memory timetorun timeout
+        [0, 0, 0, 1, 5],
         [0, 0, 1, 1, 5],
         [0, 1, 0, 1, 5],
         [0, 1, 1, 1, 5],
         [1, 0, 0, 1, 5],
         [1, 0, 1, 1, 5],
         [1, 1, 0, 1, 5],
-        [0, 0, 1, 5, 10],
-        [0, 1, 0, 5, 10],
-        [0, 1, 1, 5, 10],
-        [1, 0, 0, 5, 10],
-        [1, 0, 1, 5, 10],
-        [1, 1, 0, 5, 10],
-        [0, 0, 1, 10, 30],
-        [0, 1, 0, 10, 30],
-        [0, 1, 1, 10, 30],
-        [1, 0, 0, 10, 30],
-        [1, 0, 1, 10, 30],
-        [1, 1, 0, 10, 30],
-        [0, 0, 1, 15, 60],
-        [0, 1, 0, 15, 60],
-        [0, 1, 1, 15, 60],
-        [1, 0, 0, 15, 60],
-        [1, 0, 1, 15, 60],
-        [1, 1, 0, 15, 60],
-        [0, 0, 1, 20, 80],
-        [0, 1, 0, 20, 80],
-        [0, 1, 1, 20, 80],
-        [1, 0, 0, 20, 80],
-        [1, 0, 1, 20, 80],
-        [1, 1, 0, 20, 80]
+        [1, 1, 1, 1, 5]
     ]
             
     def on_start(self):
@@ -48,7 +26,7 @@ class BusinessUserBehaviour(TaskSet):
 
     @task
     def business_request(self):
-        if (self._round >= 2):
+        if (self._round >= 20):
             return
         current_config = self._shuffled[self.current_config_no]
         run_io = current_config[0]
@@ -71,5 +49,5 @@ class BusinessUserBehaviour(TaskSet):
 class BusinessUser(HttpLocust):
     task_set = BusinessUserBehaviour
     # Waiting (resting) time between requests
-    min_wait = 500 # ms
-    max_wait = 1000 # ms
+    min_wait = 50 # ms
+    max_wait = 100 # ms

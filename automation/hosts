@@ -1,11 +1,18 @@
 # WARNING: DO NOT check-in public IPs of the servers into git
 # 不要把公网 IP 写入到 git 仓库里
 
-[controlvm]
-saasi-vm01.it.deakin.edu.au
-[workvm]
-172.17.0.9
-172.17.0.14
-172.17.0.15
-
-
+[manager]
+manager-01
+manager-02
+manager-03
+[worker]
+worker-01
+worker-02
+worker-03
+worker-04
+worker-05
+worker-06
+worker-07
+worker-08
+worker-09
+worker-10

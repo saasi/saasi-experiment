@@ -10,7 +10,7 @@ COPY . .
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package
 
 
-FROM tomcat:9.0-jre8-alpine
+FROM tomcat:9.0-jre8
 # ADD tomcat/catalina.sh $CATALINA_HOME/bin/
 WORKDIR /usr/local/tomcat/bin
 COPY run.sh run.sh
@@ -25,3 +25,5 @@ ENV JPDA_TRANSPORT="dt_socket"
 EXPOSE 8080
 WORKDIR /usr/local/tomcat/bin
 CMD ["run.sh"]
+
+HEALTHCHECK --interval=3s --timeout=5s --start-period=15s --retries=3 CMD curl --fail http://localhost:8080/health || exit 1
