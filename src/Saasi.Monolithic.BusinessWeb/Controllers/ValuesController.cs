@@ -30,12 +30,12 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             this._tq = tq;
         }
 
-        private void UpdateMetrics(int operationId) {
+        private void UpdateMetrics() {
             _metrics.GetGauge("bms_in_queue")
-                .Labels(operationId.ToString())
+                .Labels("1")
                 .Value = _tq.ItemsWaiting;
             _metrics.GetGauge("bms_exec")
-                .Labels(operationId.ToString())
+                .Labels("1")
                 .Value = _tq.ItemsRunning;
         }
         // GET api/Business
@@ -59,11 +59,11 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                 .Increment();
             DateTime QueueTime = DateTime.Now;
             Console.WriteLine($"Transcation {TranscationID}: Queued at {QueueTime.ToString()}");
-            Task.Factory.StartNew(()=>UpdateMetrics(operationId));
+            Task.Factory.StartNew(()=>UpdateMetrics());
             Guid token = await _tq.QueueUp();
             DateTime StartTime = DateTime.Now;
             Console.WriteLine($"Transcation {TranscationID}: Started {StartTime.ToString()}");
-            UpdateMetrics(operationId);
+            UpdateMetrics();
             Object result = new {};
             try {
                 switch (operationId)
@@ -111,7 +111,7 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             _metrics.GetCounter("bms_requests_served")
                 .Labels(operationId.ToString())
                 .Increment();
-            Task.Factory.StartNew(()=>{ _tq.Finish(token); UpdateMetrics(operationId);});
+            Task.Factory.StartNew(()=>{ _tq.Finish(token); UpdateMetrics();});
             return new JsonResult(new {
                 Result = result,
                 QueuedAt = QueueTime.ToString(),

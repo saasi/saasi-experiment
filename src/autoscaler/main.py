@@ -18,7 +18,7 @@ with open("config.txt", "r") as f:
         elif l == "business_microservice2":  # eval 2
             core.register(core.MemoryMicroserviceMG(microservice_name='business_microservice', min_scale=2, max_scale=20))
         elif l == "business_web":
-            core.register(core.CpuMicroserviceMG('business_web'))
+            core.register(core.CpuMicroserviceMG('business_web',min_scale=1, max_scale=20))
 
 core.start_event_loop()
 

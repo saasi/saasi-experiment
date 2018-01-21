@@ -31,8 +31,6 @@ namespace Saasi.Monolithic.BusinessWeb
             services.AddPrometheus();
             services.AddSingleton<IMetricsContainer, MetricsContainer>();
             services.AddSingleton<IThrottleQueue>(new ThrottleQueue(50));
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

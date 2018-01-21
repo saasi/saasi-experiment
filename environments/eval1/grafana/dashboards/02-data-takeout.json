@@ -540,7 +540,7 @@
                         ],
                         "targets": [
                             {
-                                "expr": "avg_over_time(microservice_io_average{container_label_com_docker_swarm_service_name=~\"\\\\w+_microservice\"}[100d])",
+                                "expr": "avg_over_time(microservice_disk_io_reads_average{container_label_com_docker_swarm_service_name=~\"\\\\w+_microservice\"}[100d])",
                                 "format": "table",
                                 "hide": false,
                                 "instant": true,

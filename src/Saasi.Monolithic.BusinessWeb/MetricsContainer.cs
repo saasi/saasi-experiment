@@ -23,16 +23,16 @@ namespace Saasi.Monolithic.BusinessWeb {
             var inq = metrics.Gauge()
                 .Name("bms_in_queue")
                 .Help("The number requests currently queuing.")
-                .LabelNames("operation_id")
+                .LabelNames("ok")
                 .Register();
-            this.AddGauge("bms_in_queue", bms);
+            this.AddGauge("bms_in_queue", inq);
 
             var exec = metrics.Gauge()
                 .Name("bms_exec")
                 .Help("The number currently executing requests.")
-                .LabelNames("operation_id")
+                .LabelNames("ok")
                 .Register();
-            this.AddGauge("bms_exec", bms);
+            this.AddGauge("bms_exec", exec);
 
             var vio = metrics.Counter()
                 .Name("bms_business_violation_total")
@@ -46,7 +46,7 @@ namespace Saasi.Monolithic.BusinessWeb {
                 .Help("The number of requests served")
                 .LabelNames("operation_id")
                 .Register();
-            this.AddCounter("bms_requests_served", vio);
+            this.AddCounter("bms_requests_served", total);
         }
         
         private Dictionary<string, ILabelledGauge> gauges = new Dictionary<string, ILabelledGauge>();

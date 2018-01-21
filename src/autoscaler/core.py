@@ -45,7 +45,7 @@ class MicroserviceMonitoringGroup(object):
             print('updated')
 
 class CpuMicroserviceMG(MicroserviceMonitoringGroup):
-    CPU_THRESHOLD = 80.0 * 2 # 2 cores
+    CPU_THRESHOLD = 60.0 * 2 # 2 cores
 
     def __init__(self, microservice_name = 'cpu_microservice', min_scale = 1, max_scale = 10):
         super().__init__(microservice_name)
