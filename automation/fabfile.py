@@ -41,7 +41,24 @@ class PrometheusClient(object):
             except Exception:
                 return [0,float('nan')]
 
+class ElasticSearchClient(object):
+    def __init__(self, endpoint="http://manager-01:9200"):
+        self._endpoint = endpoint
+    
+    def GetCount(self, queryString):
+        '''
+            Get an instant value from Prometheus.
+            It is the caller's responsibility to ensure
+            the query returns an instant.
+        '''
+        r = requests.get(self._endpoint + '/fluentd-*/_search', params={'q': queryString})
+        r = r.json()
+        print(json.dumps(r))
+        return r['hits']['total']
+        
+
 prom = PrometheusClient()
+elst = ElasticSearchClient()
 
 @roles('loadgen')
 def start_load(userCount, requestsToRun):
@@ -105,7 +122,7 @@ def test_elasticsearch():
         r = requests.get('http://manager-01:9200/_cat/health', params={'h': 'status'})
     except Exception as e:
         return False
-    return r.content.strip() in ['yellow', 'green']
+    return r.content.strip() in ['green']
 
 def test_business_web():
     try:
@@ -161,7 +178,18 @@ def run_eval1(users='10',reqs='20'):
     execute(start_load,userCount=usersInt, requestsToRun=requestsInt)
     execute(clean_load)
     # wait for the cluster to chill off
-    #time.sleep(60)
+    while True:
+        try:
+            s = prom.GetInstantValue("scalar(sum(bms_active_transactions))")[1]
+            print(s)
+            p = int(s)
+        except:
+            p = 0
+        if p<5:
+            break
+        print("Still",p,"requests running... Waiting for them to finish")
+        time.sleep(10)
+
     endTime = datetime.now()
     timeSpent = endTime - startTime
     minutesSpent = int(math.ceil(timeSpent.seconds/60.0))
@@ -176,7 +204,7 @@ def run_eval1(users='10',reqs='20'):
     execute(export_data, str(minutesSpent)+'m', outputPath)
     
     execute(clean_stack)
-    #execute(restart_cluster)
+    execute(restart_cluster)
 
 def collect_data(minutesSpent):
     # COST
@@ -286,9 +314,13 @@ def collect_data(minutesSpent):
         )
     """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
 
+    business_requests_total = elst.GetCount("container_name: *business** AND log: *finished* AND log: Transcation")
+    business_violation_total = elst.GetCount("container_name: *business** AND log: *violation* AND log: Transcation")
+
+
     return {
-        'MaxScale': avg_scale,
-        'AvgScale': max_scale,
+        'MaxScale': max_scale,
+        'AvgScale': avg_scale,
         'CpuAverage': avg_cpu_per_container_per_microservice,
         'MemAverage': avg_mem_per_container_per_microservice,
         'NetInAverage': avg_network_in_per_container_per_microservice,
@@ -300,5 +332,7 @@ def collect_data(minutesSpent):
         'WorkloadNetInTotal': workload_total_network_in,
         'WorkloadNetOutTotal': workload_total_network_out,
         'ControllerNetInTotal': controller_total_network_in,
-        'ControllerNetOutTotal': controller_total_network_out
+        'ControllerNetOutTotal': controller_total_network_out,
+        'TotalRequests': business_requests_total,
+        'TotalViolations': business_violation_total
     }
