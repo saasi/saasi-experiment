@@ -1,0 +1,9 @@
+groups:
+  - name: resource
+    rules:
+    - record: microservice_cpu_average
+      expr: avg(rate(container_cpu_usage_seconds_total[1m])) by (container_label_com_docker_swarm_service_name) * 100 
+    - record: microservice_memory_average
+      expr: avg(container_memory_rss) by (container_label_com_docker_swarm_service_name)
+    - record: microservice_io_average
+      expr: avg(rate(container_fs_writes_bytes_total[1m])) by (container_label_com_docker_swarm_service_name)
