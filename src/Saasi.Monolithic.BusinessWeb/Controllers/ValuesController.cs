@@ -18,13 +18,26 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
         private readonly IMetricsContainer _metrics;
         private readonly IThrottleQueue _tq;
 
-        private readonly TimeSpan[] Timeout = new TimeSpan[]{new TimeSpan(0,0,5)};
+        private readonly TimeSpan[] Timeout = new TimeSpan[]{new TimeSpan(0,0,10), 
+                                                             new TimeSpan(0,0,25),
+                                                             new TimeSpan(0,0,30),
+                                                             new TimeSpan(0,0,20),
+                                                             new TimeSpan(0,0,30),
+                                                             new TimeSpan(0,1,0)};
         public ValuesController(IMetricsContainer metrics, IThrottleQueue tq)
         {
             this._metrics = metrics;
             this._tq = tq;
         }
 
+        private void UpdateMetrics(int operationId) {
+            _metrics.GetGauge("bms_in_queue")
+                .Labels(operationId.ToString())
+                .Value = _tq.ItemsWaiting;
+            _metrics.GetGauge("bms_exec")
+                .Labels(operationId.ToString())
+                .Value = _tq.ItemsRunning;
+        }
         // GET api/Business
         [HttpGet("Business")]
         /*
@@ -37,7 +50,7 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
          */
         public async Task<ActionResult> SimulateBusinessTransaction(int operationId)
         {
-            if (! (operationId>=0 && operationId <=0) ) {
+            if (! (operationId>=0 && operationId <=5) ) {
                 return new StatusCodeResult(404);
             }
             Guid TranscationID = Guid.NewGuid();
@@ -46,17 +59,32 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                 .Increment();
             DateTime QueueTime = DateTime.Now;
             Console.WriteLine($"Transcation {TranscationID}: Queued at {QueueTime.ToString()}");
-
+            Task.Factory.StartNew(()=>UpdateMetrics(operationId));
             Guid token = await _tq.QueueUp();
             DateTime StartTime = DateTime.Now;
             Console.WriteLine($"Transcation {TranscationID}: Started {StartTime.ToString()}");
-            
+            UpdateMetrics(operationId);
             Object result = new {};
             try {
                 switch (operationId)
                 {
                     case 0:
                         result = await Operation0();
+                        break;
+                    case 1:
+                        result = await Operation1();
+                        break;
+                    case 2:
+                        result = await Operation2();
+                        break;
+                    case 3:
+                        result = await Operation3();
+                        break;
+                    case 4:
+                        result = await Operation4();
+                        break;
+                    case 5:
+                        result = await Operation5();
                         break;
                     default:
                         break;
@@ -71,7 +99,6 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             _metrics.GetGauge("bms_active_transactions")
                 .Labels(operationId.ToString())
                 .Decrement();
-            _tq.Finish(token);
             var finishedTime = DateTime.Now;
             var violated = false;
             if (finishedTime - QueueTime > this.Timeout[operationId]) {
@@ -81,6 +108,10 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                     .Increment();
                 violated = true;
             } 
+            _metrics.GetCounter("bms_requests_served")
+                .Labels(operationId.ToString())
+                .Increment();
+            Task.Factory.StartNew(()=>{ _tq.Finish(token); UpdateMetrics(operationId);});
             return new JsonResult(new {
                 Result = result,
                 QueuedAt = QueueTime.ToString(),
@@ -95,27 +126,35 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             return "OK";
         }
 
+        private Task<ExecutionResult> IoHelper(int level) {
+            var ioWorkload = new IoWorkload();
+            var r = new Random();
+            Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
+            Int64 length = Convert.ToInt64(level) * Program.cellSize;
+            return ioWorkload.Run(startByte, length);
+        }
+
+        // sleep 5s
         private async Task<object> Operation0() {
+            await Task.Delay(5000);
+
+            return "Slept";
+        }
+        // par(io(1), cpu(1))  sleep 2s  mem(2)
+        private async Task<object> Operation1() {
             var tasks = new List<Task<ExecutionResult>>();
            
-            {
-                var ioWorkload = new IoWorkload();
-                var r = new Random();
-                Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
-                Int64 length = 1L * Program.cellSize;
-
-                tasks.Add(ioWorkload.Run(startByte, length));
-            }
-            {
-                var cpuWorkload = new CpuWorkload();
-                tasks.Add(cpuWorkload.Run(1));
-            }
+            tasks.Add(IoHelper(1));
+            
+            var cpuWorkload = new CpuWorkload();
+            tasks.Add(cpuWorkload.Run(1));
+        
             await Task.WhenAll(tasks.ToArray());
 
-            Thread.Sleep(2000);
+            await Task.Delay(2000);
             
             var resultList = new Dictionary<string, ExecutionResult>();
-                resultList.Add("io", tasks[0].Result);    
+                //resultList.Add("io", tasks[0].Result.Payload.Length);    
                 resultList.Add("cpu", tasks[1].Result);
             {
                 var memoryWorkload = new MemoryWorkload();
@@ -124,6 +163,63 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             }
 
             return resultList;
+        }
+
+        // cpu(1)  sleep 5s  mem(1) io(1)
+        private async Task<object> Operation2() {
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(1);
+
+            await Task.Delay(5000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+
+            var memoryWorkload = new MemoryWorkload();
+            var resultMem = await memoryWorkload.Run(1);
+            resultList.Add("memory", resultMem);
+            await IoHelper(1);
+
+            return resultList;
+        }
+
+        // io(1) sleep 1 mem(3)
+        private async Task<object> Operation3() {
+            await IoHelper(1);
+ 
+            await Task.Delay(1000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+
+            var memoryWorkload = new MemoryWorkload();
+            var resultMem = await memoryWorkload.Run(3);
+            resultList.Add("memory", resultMem);
+
+            return resultList;
+        }
+
+         // mem(3) cpu(1)
+        private async Task<object> Operation4() {
+            var resultList = new Dictionary<string, ExecutionResult>();
+            var memoryWorkload = new MemoryWorkload();
+
+            var resultMem = await memoryWorkload.Run(1);
+            resultList.Add("memory", resultMem);
+            
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(1);
+
+
+            return resultList;
+        }
+        // io(1) sleep 1 cpu(3)
+        private async Task<object> Operation5() {
+            await IoHelper(1);
+            await Task.Delay(1000);
+
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(3);
+
+            return "OK";
         }
 
     }

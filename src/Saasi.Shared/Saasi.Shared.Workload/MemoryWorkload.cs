@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,16 @@ namespace Saasi.Shared.Workload
             // simulate memory use 
             var url = "https://news.ycombinator.com/";
             var web = new HtmlWeb();
-            var doc = await web.LoadFromWebAsync(url);
+            HtmlDocument doc;
+            try {
+                doc = await web.LoadFromWebAsync(url);
+            } catch {
+                var assembly = Assembly.GetExecutingAssembly();
+                string[] names = assembly.GetManifestResourceNames(); 
+                var resourceStream = assembly.GetManifestResourceStream("Saasi.Shared.Workload.Data.hn.html");
+                doc = new HtmlDocument();
+                doc.Load(resourceStream);
+            }
             var result = new List<object>();
             for (var i = 0; i < round; ++i) {
                 var mainTable = doc.DocumentNode.Descendants("table")

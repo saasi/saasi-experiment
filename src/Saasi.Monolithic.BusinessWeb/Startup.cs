@@ -30,7 +30,7 @@ namespace Saasi.Monolithic.BusinessWeb
             services.AddMvc();
             services.AddPrometheus();
             services.AddSingleton<IMetricsContainer, MetricsContainer>();
-            services.AddSingleton<IThrottleQueue, ThrottleQueue>();
+            services.AddSingleton<IThrottleQueue>(new ThrottleQueue(50));
 
 
         }
