@@ -7,6 +7,7 @@ using System.Threading;
 using Saasi.Shared.Workload;
 using Newtonsoft.Json.Serialization;
 using Nexogen.Libraries.Metrics.Prometheus;
+using Saasi.Shared.Queue;
 
 namespace Saasi.Monolithic.BusinessWeb.Controllers
 {
@@ -15,9 +16,13 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
     {
 
         private readonly IMetricsContainer _metrics;
-        public ValuesController(IMetricsContainer metrics)
+        private readonly IThrottleQueue _tq;
+
+        private readonly TimeSpan[] Timeout = new TimeSpan[]{new TimeSpan(0,0,5)};
+        public ValuesController(IMetricsContainer metrics, IThrottleQueue tq)
         {
             this._metrics = metrics;
+            this._tq = tq;
         }
 
         // GET api/Business
@@ -30,79 +35,57 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
          * timetorun: for how long (in seconds) should we generate the CPU/Memory/IO load?
          * timeout: the maximum time (in seconds) allowed for the request to finish.
          */
-        public async Task<JsonResult> SimulateBusinessTransaction(int io,
-                                                              int cpu,
-                                                              int memory,
-                                                              long timestart,
-                                                              int timetorun,
-                                                              int timeout)
+        public async Task<ActionResult> SimulateBusinessTransaction(int operationId)
         {
+            if (! (operationId>=0 && operationId <=0) ) {
+                return new StatusCodeResult(404);
+            }
             Guid TranscationID = Guid.NewGuid();
             _metrics.GetGauge("bms_active_transactions")
-                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Labels(operationId.ToString())
                 .Increment();
+            DateTime QueueTime = DateTime.Now;
+            Console.WriteLine($"Transcation {TranscationID}: Queued at {QueueTime.ToString()}");
 
-            long StartTimestampMs = timestart * 1000;
-            long ExpectedFinishTimeMs = (timestart + timeout) * 1000;
-            DateTime StartTimeDateTime = new DateTime(StartTimestampMs); //don't know if it's need to add the 1970
-            long ReceivedTimeMs = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds; //don't know if it's reasonable
-            Console.WriteLine($"Transcation {TranscationID}: Started at {DateTime.Now.ToString()}");
+            Guid token = await _tq.QueueUp();
+            DateTime StartTime = DateTime.Now;
+            Console.WriteLine($"Transcation {TranscationID}: Started {StartTime.ToString()}");
+            
+            Object result = new {};
+            try {
+                switch (operationId)
+                {
+                    case 0:
+                        result = await Operation0();
+                        break;
+                    default:
+                        break;
+                }
 
-            var tasks = new List<Task<ExecutionResult>>();
-            
-            if (io == 1)
-            {
-                var ioWorkload = new IoWorkload();
-                tasks.Add(ioWorkload.Run(timetorun));
+            } catch {
+                // do nothing
             }
-            if (cpu == 1)
-            {
-                var cpuWorkload = new CpuWorkload();
-                tasks.Add(cpuWorkload.Run(timetorun));
-            }
-            if (memory == 1)
-            {
-                var memoryWorkload = new MemoryWorkload();
-                tasks.Add(memoryWorkload.Run(timetorun));
-            }
-            if (tasks.Count > 0) {
-                await Task.WhenAll(tasks.ToArray());
-            }
-            
-            var resultList = new Dictionary<string, ExecutionResult>();
-            var i = 0;
-            if (io == 1) {
-                resultList.Add("io", tasks[i].Result);
-                ++i;
-            }
-            if (cpu == 1) {
-                resultList.Add("cpu", tasks[i].Result);
-                ++i;
-            }
-            if (memory == 1) {
-                resultList.Add("memory", tasks[i].Result);
-                ++i;
-            }
+  
 
             Console.WriteLine($"Transcation {TranscationID}: Finished at {DateTime.Now.ToString()}");
             _metrics.GetGauge("bms_active_transactions")
-                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Labels(operationId.ToString())
                 .Decrement();
-
+            _tq.Finish(token);
             var finishedTime = DateTime.Now;
             var violated = false;
-            if (finishedTime - StartTimeDateTime > new TimeSpan(0,0,timeout)) {
+            if (finishedTime - QueueTime > this.Timeout[operationId]) {
                 Console.WriteLine($"Transcation {TranscationID}: Business violation");            
                 _metrics.GetCounter("bms_business_violation_total")
-                    .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                     .Labels(operationId.ToString())
                     .Increment();
                 violated = true;
             } 
             return new JsonResult(new {
-                Tasks = resultList,
-                StartedAt = StartTimeDateTime.ToString(),
+                Result = result,
+                QueuedAt = QueueTime.ToString(),
+                StartedAt = StartTime.ToString(),
                 FinishedAt = finishedTime,
-                ExpectedToFinishAt = new DateTime(ExpectedFinishTimeMs).ToString(),
                 BusinessViolation = violated
             });
         }
@@ -110,7 +93,38 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
         [HttpGet("status")]
         public string GetStatus() {
             return "OK";
-        } 
+        }
+
+        private async Task<object> Operation0() {
+            var tasks = new List<Task<ExecutionResult>>();
+           
+            {
+                var ioWorkload = new IoWorkload();
+                var r = new Random();
+                Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
+                Int64 length = 1L * Program.cellSize;
+
+                tasks.Add(ioWorkload.Run(startByte, length));
+            }
+            {
+                var cpuWorkload = new CpuWorkload();
+                tasks.Add(cpuWorkload.Run(1));
+            }
+            await Task.WhenAll(tasks.ToArray());
+
+            Thread.Sleep(2000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+                resultList.Add("io", tasks[0].Result);    
+                resultList.Add("cpu", tasks[1].Result);
+            {
+                var memoryWorkload = new MemoryWorkload();
+                var resultMem = await memoryWorkload.Run(2);
+                resultList.Add("memory", resultMem);
+            }
+
+            return resultList;
+        }
 
     }
 }

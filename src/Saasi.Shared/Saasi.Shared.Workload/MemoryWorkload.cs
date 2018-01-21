@@ -35,13 +35,16 @@ namespace Saasi.Shared.Workload
 
         public async Task<string> XMLManipulation(int round)
         {
+            
             // simulate memory use 
             var url = "https://news.ycombinator.com/";
             var web = new HtmlWeb();
             var doc = await web.LoadFromWebAsync(url);
-            var mainTable = doc.DocumentNode.Descendants("table")
-                .Where(x => x.Attributes["id"].Value == "hnmain")
-                .First();
+            var result = new List<object>();
+            for (var i = 0; i < round; ++i) {
+                var mainTable = doc.DocumentNode.Descendants("table")
+                    .Where(x => x.Attributes["id"].Value == "hnmain")
+                    .First();
 
                 var itemList = mainTable.Descendants("table")
                     .Where(x => x.Attributes["class"]?.Value  == "itemlist")
@@ -66,7 +69,9 @@ namespace Saasi.Shared.Workload
                     .ToList()
                     .Where(x => x != null)
                     .ToList();
-            return JsonConvert.SerializeObject(resultList);
+                result.Add(resultList);
+            }
+            return JsonConvert.SerializeObject(result);
 
         }
     }

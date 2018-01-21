@@ -16,14 +16,14 @@ namespace Saasi.Monolithic.BusinessWeb {
             var bms = metrics.Gauge()
                 .Name("bms_active_transactions")
                 .Help("The number of currently running requests.")
-                .LabelNames("io", "cpu", "memory", "timetorun")
+                .LabelNames("operation_id")
                 .Register();
             this.AddGauge("bms_active_transactions", bms);
 
             var vio = metrics.Counter()
                 .Name("bms_business_violation_total")
                 .Help("The number of business violations")
-                .LabelNames("io", "cpu", "memory", "timetorun")
+                .LabelNames("operation_id")
                 .Register();
             this.AddCounter("bms_business_violation_total", vio);
         }
