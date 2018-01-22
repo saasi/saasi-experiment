@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
-using Saasi.Shared.Workload;
 using Newtonsoft.Json.Serialization;
 using Nexogen.Libraries.Metrics.Prometheus;
 using Saasi.Shared.Queue;
 
-namespace Saasi.Monolithic.BusinessWeb.Controllers
+namespace Saasi.Microservices.Business
 {
     [Route("api")]
     public class ValuesController : Controller
@@ -17,6 +16,7 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
 
         private readonly IMetricsContainer _metrics;
         private readonly IThrottleQueue _tq;
+        private readonly IApiCaller _api;
 
         private readonly TimeSpan[] Timeout = new TimeSpan[]{new TimeSpan(0,0,10), 
                                                              new TimeSpan(0,0,25),
@@ -24,10 +24,11 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                                                              new TimeSpan(0,0,20),
                                                              new TimeSpan(0,0,30),
                                                              new TimeSpan(0,1,0)};
-        public ValuesController(IMetricsContainer metrics, IThrottleQueue tq)
+        public ValuesController(IMetricsContainer metrics, IThrottleQueue tq, IApiCaller api)
         {
             this._metrics = metrics;
             this._tq = tq;
+            this._api = api;
         }
 
         private void UpdateMetrics() {
@@ -126,14 +127,6 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
             return "OK";
         }
 
-        private Task<ExecutionResult> IoHelper(int level) {
-            var ioWorkload = new IoWorkload();
-            var r = new Random();
-            Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
-            Int64 length = Convert.ToInt64(level) * Program.cellSize;
-            return ioWorkload.Run(startByte, length);
-        }
-
         // sleep 5s
         private async Task<object> Operation0() {
             await Task.Delay(5000);
@@ -142,23 +135,21 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
         }
         // par(io(1), cpu(1))  sleep 2s  mem(2)
         private async Task<object> Operation1() {
-            var tasks = new List<Task<ExecutionResult>>();
+            var tasks = new List<Task<object>>();
            
-            tasks.Add(IoHelper(1));
+            tasks.Add(_api.CallIo(1));
             
-            var cpuWorkload = new CpuWorkload();
-            tasks.Add(cpuWorkload.Run(1));
+            tasks.Add(_api.CallCpu(1));
         
             await Task.WhenAll(tasks.ToArray());
 
             await Task.Delay(2000);
             
-            var resultList = new Dictionary<string, ExecutionResult>();
+            var resultList = new Dictionary<string, object>();
                 //resultList.Add("io", tasks[0].Result.Payload.Length);    
                 resultList.Add("cpu", tasks[1].Result);
             {
-                var memoryWorkload = new MemoryWorkload();
-                var resultMem = await memoryWorkload.Run(2);
+                var resultMem = await _api.CallMemory(2);
                 resultList.Add("memory", resultMem);
             }
 
@@ -167,31 +158,28 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
 
         // cpu(1)  sleep 5s  mem(1) io(1)
         private async Task<object> Operation2() {
-            var cpuWorkload = new CpuWorkload();
-            await cpuWorkload.Run(1);
+            await _api.CallCpu(1);
 
             await Task.Delay(5000);
             
-            var resultList = new Dictionary<string, ExecutionResult>();
+            var resultList = new Dictionary<string, object>();
 
-            var memoryWorkload = new MemoryWorkload();
-            var resultMem = await memoryWorkload.Run(1);
+            var resultMem = await _api.CallMemory(1);
             resultList.Add("memory", resultMem);
-            await IoHelper(1);
+            await _api.CallIo(1);
 
             return resultList;
         }
 
         // io(1) sleep 1 mem(3)
         private async Task<object> Operation3() {
-            await IoHelper(1);
+            await _api.CallIo(1);
  
             await Task.Delay(1000);
             
-            var resultList = new Dictionary<string, ExecutionResult>();
+            var resultList = new Dictionary<string, object>();
 
-            var memoryWorkload = new MemoryWorkload();
-            var resultMem = await memoryWorkload.Run(3);
+            var resultMem = await _api.CallMemory(3);
             resultList.Add("memory", resultMem);
 
             return resultList;
@@ -199,25 +187,22 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
 
          // mem(1) cpu(1)
         private async Task<object> Operation4() {
-            var resultList = new Dictionary<string, ExecutionResult>();
-            var memoryWorkload = new MemoryWorkload();
+            var resultList = new Dictionary<string, object>();
 
-            var resultMem = await memoryWorkload.Run(1);
+            var resultMem = await _api.CallMemory(1);
             resultList.Add("memory", resultMem);
             
-            var cpuWorkload = new CpuWorkload();
-            await cpuWorkload.Run(1);
-
+            await _api.CallCpu(1);
 
             return resultList;
         }
+        
         // io(1) sleep 1 cpu(3)
         private async Task<object> Operation5() {
-            await IoHelper(1);
+            await _api.CallIo(1);
             await Task.Delay(1000);
 
-            var cpuWorkload = new CpuWorkload();
-            await cpuWorkload.Run(3);
+            await _api.CallCpu(3);
 
             return "OK";
         }

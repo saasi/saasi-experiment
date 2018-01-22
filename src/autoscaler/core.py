@@ -163,7 +163,7 @@ class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
         currentRate = self._res.GetBusinessViolationRate()
         currentScale = self._swarm.GetScaleTarget()
         
-        if (currentRate > 0.30):
+        if (currentRate > 0.15):
             self._scale_up_rule.setActive()
             if (self._scale_up_rule.activeFor().total_seconds() > 15):
                 targetScale = currentScale + 2

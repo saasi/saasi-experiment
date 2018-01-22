@@ -5,5 +5,19 @@ groups:
       expr: avg(rate(container_cpu_usage_seconds_total[1m])) by (container_label_com_docker_swarm_service_name) * 100 
     - record: microservice_memory_average
       expr: avg(container_memory_rss) by (container_label_com_docker_swarm_service_name)
-    - record: microservice_io_average
+    - record: microservice_disk_io_write_average
       expr: avg(rate(container_fs_writes_bytes_total[1m])) by (container_label_com_docker_swarm_service_name)
+    - record: microservice_disk_io_read_average
+      expr: avg(rate(container_fs_reads_bytes_total[1m])) by (container_label_com_docker_swarm_service_name)
+    - record: microservice_network_io_in_average
+      expr: avg(rate(container_network_receive_bytes_total[1m])) by (container_label_com_docker_swarm_service_name)
+    - record: microservice_network_io_out_average
+      expr: avg(rate(container_network_transmit_bytes_total[1m])) by (container_label_com_docker_swarm_service_name)
+    - record: container_cpu_total
+      expr: sum(rate(container_cpu_usage_seconds_total[1m])) by (container_label_com_docker_swarm_task_name, container_label_com_docker_swarm_service_name, container_label_saasi_group) * 100 
+    - record: container_memory_total
+      expr: sum(container_memory_rss) by (container_label_com_docker_swarm_task_name, container_label_com_docker_swarm_service_name, container_label_saasi_group)
+    - record: container_network_io_in_total
+      expr: sum(container_network_receive_bytes_total) by (container_label_com_docker_swarm_task_name, container_label_com_docker_swarm_service_name, container_label_saasi_group)
+    - record: container_network_io_out_total
+      expr: sum(container_network_transmit_bytes_total) by (container_label_com_docker_swarm_task_name, container_label_com_docker_swarm_service_name, container_label_saasi_group)
