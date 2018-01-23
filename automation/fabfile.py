@@ -67,6 +67,12 @@ def start_load_eval1(userCount, requestsToRun):
             run('locust --host=http://172.17.0.3:8080/api --no-web -r 5 -c '+str(userCount)+' -n '+str(requestsToRun))
 
 @roles('loadgen')
+def start_load_eval2(userCount, requestsToRun):
+    with settings(warn_only=True):
+        with cd('/root/saasi-experiment/environments/eval2'):
+            run('locust --host=http://172.17.0.3:80/api --no-web -r 5 -c '+str(userCount)+' -n '+str(requestsToRun))
+
+@roles('loadgen')
 def start_load_eval3(userCount, requestsToRun):
     with settings(warn_only=True):
         with cd('/root/saasi-experiment/environments/eval3'):
@@ -91,6 +97,12 @@ def build_stack_eval1():
         run('./push_to_registry.sh')
 
 @roles('manager')
+def build_stack_eval2():
+    with cd('/root/saasi-experiment/environments/eval2'):
+        run('./build.sh')
+        run('./push_to_registry.sh')
+
+@roles('manager')
 def build_stack_eval3():
     with cd('/root/saasi-experiment/environments/eval3'):
         run('./build.sh')
@@ -100,6 +112,11 @@ def build_stack_eval3():
 def deploy_stack_eval1():
     with cd('/root/saasi-experiment/environments/eval1'):
         run('docker stack deploy -c docker-compose.yml eval1')
+
+@roles('manager')
+def deploy_stack_eval2():
+    with cd('/root/saasi-experiment/environments/eval2'):
+        run('docker stack deploy -c docker-compose.yml eval2')
 
 @roles('manager')
 def deploy_stack_eval3():
@@ -184,6 +201,12 @@ def export_data(timespan, outputPath):
     get('/root/data', outputPath)
 
 @roles('manager')
+def export_data_eval2(timespan, outputPath):
+    with cd('/root/saasi-experiment/environments/eval2'):
+        run('./export_data.sh '+timespan+' /root/data')
+    get('/root/data', outputPath)
+
+@roles('manager')
 def export_data_eval3(timespan, outputPath):
     with cd('/root/saasi-experiment/environments/eval3'):
         run('./export_data.sh '+timespan+' /root/data')
@@ -240,6 +263,61 @@ def run_eval1(users='10',reqs='20'):
         json.dump(result, outfile, sort_keys=True, indent=4)
 
     execute(export_data, str(minutesSpent)+'m', outputPath)
+    
+    execute(clean_stack)
+    execute(restart_cluster)
+
+def run_eval2(users='10',reqs='20'):
+    requestsInt = int(reqs)
+    usersInt = int(users)
+    print("="*20)
+    print('Evaluation 2, '+str(usersInt)+' users run for '+str(requestsInt)+ ' requests')
+    print("="*20)
+    outputPath = Template('/home/ztl8702/saasi-data/users-$users-req-$requests-$ts').substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S')})
+    local("mkdir "+outputPath)
+
+    execute(clean_load)
+    retry = True
+    while (retry):
+        try:
+            execute(clean_stack)
+            execute(deploy_stack_eval2)
+            retry = False
+        except SystemExit:
+            print('Retrying')
+            retry = True
+
+    ensure_elasticsearch_healthy()
+    ensure_business_microservice_healthy()
+
+    startTime = datetime.now()
+    execute(start_load_eval2, userCount=usersInt, requestsToRun=requestsInt)
+    execute(clean_load)
+    # wait for the cluster to chill off
+    while True:
+        try:
+            s = prom.GetInstantValue("scalar(sum(bms_active_transactions))")[1]
+            print(s)
+            p = int(s)
+        except:
+            p = 0
+        if p<5:
+            break
+        print("Still",p,"requests running... Waiting for them to finish")
+        time.sleep(10)
+
+    endTime = datetime.now()
+    timeSpent = endTime - startTime
+    minutesSpent = int(math.ceil(timeSpent.seconds/60.0))
+    print("From "+str(startTime)+' to '+str(endTime)+', thats '+str(minutesSpent)+' minutes.')
+    # collect data
+    result = collect_data_eval3(minutesSpent) # same as 3
+
+    print(result)
+    with open(outputPath+'/data.json', 'w') as outfile:
+        json.dump(result, outfile, sort_keys=True, indent=4)
+
+    execute(export_data_eval2, str(minutesSpent)+'m', outputPath)
     
     execute(clean_stack)
     execute(restart_cluster)
