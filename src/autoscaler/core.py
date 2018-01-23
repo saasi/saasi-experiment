@@ -45,15 +45,15 @@ class MicroserviceMonitoringGroup(object):
             print('updated')
 
 class CpuMicroserviceMG(MicroserviceMonitoringGroup):
-    CPU_THRESHOLD = 60.0 * 2 # 2 cores
+    
 
-    def __init__(self, microservice_name = 'cpu_microservice', min_scale = 1, max_scale = 10):
+    def __init__(self, microservice_name = 'cpu_microservice', min_scale = 1, max_scale = 10, threshold= 60.0 * 2 ): # 2 cores
         super().__init__(microservice_name)
         self._min_scale = min_scale
         self._max_scale = max_scale
         self._scale_up_rule = utils.DelayedActionHelper()
         self._scale_down_rule = utils.DelayedActionHelper()
-        
+        self.CPU_THRESHOLD = threshold
     def _check(self):
         cpuTotal = self._res.GetCPUUsageSum(timespan='30s')
         targetScale = math.ceil(cpuTotal / self.CPU_THRESHOLD)
@@ -113,21 +113,21 @@ class IoMicroserviceMG(MicroserviceMonitoringGroup):
             self._scale_down_rule.setInactive()
 
 class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
-    MEMORY_THRESHOLD = 150 * 1024.0 * 1024.0 # 150MB
 
-    def __init__(self, microservice_name = 'memory_microservice', min_scale = 1, max_scale = 40):
+    def __init__(self, microservice_name = 'memory_microservice', min_scale = 1, max_scale = 40, threshold =  150 * 1024.0 * 1024.0 ):
         super().__init__(microservice_name)
         self._min_scale = min_scale
         self._max_scale = max_scale
         self._scale_up_rule = utils.DelayedActionHelper()
         self._scale_down_rule = utils.DelayedActionHelper()
+        self.MEMORY_THRESHOLD = threshold
         
     def _check(self):
         memTotal = self._res.GetMemoryUsage('30s')
         currentScale = self._swarm.GetScaleTarget()
          
-        print("#### MEM",memTotal, self.MEMORY_THRESHOLD,(memTotal - MemoryMicroserviceMG.MEMORY_THRESHOLD) / MemoryMicroserviceMG.MEMORY_THRESHOLD)
-        if ((memTotal - MemoryMicroserviceMG.MEMORY_THRESHOLD) / MemoryMicroserviceMG.MEMORY_THRESHOLD > 0.1):
+        print("#### MEM",memTotal, self.MEMORY_THRESHOLD,(memTotal - self.MEMORY_THRESHOLD) / self.MEMORY_THRESHOLD)
+        if ((memTotal - self.MEMORY_THRESHOLD) / self.MEMORY_THRESHOLD > 0.1):
             # scale up rule
             self._scale_up_rule.setActive()
             if (self._scale_up_rule.activeFor().total_seconds() > 10):
@@ -138,7 +138,7 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         else:
             self._scale_up_rule.setInactive()
 
-        if ((MemoryMicroserviceMG.MEMORY_THRESHOLD - memTotal) / MemoryMicroserviceMG.MEMORY_THRESHOLD > 0.05):
+        if ((self.MEMORY_THRESHOLD - memTotal) / self.MEMORY_THRESHOLD > 0.05):
             # scale down rule
             self._scale_down_rule.setActive()
             if (self._scale_down_rule.activeFor().total_seconds() > 30):
@@ -148,6 +148,25 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
                 self._scale_down_rule.setInactive()
         else:
             self._scale_down_rule.setInactive()
+
+class MemoryMicroserviceMGStub(MemoryMicroserviceMG):
+    def __init__(self, scaleout_func, microservice_name = 'memory_microservice', min_scale = 1, max_scale = 40,  threshold =  150 * 1024.0 * 1024.0):
+        super().__init__(microservice_name,min_scale,max_scale,threshold)
+        self._scaleout_func = scaleout_func
+
+    def _do_scale(self, targetScale):
+        print("Passing scale to ...")
+        self._scaleout_func(targetScale)
+
+class CpuMicroserviceMGStub(CpuMicroserviceMG):
+
+    def __init__(self, scaleout_func, microservice_name = 'cpu_microservice', min_scale = 1, max_scale = 10, threshold=48.0*2):
+        super().__init__(microservice_name, min_scale, max_scale,threshold)
+        self._scaleout_func = scaleout_func
+ 
+    def _do_scale(self, targetScale):
+        print("Passing scale to ...")
+        self._scaleout_func(targetScale)
 
 class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
     BUSINESS_VIOLATION_RATE_THRESHOLD = 0.15
@@ -183,10 +202,37 @@ class BusinessMicroserviceMG(MicroserviceMonitoringGroup):
         else:
             self._scale_down_rule.setInactive()
 
+class BusinessWebMG(MicroserviceMonitoringGroup):
+    def __init__(self, microservice_name = 'business_web', min_scale = 1, max_scale = 40):
+        super().__init__(microservice_name)
+        self._min_scale = min_scale
+        self._max_scale = max_scale
+        self._cpu_mg = CpuMicroserviceMGStub(self._cpu_callback, microservice_name='business_web', min_scale=min_scale, max_scale=max_scale, threshold= 48.0*2)
+        self._memory_mg = MemoryMicroserviceMGStub(self._memory_callback,  microservice_name='business_web', min_scale=min_scale, max_scale=max_scale, threshold=200 * 1024.0 * 1024.0)
+        self._cpu_scale = 0
+        self._memory_scale = 0
 
+    def _check(self):
+        self._cpu_mg._check()
+        self._memory_mg._check()
+
+    def _cpu_callback(self, targetScale):
+        self._cpu_scale = targetScale
+        self._do_check()
+
+    def _memory_callback(self, targetScale):
+        self._memory_scale = targetScale 
+        self._do_check()
+
+    def _do_check(self):
+        targetScale = self._swarm.GetScaleTarget()
+        targetScale = limit_range(self._cpu_scale, targetScale, self._max_scale)
+        targetScale = limit_range(self._memory_scale, targetScale, self._max_scale)
+        targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
+        if targetScale != self._swarm.GetScaleTarget():
+            self._do_scale(targetScale)
+    
 class DummyMG(MicroserviceMonitoringGroup):
-    CPU_THRESHOLD = 80.0
-
     def __init__(self):
         super().__init__('cpu_microservice')        
         

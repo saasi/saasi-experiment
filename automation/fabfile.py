@@ -195,7 +195,7 @@ def ensure_business_microservice_healthy():
     print('Business Microservice OK!')
 
 @roles('manager')
-def export_data(timespan, outputPath):
+def export_data_eval1(timespan, outputPath):
     with cd('/root/saasi-experiment/environments/eval1'):
         run('./export_data.sh '+timespan+' /root/data')
     get('/root/data', outputPath)
@@ -256,13 +256,13 @@ def run_eval1(users='10',reqs='20'):
     minutesSpent = int(math.ceil(timeSpent.seconds/60.0))
     print("From "+str(startTime)+' to '+str(endTime)+', thats '+str(minutesSpent)+' minutes.')
     # collect data
-    result = collect_data(minutesSpent)
+    result = collect_data_eval1(minutesSpent)
 
     print(result)
     with open(outputPath+'/data.json', 'w') as outfile:
         json.dump(result, outfile, sort_keys=True, indent=4)
 
-    execute(export_data, str(minutesSpent)+'m', outputPath)
+    execute(export_data_eval1, str(minutesSpent)+'m', outputPath)
     
     execute(clean_stack)
     execute(restart_cluster)
