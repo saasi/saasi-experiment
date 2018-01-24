@@ -11,7 +11,7 @@ class CombinedMicroserviceMG(MicroserviceMonitoringGroup):
         self._min_scale = min_scale
         self._max_scale = max_scale
         self._cpu_mg = CpuMicroserviceMGStub(self._cpu_callback, microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 15.0*2)
-        self._memory_mg = MemoryMicroserviceMGStub(self._memory_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold=200 * 1024.0 * 1024.0)
+        self._memory_mg = MemoryMicroserviceMGStub(self._memory_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold=400 * 1024.0 * 1024.0)
         self._io_mg = IoMicroserviceMGStub(self._io_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 6 * 1024.0 * 1024.0)
         self._cpu_scale = 0
         self._memory_scale = 0
@@ -35,8 +35,8 @@ class CombinedMicroserviceMG(MicroserviceMonitoringGroup):
         self._do_check()
 
     def _do_check(self):
-        targetScale = self._swarm.GetScaleTarget()
-        targetScale = limit_range(self._cpu_scale, targetScale, self._max_scale)
+        #targetScale = self._swarm.GetScaleTarget()
+        targetScale = limit_range(self._cpu_scale, self._min_scale, self._max_scale)
         targetScale = limit_range(self._memory_scale, targetScale, self._max_scale)
         targetScale = limit_range(self._io_scale, targetScale, self._max_scale)
         targetScale = limit_range(targetScale, self._min_scale, self._max_scale)

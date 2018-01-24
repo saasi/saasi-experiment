@@ -9,15 +9,10 @@ services:
     labels:
       saasi.microservices.type: "business"
       saasi.group: 'workload'
-    depends_on:
-      - io_microservice
-      - cpu_microservice
-      - memory_microservice
-    labels:
-      - "traefik.backend.healthcheck.path=/api/status"
-      - "traefik.backend.healthcheck.interval=1s"
-      - "traefik.backend.healthcheck.port=80"
-      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
+      traefik.backend.healthcheck.path: "/api/status"
+      traefik.backend.healthcheck.interval: "1s"
+      traefik.backend.healthcheck.port: "80"
+      traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
         saasi.microservices.type: "business"

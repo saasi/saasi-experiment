@@ -6,7 +6,7 @@ from string import Template
 import math
 import json
 
-OUTPUT_PATH = '/home/ztl8702/saasi-data/users-$users-req-$requests-$ts-eval$type'
+OUTPUT_PATH = '/home/ztl8702/saasi-data/users-$users-req-$requests-$ts-$type'
 
 
 env.user = 'root'

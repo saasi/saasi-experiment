@@ -15,7 +15,7 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         
     def _check(self):
         memTotal = self._res.GetMemoryUsage('30s')
-        targetScale =  math.ceil(cpuTotal / self.MEMORY_THRESHOLD)
+        targetScale =  math.ceil(memTotal / self.MEMORY_THRESHOLD)
         targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
         currentScale = float(self._swarm.GetScaleTarget())
  
