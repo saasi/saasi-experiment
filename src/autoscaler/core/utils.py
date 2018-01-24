@@ -86,6 +86,26 @@ class ResourceUsageQuerier(PrometheusClient):
         scalar(sum(increase(bms_business_violation_total[$timespan])) / (sum(increase(bms_requests_served[$timespan]))+1) )
     """
 
+    QUERY_NET = """
+        scalar(
+            avg(
+                rate(
+                    container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )
+    """
+
+    QUERY_NET_SUM = """
+        scalar(
+            sum(
+                rate(
+                    container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~"\\\\w+_$msname"}[$timespan]
+                )
+            )
+        )    
+    """
+
     def __init__(self, endpoint, microservice_name):
         super().__init__(endpoint)
         self._microservice_name = microservice_name
@@ -107,11 +127,11 @@ class ResourceUsageQuerier(PrometheusClient):
         return float(self.GetInstantValue(query)[1])
 
     def GetIOUsage(self, timespan='1m'):
-        query = Template(ResourceUsageQuerier.QUERY_IO).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        query = Template(ResourceUsageQuerier.QUERY_NET).substitute({'msname': self._microservice_name, 'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 
     def GetIOUsageSum(self, timespan='1m'):
-        query = Template(ResourceUsageQuerier.QUERY_IO_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
+        query = Template(ResourceUsageQuerier.QUERY_NET_SUM).substitute({'msname': self._microservice_name, 'timespan': timespan})
         return float(self.GetInstantValue(query)[1])
 
     def GetBusinessViolationRate(self, timespan='30s'):

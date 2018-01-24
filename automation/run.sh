@@ -1,3 +1,6 @@
+fab clean_stack
+fab restart_cluster
+
 fab build_stack_eval2
 
 fab run_eval2:10,300
