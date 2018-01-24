@@ -59,7 +59,7 @@ services:
     deploy:
       labels:
         saasi.microservices.type: "api"
-      replicas: 5
+      replicas: 1
       placement:
         constraints: [node.role != manager]
       restart_policy:
