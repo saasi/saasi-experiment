@@ -35,6 +35,13 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 512M
+        reservations:
+          cpus: '0.20'
+          memory: 256M
     networks:
       - appnet
     logging:
@@ -44,69 +51,34 @@ services:
         fluentd-async-connect: 
         tag: microservice.business.main
 
-  io_microservice:
-    image: regserv:5000/io_microservice
+  combined_microservice:
+    image: regserv:5000/combined_microservice
     labels:
       saasi.microservices.type: "api"
       saasi.group: 'workload'
     deploy:
       labels:
         saasi.microservices.type: "api"
-      replicas: 5
+      replicas: 1
       placement:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 512M
+        reservations:
+          cpus: '0.20'
+          memory: 256M
     networks:
       appnet:
         aliases:
           - io
-    ports: 
-      - "5003:80"
-
-  cpu_microservice:
-    image: regserv:5000/cpu_microservice
-    labels:
-      saasi.microservices.type: "api"
-      saasi.group: 'workload'
-    deploy:
-      labels:
-        saasi.microservices.type: "api"
-      replicas: 1
-      placement:
-        constraints: [node.role != manager]
-      restart_policy:
-        condition: any
-    networks:
-      appnet:
-        aliases:
           - cpu
-    ports: 
-      - "5004:80"
-
-  memory_microservice:
-    image: regserv:5000/memory_microservice
-    labels:
-      saasi.microservices.type: "api"
-      saasi.group: 'workload'
-    networks:
-      appnet:
-        aliases:
           - memory
     ports: 
-      - "5005:80"
-    deploy:
-      labels:
-        saasi.microservices.type: "api"
-      replicas: 1
-      resources:
-        limits:
-          memory: 512M
-      placement:
-        constraints: [node.role != manager]
-      restart_policy:
-        condition: any
-
+      - "5003:80"
 
   # Monitoring Components
 
