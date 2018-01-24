@@ -5,28 +5,31 @@ version: '3.3'
 
 services:
   business_microservice:
-    image: regserv:5000/business_microservice
+    image: regserv:5000/business_microservice_2
+    labels:
+      saasi.microservices.type: "business"
+      saasi.group: 'workload'
     depends_on:
       - io_microservice
       - cpu_microservice
       - memory_microservice
     labels:
-      - "traefik.backend.healthcheck.path=/health"
+      - "traefik.backend.healthcheck.path=/api/status"
       - "traefik.backend.healthcheck.interval=1s"
-      - "traefik.backend.healthcheck.port=8080"
+      - "traefik.backend.healthcheck.port=80"
       - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
         saasi.microservices.type: "business"
         traefik.backend: bms
         traefik.docker.network: "eval2_appnet"
-        traefik.port: 8080
-        traefik.frontend.rule: "PathPrefix:/Business, /status"
+        traefik.port: 80
+        traefik.frontend.rule: "PathPrefix:/api/Business, /api/status"
         traefik.enable: "true"
         traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
-        traefik.backend.healthcheck.path: "/health"
+        traefik.backend.healthcheck.path: "/api/status"
         traefik.backend.healthcheck.interval: "1s"
-        traefik.backend.healthcheck.port: "8080"
+        traefik.backend.healthcheck.port: "80"
       replicas: 1
       placement:
         constraints: [node.role != manager]
@@ -43,6 +46,9 @@ services:
 
   io_microservice:
     image: regserv:5000/io_microservice
+    labels:
+      saasi.microservices.type: "api"
+      saasi.group: 'workload'
     deploy:
       labels:
         saasi.microservices.type: "api"
@@ -57,15 +63,12 @@ services:
           - io
     ports: 
       - "5003:80"
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        fluentd-async-connect: 
-        tag: microservice.api.io
 
   cpu_microservice:
     image: regserv:5000/cpu_microservice
+    labels:
+      saasi.microservices.type: "api"
+      saasi.group: 'workload'
     deploy:
       labels:
         saasi.microservices.type: "api"
@@ -80,15 +83,12 @@ services:
           - cpu
     ports: 
       - "5004:80"
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        fluentd-async-connect:
-        tag: microservice.api.cpu
 
   memory_microservice:
     image: regserv:5000/memory_microservice
+    labels:
+      saasi.microservices.type: "api"
+      saasi.group: 'workload'
     networks:
       appnet:
         aliases:
@@ -106,18 +106,14 @@ services:
         constraints: [node.role != manager]
       restart_policy:
         condition: any
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        fluentd-async-connect:
-        tag: microservice.api.memory
 
 
   # Monitoring Components
 
   visualizer:
     image: dockersamples/visualizer:stable
+    labels:
+      saasi.group: 'controller'
     ports: 
      - "5009:8080"
     volumes:
@@ -130,6 +126,8 @@ services:
 
   cadvisor:
     image: google/cadvisor:latest
+    labels:
+      saasi.group: 'controller'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /:/rootfs:ro
@@ -147,6 +145,8 @@ services:
 
   prometheus:
     image: regserv:5000/prometheus:latest
+    labels:
+      saasi.group: 'controller'
     ports:
       - "9090:9090"
     deploy:
@@ -161,6 +161,8 @@ services:
 
   grafana:
     image: regserv:5000/grafana:latest
+    labels:
+      saasi.group: 'controller'
     ports:
       - "3000:3000"
     networks:
@@ -183,6 +185,8 @@ services:
 
   swarm-exporter:
     image: regserv:5000/docker-swarm-exporter:latest
+    labels:
+      saasi.group: 'controller'
     deploy:
       mode: replicated
       replicas: 1
@@ -198,6 +202,8 @@ services:
 
   autoscaler:
     image: regserv:5000/autoscaler:latest
+    labels:
+      saasi.group: 'controller'
     deploy:
       mode: replicated
       replicas: 1
@@ -219,6 +225,8 @@ services:
 
   fluentd:
     image: regserv:5000/fluentd:latest
+    labels:
+      saasi.group: 'controller'
     deploy: 
       mode: replicated
       replicas: 1
@@ -233,6 +241,8 @@ services:
 
   elasticsearch:
     image: elasticsearch
+    labels:
+      saasi.group: 'controller'
     deploy: 
       mode: replicated
       replicas: 1
@@ -245,6 +255,8 @@ services:
       - appnet
 
   kibana:
+    labels:
+      saasi.group: 'controller'
     image: kibana
     deploy: 
       mode: replicated

@@ -3,7 +3,7 @@
         "annotations": {
             "list": []
         },
-        "editable": false,
+        "editable": true,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
@@ -13,7 +13,7 @@
         "rows": [
             {
                 "collapse": false,
-                "height": 203,
+                "height": 171,
                 "panels": [
                     {
                         "aliasColors": {},
@@ -107,6 +107,82 @@
                             "thresholdLabels": false,
                             "thresholdMarkers": true
                         },
+                        "id": 13,
+                        "interval": null,
+                        "links": [],
+                        "mappingType": 1,
+                        "mappingTypes": [
+                            {
+                                "name": "value to text",
+                                "value": 1
+                            },
+                            {
+                                "name": "range to text",
+                                "value": 2
+                            }
+                        ],
+                        "maxDataPoints": 100,
+                        "nullPointMode": "connected",
+                        "nullText": null,
+                        "postfix": "",
+                        "postfixFontSize": "50%",
+                        "prefix": "",
+                        "prefixFontSize": "50%",
+                        "rangeMaps": [
+                            {
+                                "from": "null",
+                                "text": "N/A",
+                                "to": "null"
+                            }
+                        ],
+                        "span": 1,
+                        "sparkline": {
+                            "fillColor": "rgba(31, 118, 189, 0.18)",
+                            "full": false,
+                            "lineColor": "rgb(31, 120, 193)",
+                            "show": false
+                        },
+                        "tableColumn": "",
+                        "targets": [
+                            {
+                                "expr": "sum(bms_active_transactions)",
+                                "format": "time_series",
+                                "instant": true,
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": "",
+                        "title": "Active",
+                        "type": "singlestat",
+                        "valueFontSize": "80%",
+                        "valueMaps": [
+                            {
+                                "op": "=",
+                                "text": "N/A",
+                                "value": "null"
+                            }
+                        ],
+                        "valueName": "avg"
+                    },
+                    {
+                        "cacheTimeout": null,
+                        "colorBackground": false,
+                        "colorValue": false,
+                        "colors": [
+                            "#299c46",
+                            "rgba(237, 129, 40, 0.89)",
+                            "#d44a3a"
+                        ],
+                        "datasource": null,
+                        "format": "none",
+                        "gauge": {
+                            "maxValue": 100,
+                            "minValue": 0,
+                            "show": false,
+                            "thresholdLabels": false,
+                            "thresholdMarkers": true
+                        },
                         "id": 8,
                         "interval": null,
                         "links": [],
@@ -135,7 +211,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 2,
+                        "span": 1,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -145,7 +221,7 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(bms_active_transactions)",
+                                "expr": "sum(bms_in_queue)",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -153,7 +229,83 @@
                             }
                         ],
                         "thresholds": "",
-                        "title": "Ongoing Transcations",
+                        "title": "Queuing",
+                        "type": "singlestat",
+                        "valueFontSize": "80%",
+                        "valueMaps": [
+                            {
+                                "op": "=",
+                                "text": "N/A",
+                                "value": "null"
+                            }
+                        ],
+                        "valueName": "avg"
+                    },
+                    {
+                        "cacheTimeout": null,
+                        "colorBackground": false,
+                        "colorValue": false,
+                        "colors": [
+                            "#299c46",
+                            "rgba(237, 129, 40, 0.89)",
+                            "#d44a3a"
+                        ],
+                        "datasource": null,
+                        "format": "none",
+                        "gauge": {
+                            "maxValue": 100,
+                            "minValue": 0,
+                            "show": false,
+                            "thresholdLabels": false,
+                            "thresholdMarkers": true
+                        },
+                        "id": 14,
+                        "interval": null,
+                        "links": [],
+                        "mappingType": 1,
+                        "mappingTypes": [
+                            {
+                                "name": "value to text",
+                                "value": 1
+                            },
+                            {
+                                "name": "range to text",
+                                "value": 2
+                            }
+                        ],
+                        "maxDataPoints": 100,
+                        "nullPointMode": "connected",
+                        "nullText": null,
+                        "postfix": "",
+                        "postfixFontSize": "50%",
+                        "prefix": "",
+                        "prefixFontSize": "50%",
+                        "rangeMaps": [
+                            {
+                                "from": "null",
+                                "text": "N/A",
+                                "to": "null"
+                            }
+                        ],
+                        "span": 1,
+                        "sparkline": {
+                            "fillColor": "rgba(31, 118, 189, 0.18)",
+                            "full": false,
+                            "lineColor": "rgb(31, 120, 193)",
+                            "show": false
+                        },
+                        "tableColumn": "",
+                        "targets": [
+                            {
+                                "expr": "sum(bms_exec)",
+                                "format": "time_series",
+                                "instant": true,
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": "",
+                        "title": "Running",
                         "type": "singlestat",
                         "valueFontSize": "80%",
                         "valueMaps": [
@@ -211,7 +363,7 @@
                                 "to": "null"
                             }
                         ],
-                        "span": 2,
+                        "span": 1,
                         "sparkline": {
                             "fillColor": "rgba(31, 118, 189, 0.18)",
                             "full": false,
@@ -357,7 +509,7 @@
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_microservice\"}",
+                                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web\"}",
                                 "format": "time_series",
                                 "hide": false,
                                 "instant": false,
@@ -366,7 +518,7 @@
                                 "refId": "A"
                             },
                             {
-                                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_microservice\"}",
+                                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_web\"}",
                                 "format": "time_series",
                                 "hide": false,
                                 "intervalFactor": 2,
@@ -422,7 +574,7 @@
                         "datasource": null,
                         "format": "none",
                         "gauge": {
-                            "maxValue": 100,
+                            "maxValue": 20,
                             "minValue": 0,
                             "show": true,
                             "thresholdLabels": false,
@@ -466,7 +618,7 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_microservice\"}",
+                                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web\"}",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -528,6 +680,228 @@
                         "timeFrom": null,
                         "timeShift": null,
                         "title": "Ongoing Transcations",
+                        "tooltip": {
+                            "shared": true,
+                            "sort": 0,
+                            "value_type": "individual"
+                        },
+                        "type": "graph",
+                        "xaxis": {
+                            "buckets": null,
+                            "mode": "time",
+                            "name": null,
+                            "show": true,
+                            "values": []
+                        },
+                        "yaxes": [
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            },
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            }
+                        ]
+                    },
+                    {
+                        "aliasColors": {},
+                        "bars": false,
+                        "dashLength": 10,
+                        "dashes": false,
+                        "datasource": null,
+                        "fill": 1,
+                        "id": 10,
+                        "legend": {
+                            "avg": false,
+                            "current": false,
+                            "max": false,
+                            "min": false,
+                            "show": true,
+                            "total": false,
+                            "values": false
+                        },
+                        "lines": true,
+                        "linewidth": 1,
+                        "links": [],
+                        "nullPointMode": "null",
+                        "percentage": false,
+                        "pointradius": 5,
+                        "points": false,
+                        "renderer": "flot",
+                        "seriesOverrides": [],
+                        "spaceLength": 10,
+                        "span": 3,
+                        "stack": false,
+                        "steppedLine": false,
+                        "targets": [
+                            {
+                                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web\"}[1m])\n  ) * 100",
+                                "format": "time_series",
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeFrom": null,
+                        "timeShift": null,
+                        "title": "CPU usage",
+                        "tooltip": {
+                            "shared": true,
+                            "sort": 0,
+                            "value_type": "individual"
+                        },
+                        "type": "graph",
+                        "xaxis": {
+                            "buckets": null,
+                            "mode": "time",
+                            "name": null,
+                            "show": true,
+                            "values": []
+                        },
+                        "yaxes": [
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            },
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            }
+                        ]
+                    },
+                    {
+                        "aliasColors": {},
+                        "bars": false,
+                        "dashLength": 10,
+                        "dashes": false,
+                        "datasource": null,
+                        "fill": 1,
+                        "id": 11,
+                        "legend": {
+                            "avg": false,
+                            "current": false,
+                            "max": false,
+                            "min": false,
+                            "show": true,
+                            "total": false,
+                            "values": false
+                        },
+                        "lines": true,
+                        "linewidth": 1,
+                        "links": [],
+                        "nullPointMode": "null",
+                        "percentage": false,
+                        "pointradius": 5,
+                        "points": false,
+                        "renderer": "flot",
+                        "seriesOverrides": [],
+                        "spaceLength": 10,
+                        "span": 3,
+                        "stack": false,
+                        "steppedLine": false,
+                        "targets": [
+                            {
+                                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web\"}) by (name, container_label_com_docker_swarm_service_name)",
+                                "format": "time_series",
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeFrom": null,
+                        "timeShift": null,
+                        "title": "Memory usage",
+                        "tooltip": {
+                            "shared": true,
+                            "sort": 0,
+                            "value_type": "individual"
+                        },
+                        "type": "graph",
+                        "xaxis": {
+                            "buckets": null,
+                            "mode": "time",
+                            "name": null,
+                            "show": true,
+                            "values": []
+                        },
+                        "yaxes": [
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            },
+                            {
+                                "format": "short",
+                                "label": null,
+                                "logBase": 1,
+                                "max": null,
+                                "min": null,
+                                "show": true
+                            }
+                        ]
+                    },
+                    {
+                        "aliasColors": {},
+                        "bars": false,
+                        "dashLength": 10,
+                        "dashes": false,
+                        "datasource": null,
+                        "fill": 1,
+                        "id": 12,
+                        "legend": {
+                            "avg": false,
+                            "current": false,
+                            "max": false,
+                            "min": false,
+                            "show": true,
+                            "total": false,
+                            "values": false
+                        },
+                        "lines": true,
+                        "linewidth": 1,
+                        "links": [],
+                        "nullPointMode": "null",
+                        "percentage": false,
+                        "pointradius": 5,
+                        "points": false,
+                        "renderer": "flot",
+                        "seriesOverrides": [],
+                        "spaceLength": 10,
+                        "span": 3,
+                        "stack": false,
+                        "steppedLine": false,
+                        "targets": [
+                            {
+                                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web\"}[5s])) by (container_label_com_docker_swarm_service_name)\n",
+                                "format": "time_series",
+                                "intervalFactor": 2,
+                                "refId": "A"
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeFrom": null,
+                        "timeShift": null,
+                        "title": "Network I/O",
                         "tooltip": {
                             "shared": true,
                             "sort": 0,
@@ -738,7 +1112,7 @@
             "list": []
         },
         "time": {
-            "from": "now-1h",
+            "from": "now-5m",
             "to": "now"
         },
         "timepicker": {
@@ -768,6 +1142,6 @@
         },
         "timezone": "",
         "title": "Business Microservice",
-        "version": 3
+        "version": 2
     }
 }

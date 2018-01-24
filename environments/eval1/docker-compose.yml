@@ -6,10 +6,11 @@ version: '3'
 services:
   business_web:
     image: regserv:5000/business_web
+    labels:
+      saasi.microservices.type: "business"
+      saasi.group: 'workload'
     deploy:
-      labels:
-        saasi.microservices.type: "business"
-      replicas: 5
+      replicas: 1
       placement:
         constraints: [node.role != manager]
       restart_policy:
@@ -18,6 +19,12 @@ services:
       - appnet
     ports: 
       - "8080:80"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 
+        tag: microservice.business.web
 
   visualizer:
     image: dockersamples/visualizer:stable
@@ -25,6 +32,8 @@ services:
      - "80:8080"
     volumes:
      - "/var/run/docker.sock:/var/run/docker.sock"
+    labels:
+      saasi.group: 'controller'
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -44,6 +53,8 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
       - "8088:8080"
+    labels:
+      saasi.group: 'controller'
     deploy:
       #placement:
       #  constraints: [node.role == manager]
@@ -57,6 +68,8 @@ services:
     image: regserv:5000/prometheus:latest
     ports:
       - "9090:9090"
+    labels:
+      saasi.group: 'controller'
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -77,6 +90,8 @@ services:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+    labels:
+      saasi.group: 'controller'
     deploy:
       mode: replicated
       replicas: 1
@@ -91,6 +106,8 @@ services:
 
   swarm-exporter:
     image: regserv:5000/docker-swarm-exporter:latest
+    labels: 
+      saasi.group: 'controller'
     deploy:
       mode: replicated
       replicas: 1
@@ -107,6 +124,8 @@ services:
 
   autoscaler:
     image: regserv:5000/autoscaler:latest
+    labels:
+      saasi.group: 'controller'
     deploy:
       mode: replicated
       replicas: 1
@@ -119,6 +138,47 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - appnet
+
+  fluentd:
+    image: regserv:5000/fluentd:latest
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - appnet
+
+  elasticsearch:
+    image: elasticsearch
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "9200:9200"
+    networks:
+      - appnet
+
+  kibana:
+    image: kibana
+    deploy: 
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "5601:5601"
+    networks:
+      - appnet
+
 
 networks: # Overlay network 
   appnet: # Network for the microservices

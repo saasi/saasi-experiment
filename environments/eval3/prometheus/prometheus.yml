@@ -44,4 +44,4 @@ scrape_configs:
     - names:
       - 'tasks.business_microservice'
       type: 'A'
-      port: 8080
+      port: 80

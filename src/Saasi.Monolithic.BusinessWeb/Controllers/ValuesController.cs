@@ -7,6 +7,7 @@ using System.Threading;
 using Saasi.Shared.Workload;
 using Newtonsoft.Json.Serialization;
 using Nexogen.Libraries.Metrics.Prometheus;
+using Saasi.Shared.Queue;
 
 namespace Saasi.Monolithic.BusinessWeb.Controllers
 {
@@ -15,11 +16,28 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
     {
 
         private readonly IMetricsContainer _metrics;
-        public ValuesController(IMetricsContainer metrics)
+        private readonly IThrottleQueue _tq;
+
+        private readonly TimeSpan[] Timeout = new TimeSpan[]{new TimeSpan(0,0,10), 
+                                                             new TimeSpan(0,0,25),
+                                                             new TimeSpan(0,0,30),
+                                                             new TimeSpan(0,0,20),
+                                                             new TimeSpan(0,0,30),
+                                                             new TimeSpan(0,1,0)};
+        public ValuesController(IMetricsContainer metrics, IThrottleQueue tq)
         {
             this._metrics = metrics;
+            this._tq = tq;
         }
 
+        private void UpdateMetrics() {
+            _metrics.GetGauge("bms_in_queue")
+                .Labels("1")
+                .Value = _tq.ItemsWaiting;
+            _metrics.GetGauge("bms_exec")
+                .Labels("1")
+                .Value = _tq.ItemsRunning;
+        }
         // GET api/Business
         [HttpGet("Business")]
         /*
@@ -30,79 +48,75 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
          * timetorun: for how long (in seconds) should we generate the CPU/Memory/IO load?
          * timeout: the maximum time (in seconds) allowed for the request to finish.
          */
-        public async Task<JsonResult> SimulateBusinessTransaction(int io,
-                                                              int cpu,
-                                                              int memory,
-                                                              long timestart,
-                                                              int timetorun,
-                                                              int timeout)
+        public async Task<ActionResult> SimulateBusinessTransaction(int operationId)
         {
+            if (! (operationId>=0 && operationId <=5) ) {
+                return new StatusCodeResult(404);
+            }
             Guid TranscationID = Guid.NewGuid();
             _metrics.GetGauge("bms_active_transactions")
-                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Labels(operationId.ToString())
                 .Increment();
+            DateTime QueueTime = DateTime.Now;
+            Console.WriteLine($"Transcation {TranscationID}: Queued at {QueueTime.ToString()}");
+            Task.Factory.StartNew(()=>UpdateMetrics());
+            Guid token = await _tq.QueueUp();
+            DateTime StartTime = DateTime.Now;
+            Console.WriteLine($"Transcation {TranscationID}: Started {StartTime.ToString()}");
+            UpdateMetrics();
+            Object result = new {};
+            try {
+                switch (operationId)
+                {
+                    case 0:
+                        result = await Operation0();
+                        break;
+                    case 1:
+                        result = await Operation1();
+                        break;
+                    case 2:
+                        result = await Operation2();
+                        break;
+                    case 3:
+                        result = await Operation3();
+                        break;
+                    case 4:
+                        result = await Operation4();
+                        break;
+                    case 5:
+                        result = await Operation5();
+                        break;
+                    default:
+                        break;
+                }
 
-            long StartTimestampMs = timestart * 1000;
-            long ExpectedFinishTimeMs = (timestart + timeout) * 1000;
-            DateTime StartTimeDateTime = new DateTime(StartTimestampMs); //don't know if it's need to add the 1970
-            long ReceivedTimeMs = (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds; //don't know if it's reasonable
-            Console.WriteLine($"Transcation {TranscationID}: Started at {DateTime.Now.ToString()}");
-
-            var tasks = new List<Task<ExecutionResult>>();
-            
-            if (io == 1)
-            {
-                var ioWorkload = new IoWorkload();
-                tasks.Add(ioWorkload.Run(timetorun));
+            } catch {
+                // do nothing
             }
-            if (cpu == 1)
-            {
-                var cpuWorkload = new CpuWorkload();
-                tasks.Add(cpuWorkload.Run(timetorun));
-            }
-            if (memory == 1)
-            {
-                var memoryWorkload = new MemoryWorkload();
-                tasks.Add(memoryWorkload.Run(timetorun));
-            }
-            if (tasks.Count > 0) {
-                await Task.WhenAll(tasks.ToArray());
-            }
-            
-            var resultList = new Dictionary<string, ExecutionResult>();
-            var i = 0;
-            if (io == 1) {
-                resultList.Add("io", tasks[i].Result);
-                ++i;
-            }
-            if (cpu == 1) {
-                resultList.Add("cpu", tasks[i].Result);
-                ++i;
-            }
-            if (memory == 1) {
-                resultList.Add("memory", tasks[i].Result);
-                ++i;
-            }
+  
 
             Console.WriteLine($"Transcation {TranscationID}: Finished at {DateTime.Now.ToString()}");
             _metrics.GetGauge("bms_active_transactions")
-                .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                .Labels(operationId.ToString())
                 .Decrement();
-
             var finishedTime = DateTime.Now;
             var violated = false;
-            if (finishedTime - StartTimeDateTime > new TimeSpan(0,0,timeout)) {
+            if (finishedTime - QueueTime > this.Timeout[operationId]) {
                 Console.WriteLine($"Transcation {TranscationID}: Business violation");            
                 _metrics.GetCounter("bms_business_violation_total")
-                    .Labels(io.ToString(), cpu.ToString(), memory.ToString(), timetorun.ToString())
+                     .Labels(operationId.ToString())
                     .Increment();
                 violated = true;
             } 
+            _metrics.GetCounter("bms_requests_served")
+                .Labels(operationId.ToString())
+                .Increment();
+            Task.Factory.StartNew(()=>{ _tq.Finish(token); UpdateMetrics();});
             return new JsonResult(new {
-                Tasks = resultList,
-                StartedAt = StartTimeDateTime.ToString(),
+                Result = result,
+                QueuedAt = QueueTime.ToString(),
+                StartedAt = StartTime.ToString(),
                 FinishedAt = finishedTime,
-                ExpectedToFinishAt = new DateTime(ExpectedFinishTimeMs).ToString(),
                 BusinessViolation = violated
             });
         }
@@ -110,7 +124,103 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
         [HttpGet("status")]
         public string GetStatus() {
             return "OK";
-        } 
+        }
+
+        private Task<ExecutionResult> IoHelper(int level) {
+            var ioWorkload = new IoWorkload();
+            var r = new Random();
+            Int64 startByte = ((long)r.Next(10, 100000000) * (long)r.Next(10, 100000000)) % (Program.cellSize*(Program.cellCount-1L));
+            Int64 length = Convert.ToInt64(level) * Program.cellSize;
+            return ioWorkload.Run(startByte, length);
+        }
+
+        // sleep 5s
+        private async Task<object> Operation0() {
+            await Task.Delay(5000);
+
+            return "Slept";
+        }
+        // par(io(1), cpu(1))  sleep 2s  mem(2)
+        private async Task<object> Operation1() {
+            var tasks = new List<Task<ExecutionResult>>();
+           
+            tasks.Add(IoHelper(1));
+            
+            var cpuWorkload = new CpuWorkload();
+            tasks.Add(cpuWorkload.Run(1));
+        
+            await Task.WhenAll(tasks.ToArray());
+
+            await Task.Delay(2000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+                //resultList.Add("io", tasks[0].Result.Payload.Length);    
+                resultList.Add("cpu", tasks[1].Result);
+            {
+                var memoryWorkload = new MemoryWorkload();
+                var resultMem = await memoryWorkload.Run(2);
+                resultList.Add("memory", resultMem);
+            }
+
+            return resultList;
+        }
+
+        // cpu(1)  sleep 5s  mem(1) io(1)
+        private async Task<object> Operation2() {
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(1);
+
+            await Task.Delay(5000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+
+            var memoryWorkload = new MemoryWorkload();
+            var resultMem = await memoryWorkload.Run(1);
+            resultList.Add("memory", resultMem);
+            await IoHelper(1);
+
+            return resultList;
+        }
+
+        // io(1) sleep 1 mem(3)
+        private async Task<object> Operation3() {
+            await IoHelper(1);
+ 
+            await Task.Delay(1000);
+            
+            var resultList = new Dictionary<string, ExecutionResult>();
+
+            var memoryWorkload = new MemoryWorkload();
+            var resultMem = await memoryWorkload.Run(3);
+            resultList.Add("memory", resultMem);
+
+            return resultList;
+        }
+
+         // mem(1) cpu(1)
+        private async Task<object> Operation4() {
+            var resultList = new Dictionary<string, ExecutionResult>();
+            var memoryWorkload = new MemoryWorkload();
+
+            var resultMem = await memoryWorkload.Run(1);
+            resultList.Add("memory", resultMem);
+            
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(1);
+
+
+            return resultList;
+        }
+        // io(1) sleep 1 cpu(3)
+        private async Task<object> Operation5() {
+            await IoHelper(1);
+            await Task.Delay(1000);
+
+            var cpuWorkload = new CpuWorkload();
+            await cpuWorkload.Run(3);
+
+            return "OK";
+        }
 
     }
 }

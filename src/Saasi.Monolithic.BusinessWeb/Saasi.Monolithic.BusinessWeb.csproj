@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Saasi.Shared\Saasi.Shared.Workload\Saasi.Shared.Workload.csproj" />
+    <ProjectReference Include="..\Saasi.Shared\Saasi.Shared.Queue\Saasi.Shared.Queue.csproj" />
   </ItemGroup>
 
 </Project>

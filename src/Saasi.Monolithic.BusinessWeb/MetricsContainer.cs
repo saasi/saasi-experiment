@@ -16,16 +16,37 @@ namespace Saasi.Monolithic.BusinessWeb {
             var bms = metrics.Gauge()
                 .Name("bms_active_transactions")
                 .Help("The number of currently running requests.")
-                .LabelNames("io", "cpu", "memory", "timetorun")
+                .LabelNames("operation_id")
                 .Register();
             this.AddGauge("bms_active_transactions", bms);
+
+            var inq = metrics.Gauge()
+                .Name("bms_in_queue")
+                .Help("The number requests currently queuing.")
+                .LabelNames("ok")
+                .Register();
+            this.AddGauge("bms_in_queue", inq);
+
+            var exec = metrics.Gauge()
+                .Name("bms_exec")
+                .Help("The number currently executing requests.")
+                .LabelNames("ok")
+                .Register();
+            this.AddGauge("bms_exec", exec);
 
             var vio = metrics.Counter()
                 .Name("bms_business_violation_total")
                 .Help("The number of business violations")
-                .LabelNames("io", "cpu", "memory", "timetorun")
+                .LabelNames("operation_id")
                 .Register();
             this.AddCounter("bms_business_violation_total", vio);
+            
+            var total = metrics.Counter()
+                .Name("bms_requests_served")
+                .Help("The number of requests served")
+                .LabelNames("operation_id")
+                .Register();
+            this.AddCounter("bms_requests_served", total);
         }
         
         private Dictionary<string, ILabelledGauge> gauges = new Dictionary<string, ILabelledGauge>();

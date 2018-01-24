@@ -3,7 +3,7 @@
     "annotations": {
       "list": []
     },
-    "editable": false,
+    "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
     "hideControls": false,
@@ -13,7 +13,7 @@
     "rows": [
       {
         "collapse": false,
-        "height": 175,
+        "height": 195,
         "panels": [
           {
             "cacheTimeout": null,
@@ -280,7 +280,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 4,
+            "span": 3,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -338,6 +338,90 @@
             "dashes": false,
             "datasource": null,
             "fill": 1,
+            "id": 27,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 2,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_memory_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "hide": false,
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "out",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_memory_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "in",
+                "refId": "D"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Network IO",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "Bps",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
             "id": 4,
             "legend": {
               "avg": false,
@@ -358,7 +442,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 3,
+            "span": 2,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -366,13 +450,21 @@
                 "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_memory_microservice\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
+                "legendFormat": "write",
                 "refId": "A"
+              },
+              {
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_memory_microservice\"}[1m])\n)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "read",
+                "refId": "B"
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Bytes Write Rate",
+            "title": "Disk I/O",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -658,7 +750,7 @@
       },
       {
         "collapse": false,
-        "height": 241,
+        "height": 229,
         "panels": [
           {
             "cacheTimeout": null,
@@ -983,6 +1075,90 @@
             "dashes": false,
             "datasource": null,
             "fill": 1,
+            "id": 28,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 2,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "hide": false,
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "out",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "in",
+                "refId": "D"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Network IO",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "Bps",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
             "id": 10,
             "legend": {
               "avg": false,
@@ -1003,7 +1179,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 4,
+            "span": 2,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -1011,13 +1187,21 @@
                 "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
+                "legendFormat": "write",
                 "refId": "A"
+              },
+              {
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "read",
+                "refId": "B"
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Bytes Write Rate",
+            "title": "Disk I/O",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -1303,7 +1487,7 @@
       },
       {
         "collapse": false,
-        "height": 235,
+        "height": 250,
         "panels": [
           {
             "cacheTimeout": null,
@@ -1570,7 +1754,7 @@
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "span": 4,
+            "span": 2,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -1628,6 +1812,90 @@
             "dashes": false,
             "datasource": null,
             "fill": 1,
+            "id": 29,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 2,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "hide": false,
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "out",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "in",
+                "refId": "D"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Network IO",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "Bps",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
             "id": 16,
             "legend": {
               "avg": false,
@@ -1656,13 +1924,21 @@
                 "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
+                "legendFormat": "write",
                 "refId": "A"
+              },
+              {
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n)",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "read",
+                "refId": "B"
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Bytes Write Rate",
+            "title": "Disk I/O",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -1985,6 +2261,6 @@
     },
     "timezone": "",
     "title": "Microservices Monitoring (Debug)",
-    "version": 4
+    "version": 5
   }
 }

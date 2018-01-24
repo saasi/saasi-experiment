@@ -1,0 +1,7 @@
+groups:
+  - name: swarm
+    rules:
+    - record: docker_swarm_service_target_replicas_sum
+      expr: sum(docker_swarm_service_target_replicas) by (service_name)
+    - record: docker_swarm_service_running_replicas_sum
+      expr: sum(docker_swarm_service_running_replicas) by (service_name)

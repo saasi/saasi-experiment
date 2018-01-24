@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Nexogen.Libraries.Metrics;
 using Nexogen.Libraries.Metrics.Prometheus;
 using Nexogen.Libraries.Metrics.Prometheus.AspCore;
+using Saasi.Shared.Queue;
 
 namespace Saasi.Monolithic.BusinessWeb
 {
@@ -29,9 +30,7 @@ namespace Saasi.Monolithic.BusinessWeb
             services.AddMvc();
             services.AddPrometheus();
             services.AddSingleton<IMetricsContainer, MetricsContainer>();
-           
-
-
+            services.AddSingleton<IThrottleQueue>(new ThrottleQueue(50));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,0 +1,11 @@
+{
+    "name": "Elasticsearch",
+    "type": "elasticsearch",
+    "access": "proxy",
+    "url": "http://elasticsearch:9200",
+    "isDefault": false,
+    "database": "fluentd-*",
+    "jsonData": {
+        "timeField": "@timestamp"
+    }
+}
