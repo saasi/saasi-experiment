@@ -1,4 +1,2 @@
-cpu_microservice
-memory_microservice
-io_microservice
+combined_microservice
 business_microservice2

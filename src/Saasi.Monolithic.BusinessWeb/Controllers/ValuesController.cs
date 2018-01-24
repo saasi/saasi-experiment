@@ -23,7 +23,7 @@ namespace Saasi.Monolithic.BusinessWeb.Controllers
                                                              new TimeSpan(0,0,30),
                                                              new TimeSpan(0,0,20),
                                                              new TimeSpan(0,0,30),
-                                                             new TimeSpan(0,1,0)};
+                                                             new TimeSpan(0,0,30)};
         public ValuesController(IMetricsContainer metrics, IThrottleQueue tq)
         {
             this._metrics = metrics;
