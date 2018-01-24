@@ -42,6 +42,8 @@ scrape_configs:
   - job_name: 'business_microservices'
     dns_sd_configs:
     - names:
-      - 'tasks.business_microservice'
+      - 'tasks.business_web_1'
+      - 'tasks.business_web_2'
+      - 'tasks.business_web_3'
       type: 'A'
       port: 80

@@ -72,7 +72,7 @@
             "tableColumn": "__name__",
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_combined_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_1\"}",
                 "format": "time_series",
                 "instant": true,
                 "intervalFactor": 2,
@@ -124,14 +124,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_combined_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_1\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "target",
                 "refId": "A"
               },
               {
-                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_combined_microservice\"}",
+                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_web_1\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "actual",
@@ -207,7 +207,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}) ",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}) ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -285,7 +285,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[1m])\n  ) * 100",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[1m])\n  ) * 100",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -363,7 +363,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -372,7 +372,7 @@
                 "refId": "B"
               },
               {
-                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "in",
@@ -447,14 +447,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "write",
                 "refId": "A"
               },
               {
-                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "read",
@@ -502,7 +502,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": true,
-        "title": "Combined Microservice",
+        "title": "BMS1",
         "titleSize": "h6"
       },
       {
@@ -546,7 +546,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}) by (name, container_label_com_docker_swarm_service_name)",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}) by (name, container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"
@@ -620,7 +620,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[1m])\n  ) by (name) *100 \n ",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[1m])\n  ) by (name) *100 \n ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -698,7 +698,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_combined_microservice\"}[1m])\n) by (name)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_1\"}[1m])\n) by (name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"
@@ -809,7 +809,7 @@
             "tableColumn": "__name__",
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_cpu_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_2\"}",
                 "format": "time_series",
                 "instant": true,
                 "intervalFactor": 2,
@@ -861,14 +861,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_cpu_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_2\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "target",
                 "refId": "A"
               },
               {
-                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_cpu_microservice\"}",
+                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_web_2\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "actual",
@@ -944,7 +944,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}) ",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}) ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -1022,7 +1022,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n  ) * 100",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[1m])\n  ) * 100",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -1100,7 +1100,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -1109,7 +1109,7 @@
                 "refId": "B"
               },
               {
-                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "in",
@@ -1184,14 +1184,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "write",
                 "refId": "A"
               },
               {
-                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "read",
@@ -1239,7 +1239,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": true,
-        "title": "CPU Microservice",
+        "title": "BMS2",
         "titleSize": "h6"
       },
       {
@@ -1283,7 +1283,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}) by (name, container_label_com_docker_swarm_service_name)",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}) by (name, container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"
@@ -1357,7 +1357,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n  ) by (name) *100 \n ",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[1m])\n  ) by (name) *100 \n ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -1435,7 +1435,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_cpu_microservice\"}[1m])\n) by (name)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_2\"}[1m])\n) by (name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"
@@ -1546,7 +1546,7 @@
             "tableColumn": "__name__",
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_3\"}",
                 "format": "time_series",
                 "instant": true,
                 "intervalFactor": 2,
@@ -1598,14 +1598,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "expr": "docker_swarm_service_target_replicas{service_name=~\"\\\\w+_business_web_3\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "target",
                 "refId": "A"
               },
               {
-                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_io_microservice\"}",
+                "expr": "docker_swarm_service_running_replicas{service_name=~\"\\\\w+_business_web_3\"}",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "actual",
@@ -1681,7 +1681,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}) ",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}) ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -1759,7 +1759,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n  ) * 100",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[1m])\n  ) * 100",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -1837,7 +1837,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -1846,7 +1846,7 @@
                 "refId": "B"
               },
               {
-                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[10s])) by (container_label_com_docker_swarm_service_name)",
+                "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[10s])) by (container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "in",
@@ -1921,14 +1921,14 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "write",
                 "refId": "A"
               },
               {
-                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n)",
+                "expr": "avg(\n  rate(container_fs_reads_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[1m])\n)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "legendFormat": "read",
@@ -1976,7 +1976,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": true,
-        "title": "I/O Microservice",
+        "title": "BMS3",
         "titleSize": "h6"
       },
       {
@@ -2020,7 +2020,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}) by (name, container_label_com_docker_swarm_service_name)",
+                "expr": "avg(container_memory_rss{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}) by (name, container_label_com_docker_swarm_service_name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"
@@ -2094,7 +2094,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n  ) by (name) *100 \n ",
+                "expr": "avg(\n   rate(container_cpu_usage_seconds_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[1m])\n  ) by (name) *100 \n ",
                 "format": "time_series",
                 "hide": false,
                 "instant": false,
@@ -2172,7 +2172,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_io_microservice\"}[1m])\n) by (name)",
+                "expr": "avg(\n  rate(container_fs_writes_bytes_total{container_label_com_docker_swarm_service_name=~\"\\\\w+_business_web_3\"}[1m])\n) by (name)",
                 "format": "time_series",
                 "intervalFactor": 2,
                 "refId": "A"

@@ -18,7 +18,7 @@ class IoMicroserviceMG(MicroserviceMonitoringGroup):
         targetScale = math.ceil(ioTotal / self.IO_THRESHOLD)
         targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
         currentScale = float(self._swarm.GetScaleTarget())
-        print("###IO", ioTotal, targetScale, self._scale_up_rule.activeFor().total_seconds(),(targetScale - currentScale) / currentScale)
+        print("###IO", ioTotal, targetScale, self._scale_up_rule.activeFor().total_seconds(),self._scale_down_rule.activeFor().total_seconds(),(targetScale - currentScale) / currentScale)
         if ((targetScale - currentScale) / currentScale > 0.05):
             # scale up rule
             self._scale_up_rule.setActive()

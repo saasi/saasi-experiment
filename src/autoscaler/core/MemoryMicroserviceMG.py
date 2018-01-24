@@ -15,26 +15,24 @@ class MemoryMicroserviceMG(MicroserviceMonitoringGroup):
         
     def _check(self):
         memTotal = self._res.GetMemoryUsage('30s')
-        currentScale = self._swarm.GetScaleTarget()
-         
-        print("#### MEM",memTotal, self.MEMORY_THRESHOLD,(memTotal - self.MEMORY_THRESHOLD) / self.MEMORY_THRESHOLD)
-        if ((memTotal - self.MEMORY_THRESHOLD) / self.MEMORY_THRESHOLD > 0.1):
+        targetScale =  math.ceil(cpuTotal / self.MEMORY_THRESHOLD)
+        targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
+        currentScale = float(self._swarm.GetScaleTarget())
+ 
+        print("###MEM",memTotal, targetScale, self._scale_up_rule.activeFor().total_seconds(),self._scale_down_rule.activeFor().total_seconds(),(targetScale - currentScale) / currentScale)
+        if ((targetScale - currentScale) / currentScale > 0.05):
             # scale up rule
             self._scale_up_rule.setActive()
-            if (self._scale_up_rule.activeFor().total_seconds() > 10):
-                targetScale = currentScale + 2
-                targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
+            if (self._scale_up_rule.activeFor().total_seconds() > 30):
                 self._do_scale(targetScale)
                 self._scale_up_rule.setInactive()
         else:
             self._scale_up_rule.setInactive()
 
-        if ((self.MEMORY_THRESHOLD - memTotal) / self.MEMORY_THRESHOLD > 0.05):
+        if ((currentScale - targetScale) / currentScale > 0.05):
             # scale down rule
             self._scale_down_rule.setActive()
-            if (self._scale_down_rule.activeFor().total_seconds() > 30):
-                targetScale = currentScale - 1
-                targetScale = limit_range(targetScale, self._min_scale, self._max_scale)
+            if (self._scale_down_rule.activeFor().total_seconds() > 70):
                 self._do_scale(targetScale)
                 self._scale_down_rule.setInactive()
         else:

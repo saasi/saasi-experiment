@@ -10,9 +10,9 @@ class CombinedMicroserviceMG(MicroserviceMonitoringGroup):
         super().__init__(microservice_name)
         self._min_scale = min_scale
         self._max_scale = max_scale
-        self._cpu_mg = CpuMicroserviceMGStub(self._cpu_callback, microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 30.0)
+        self._cpu_mg = CpuMicroserviceMGStub(self._cpu_callback, microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 15.0*2)
         self._memory_mg = MemoryMicroserviceMGStub(self._memory_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold=200 * 1024.0 * 1024.0)
-        self._io_mg = IoMicroserviceMGStub(self._io_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 10 * 1024.0 * 1024.0)
+        self._io_mg = IoMicroserviceMGStub(self._io_callback,  microservice_name=microservice_name, min_scale=min_scale, max_scale=max_scale, threshold= 6 * 1024.0 * 1024.0)
         self._cpu_scale = 0
         self._memory_scale = 0
         self._io_scale = 0

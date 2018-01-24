@@ -6,6 +6,8 @@ from string import Template
 import math
 import json
 
+OUTPUT_PATH = '/home/ztl8702/saasi-data/users-$users-req-$requests-$ts-eval$type'
+
 
 env.user = 'root'
 env.roledefs = {
@@ -166,6 +168,15 @@ def test_business_web():
         return False
     return r.content.strip() == "OK"
 
+def test_business_web_eval2():
+    try:
+        r1 = requests.get('http://manager-01:80/api/status?operationId=0')
+        r2 = requests.get('http://manager-01:80/api/status?operationId=2')
+        r3 = requests.get('http://manager-01:80/api/status?operationId=4')
+    except Exception as e:
+        return False
+    return r1.content.strip() == "OK" and r2.content.strip() == "OK" and r3.content.strip() == "OK"
+
 def test_business_microservice():
     try:
         r = requests.get('http://manager-01:80/api/status')
@@ -186,6 +197,13 @@ def ensure_business_web_healthy():
         time.sleep(3)
         pass
     print('Business Web OK!')
+
+def ensure_business_web_healthy_eval2():
+    while test_business_web_eval2()!=True:
+        print('Waiting for Business Web 1 2 3')
+        time.sleep(3)
+        pass
+    print('Business Web 1 2 3 OK!')
 
 def ensure_business_microservice_healthy():
     while test_business_microservice()!=True:
@@ -218,7 +236,7 @@ def run_eval1(users='10',reqs='20'):
     print("="*20)
     print('Evaluation 1, '+str(usersInt)+' users run for '+str(requestsInt)+ ' requests')
     print("="*20)
-    outputPath = Template('/home/ztl8702/saasi-data/users-$users-req-$requests-$ts').substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S')})
+    outputPath = Template(OUTPUT_PATH).substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S'), 'type': 'eval1'})
     local("mkdir "+outputPath)
 
     execute(clean_load)
@@ -273,7 +291,7 @@ def run_eval2(users='10',reqs='20'):
     print("="*20)
     print('Evaluation 2, '+str(usersInt)+' users run for '+str(requestsInt)+ ' requests')
     print("="*20)
-    outputPath = Template('/home/ztl8702/saasi-data/users-$users-req-$requests-$ts').substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S')})
+    outputPath = Template(OUTPUT_PATH).substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S'), 'type': 'eval2'})
     local("mkdir "+outputPath)
 
     execute(clean_load)
@@ -288,7 +306,7 @@ def run_eval2(users='10',reqs='20'):
             retry = True
 
     ensure_elasticsearch_healthy()
-    ensure_business_microservice_healthy()
+    ensure_business_web_healthy_eval2()
 
     startTime = datetime.now()
     execute(start_load_eval2, userCount=usersInt, requestsToRun=requestsInt)
@@ -311,7 +329,7 @@ def run_eval2(users='10',reqs='20'):
     minutesSpent = int(math.ceil(timeSpent.seconds/60.0))
     print("From "+str(startTime)+' to '+str(endTime)+', thats '+str(minutesSpent)+' minutes.')
     # collect data
-    result = collect_data_eval3(minutesSpent) # same as 3
+    result = collect_data_eval2(minutesSpent) # same as 3
 
     print(result)
     with open(outputPath+'/data.json', 'w') as outfile:
@@ -328,7 +346,7 @@ def run_eval3(users='10',reqs='20'):
     print("="*20)
     print('Evaluation 3, '+str(usersInt)+' users run for '+str(requestsInt)+ ' requests')
     print("="*20)
-    outputPath = Template('/home/ztl8702/saasi-data/users-$users-req-$requests-$ts').substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S')})
+    outputPath = Template(OUTPUT_PATH).substitute({'users': users, 'requests': reqs, 'ts':datetime.now().strftime('%d%H%M%S'), 'type': 'eval3'})
     local("mkdir "+outputPath)
 
     execute(clean_load)
@@ -548,6 +566,116 @@ AVG_NET_OUT = """
     )
 """
 
+def collect_data_eval2(minutesSpent):
+    # COST
+    avg_scale = {}
+    max_scale = {}
+    for service in ['business_web_1', 'business_web_2', 'business_web_3']:
+        avg_scale[service] = prom.GetInstantValue(Template(AVG_SCALE_MICROSERVICE).substitute({'msname': service,'timespan': str(minutesSpent)+'m'}))[1]
+        max_scale[service] = prom.GetInstantValue(Template(MAX_SCALE_MICROSERVICE).substitute({'msname': service, 'timespan': str(minutesSpent)+'m'}))[1]
+
+    # UTILISATION
+    avg_cpu_per_container_per_microservice = {}
+    avg_mem_per_container_per_microservice = {}
+    avg_network_in_per_container_per_microservice = {}
+    avg_network_out_per_container_per_microservice = {}
+
+    for service in ['business_web_1', 'business_web_2', 'business_web_3']:
+        avg_cpu_per_container_per_microservice[service] = prom.GetInstantValue(Template(AVG_CPU).substitute({'msname': service, 'timespan': str(minutesSpent)+'m'}))[1]
+        avg_mem_per_container_per_microservice[service] = prom.GetInstantValue(Template(AVG_MEM).substitute({'msname': service, 'timespan': str(minutesSpent)+'m'}))[1]
+        avg_network_in_per_container_per_microservice[service] = prom.GetInstantValue(Template(AVG_NET_IN).substitute({'msname': service, 'timespan': str(minutesSpent)+'m'}))[1]
+        avg_network_out_per_container_per_microservice[service] = prom.GetInstantValue(Template(AVG_NET_OUT).substitute({'msname': service, 'timespan': str(minutesSpent)+'m'}))[1]
+
+    # OVERHEAD
+    workload_total_avg_cpu = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                avg_over_time(container_cpu_total{container_label_saasi_group=~\"workload\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    controller_total_avg_cpu = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                avg_over_time(container_cpu_total{container_label_saasi_group=~\"controller\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    workload_total_avg_mem = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                avg_over_time(container_memory_total{container_label_saasi_group=~\"workload\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    controller_total_avg_mem = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                avg_over_time(container_memory_total{container_label_saasi_group=~\"controller\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    workload_total_network_in = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                increase(container_network_io_in_total{container_label_saasi_group=~\"workload\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    workload_total_network_out = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                increase(container_network_io_out_total{container_label_saasi_group=~\"workload\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    controller_total_network_in = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                increase(container_network_io_in_total{container_label_saasi_group=~\"controller\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    controller_total_network_out = prom.GetInstantValue(Template("""
+        scalar(
+            sum(
+                increase(container_network_io_out_total{container_label_saasi_group=~\"controller\"}[$timespan])
+            )
+        )
+    """).substitute({'timespan': str(minutesSpent)+'m'}))[1]
+
+    business_requests_total = elst.GetCount("container_name: *business** AND log: *finished* AND log: Transcation")
+    business_violation_total = elst.GetCount("container_name: *business** AND log: *violation* AND log: Transcation")
+
+
+    return {
+        'MaxScale': max_scale,
+        'AvgScale': avg_scale,
+        'CpuAverage': avg_cpu_per_container_per_microservice,
+        'MemAverage': avg_mem_per_container_per_microservice,
+        'NetInAverage': avg_network_in_per_container_per_microservice,
+        'NetOutAverage': avg_network_out_per_container_per_microservice,
+        'WorkloadTotalCpu': workload_total_avg_cpu,
+        'WorkloadTotalMemory': workload_total_avg_mem,
+        'ControllerTotalCpu': controller_total_avg_cpu,
+        'ControllerTotalMemory': controller_total_avg_mem,
+        'WorkloadNetInTotal': workload_total_network_in,
+        'WorkloadNetOutTotal': workload_total_network_out,
+        'ControllerNetInTotal': controller_total_network_in,
+        'ControllerNetOutTotal': controller_total_network_out,
+        'TotalRequests': business_requests_total,
+        'TotalViolations': business_violation_total
+    }
+
+
+
 def collect_data_eval3(minutesSpent):
     # COST
     avg_scale = {}
@@ -656,4 +784,3 @@ def collect_data_eval3(minutesSpent):
         'TotalViolations': business_violation_total
     }
 
-    

@@ -4,7 +4,7 @@ import json
 import csv 
 
 def parseOne(filepath):
-    p = re.compile(".*saasi-data/eval([1-3])/users-([0-9]+)-req-([0-9]+)-([0-9]+)/data.json")
+    p = re.compile(".*saasi-data/eval([1-3])/users-([0-9]+)-req-([0-9]+)-([0-9]+)-eval[0-9]+/data.json")
     with open(filepath) as f:
         data = json.load(f)
        # print data

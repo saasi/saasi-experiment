@@ -297,7 +297,7 @@
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(bms_execs)",
+                                "expr": "sum(bms_exec)",
                                 "format": "time_series",
                                 "instant": true,
                                 "intervalFactor": 2,

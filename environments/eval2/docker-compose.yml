@@ -4,32 +4,27 @@
 version: '3.3'
 
 services:
-  business_microservice:
-    image: regserv:5000/business_microservice_2
+  business_web_1:
+    image: regserv:5000/business_web
     labels:
       saasi.microservices.type: "business"
       saasi.group: 'workload'
-    depends_on:
-      - io_microservice
-      - cpu_microservice
-      - memory_microservice
-    labels:
-      - "traefik.backend.healthcheck.path=/api/status"
-      - "traefik.backend.healthcheck.interval=1s"
-      - "traefik.backend.healthcheck.port=80"
-      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
+ #     - "traefik.backend.healthcheck.path=/api/status"
+ #     - "traefik.backend.healthcheck.interval=1s"
+ #     - "traefik.backend.healthcheck.port=80"
+ #     - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
         saasi.microservices.type: "business"
-        traefik.backend: bms
+        traefik.backend: bms1
         traefik.docker.network: "eval2_appnet"
         traefik.port: 80
-        traefik.frontend.rule: "PathPrefix:/api/Business, /api/status"
+        traefik.frontend.rule: "Query: operationId={operationId:[0-1]+}"
         traefik.enable: "true"
-        traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
-        traefik.backend.healthcheck.path: "/api/status"
-        traefik.backend.healthcheck.interval: "1s"
-        traefik.backend.healthcheck.port: "80"
+#        traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
+#        traefik.backend.healthcheck.path: "/api/status"
+#        traefik.backend.healthcheck.interval: "1s"
+#        traefik.backend.healthcheck.port: "80"
       replicas: 1
       placement:
         constraints: [node.role != manager]
@@ -49,16 +44,29 @@ services:
       options:
         fluentd-address: localhost:24224
         fluentd-async-connect: 
-        tag: microservice.business.main
+        tag: microservice.business.web1
 
-  combined_microservice:
-    image: regserv:5000/combined_microservice
+  business_web_2:
+    image: regserv:5000/business_web
     labels:
-      saasi.microservices.type: "api"
+      saasi.microservices.type: "business"
       saasi.group: 'workload'
+#      - "traefik.backend.healthcheck.path=/api/status"
+#      - "traefik.backend.healthcheck.interval=1s"
+#      - "traefik.backend.healthcheck.port=80"
+#      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
     deploy:
       labels:
-        saasi.microservices.type: "api"
+        saasi.microservices.type: "business"
+        traefik.backend: bms2
+        traefik.docker.network: "eval2_appnet"
+        traefik.port: 80
+        traefik.frontend.rule: "Query: operationId={operationId:[2-3]+}"
+        traefik.enable: "true"
+#        traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
+#        traefik.backend.healthcheck.path: "/api/status"
+#        traefik.backend.healthcheck.interval: "1s"
+#        traefik.backend.healthcheck.port: "80"
       replicas: 1
       placement:
         constraints: [node.role != manager]
@@ -72,13 +80,55 @@ services:
           cpus: '0.20'
           memory: 256M
     networks:
-      appnet:
-        aliases:
-          - io
-          - cpu
-          - memory
-    ports: 
-      - "5003:80"
+      - appnet
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 
+        tag: microservice.business.web2
+
+  business_web_3:
+    image: regserv:5000/business_web
+    labels:
+      saasi.microservices.type: "business"
+      saasi.group: 'workload'
+#      - "traefik.backend.healthcheck.path=/api/status"
+#      - "traefik.backend.healthcheck.interval=1s"
+#      - "traefik.backend.healthcheck.port=80"
+#      - "traefik.backend.circuitbreaker.expression=ResponseCodeRatio(400, 600, 0, 600)>0.1"
+    deploy:
+      labels:
+        saasi.microservices.type: "business"
+        traefik.backend: bms3
+        traefik.docker.network: "eval2_appnet"
+        traefik.port: 80
+        traefik.frontend.rule: "Query: operationId={operationId:[4-5]+}"
+        traefik.enable: "true"
+#        traefik.backend.circuitbreaker.expression: "ResponseCodeRatio(400, 600, 0, 600)>0.1"
+#        traefik.backend.healthcheck.path: "/api/status"
+#        traefik.backend.healthcheck.interval: "1s"
+#        traefik.backend.healthcheck.port: "80"
+      replicas: 1
+      placement:
+        constraints: [node.role != manager]
+      restart_policy:
+        condition: any
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 512M
+        reservations:
+          cpus: '0.20'
+          memory: 256M
+    networks:
+      - appnet
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 
+        tag: microservice.business.web3
 
   # Monitoring Components
 
@@ -188,12 +238,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - appnet
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        fluentd-async-connect:
-        tag: controller.autoscaler
+#    logging:
+#      driver: "fluentd"
+#      options:
+#        fluentd-address: localhost:24224
+#        fluentd-async-connect:
+#        tag: controller.autoscaler
 
   fluentd:
     image: regserv:5000/fluentd:latest

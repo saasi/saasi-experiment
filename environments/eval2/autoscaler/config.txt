@@ -1,2 +1,1 @@
-combined_microservice
 business_microservice2
