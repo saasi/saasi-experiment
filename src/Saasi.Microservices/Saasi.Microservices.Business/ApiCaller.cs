@@ -21,7 +21,7 @@ namespace Saasi.Microservices.Business
     public class ApiCaller : IApiCaller
     {
         private static readonly string URL_IO = "http://io/api/io?read=";
-        private static readonly string URL_CPU = "http://cpu/api/cpu?round=";
+        private static readonly string URL_CPU = "http://cpu/api/cpu?time=";
         private static readonly string URL_MEMORY = "http://memory/api/memory?round=";
 
         private static HttpClient client = new HttpClient();
