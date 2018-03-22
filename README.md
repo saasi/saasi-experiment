@@ -60,17 +60,17 @@ git clone https://github.com/saasi/saasi-experiment
      - `fab build_stack_eval<number>` Builds the components for Evaluation `<number>`
      - `fab run_eval<number>:<c>,<r>` Run Evaluation `<number>`, generate load to simulate `<c>` concurrent users and `<r>` requests each.
 
-  For example, the run Evaluation 2 (Uniform microservices) with two test cases `{Users = 10, Requests = 300}` and `{Users = 25, Requests = 750}`, run:
+   For example, the run Evaluation 2 (Uniform microservices) with two test cases `{Users = 10, Requests = 300}` and `{Users = 25, Requests = 750}`, run:
 
-```
-cd saasi-experiment/automation
-fab clean_stack
-fab build_stack_eval2
-fab run_eval2:10,300
-fab run_eval2:25,750
-fab restart_cluster
-```
+   ```
+   cd saasi-experiment/automation
+   fab clean_stack
+   fab build_stack_eval2
+   fab run_eval2:10,300
+   fab run_eval2:25,750
+   fab restart_cluster
+   ```
 
-  The data will be automatically collected and downloaded. Modify `fabfile.py` to change where to save the data.
+   The data will be automatically collected and downloaded. Modify `fabfile.py` to change where to save the data.
   
-  It is recommended to restart the VMs after each experiment, to ensure consistent results.
+   It is recommended to restart the VMs after each experiment, to ensure consistent results.
