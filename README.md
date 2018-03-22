@@ -37,18 +37,18 @@ Each VM should be configure with the hostname listed in the table below, and eve
 
 Every VM should also have the following programs installed:
  - Git
- - Docker
- - Docker Compose
+ - Docker 17.09-ce
+ - Docker Compose 1.18
  - Python
 
 Generate SSH key pair on `regserv` and upload the public key to all other VMs.
 
 ### Running the experiments
 1. Clone this repository on `manager-01` to `manager-03` and `regserv`.
-```
-cd /root
-git clone https://github.com/saasi/saasi-experiment
-```
+   ```
+   cd /root
+   git clone https://github.com/saasi/saasi-experiment
+   ```
 
 2. Edit `automation/fabfile.py` on `regserv` to change the paths and other configuration.
 
@@ -74,3 +74,5 @@ git clone https://github.com/saasi/saasi-experiment
    The data will be automatically collected and downloaded. Modify `fabfile.py` to change where to save the data.
   
    It is recommended to restart the VMs after each experiment, to ensure consistent results.
+   
+   > During the experiments, you can visit `http://manager-01:3000` to view the monitoring dashboard, and `http://manager-01/` to see a visualisation of containers running on each VM.
