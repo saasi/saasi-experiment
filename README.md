@@ -15,7 +15,7 @@ This repository contains the code and configuration of the SmartVM prototype com
   - `eval1` Configuration files and scripts for Evaluation 1 (Monolithic)
   - `eval2` Configuration files and scripts for Evaluation 2 (Uniform microservices)
   - `eval3` Configuration files and scripts for Evaluation 3 (SmartVM)
-- `results` Previous experimental data. New data is located at `saasi/saasi-data`
+- `results` Previous experimental data. New data is located at [`saasi/saasi-data`](https://github.com/saasi/saasi-data)
 - `docs` (_Deprecated_) Documentation 
 
 ## Experiment Setup
