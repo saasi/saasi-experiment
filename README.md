@@ -1,6 +1,10 @@
 ## SmartVM Prototype Experiments
 
-This repository contains the code and configuration of the SmartVM prototype components and evaluation applications.
+This repository contains the code and configuration of the SmartVM prototype components and evaluation applications. 
+
+### Associated Publication
+
+> T. Zheng, X. Zheng, Y. Zhang, Y. Deng, E. Dong, R. Zhang and X. Liu, SmartVM: an SLA-aware Microservice Deployment Framework, accepted into _World Wide Web Journal_, 2018.
 
 ## Folder structure
 - `src` All the code of SmartVM components and evaluation applications
